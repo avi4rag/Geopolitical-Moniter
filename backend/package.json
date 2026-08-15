@@ -1,0 +1,25 @@
+{
+  "name": "geopolitical-monitor-backend",
+  "version": "1.0.0",
+  "description": "Backend API for the Geopolitical Event Impact Monitoring System",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.10",
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.10"
+  }
+}
