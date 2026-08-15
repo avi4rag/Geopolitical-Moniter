@@ -1,3 +1,9 @@
+// Set MONGO_URI before any module imports (env.js validates at import time)
+// The setup.js sets it via MongoMemoryServer.create() which is async,
+// but env.js validation is synchronous. We provide a placeholder here
+// that satisfies Zod validation; the actual connection uses the setup.js URI.
+process.env.MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/test';
+
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import app from '../../src/app.js';
