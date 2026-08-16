@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Globe, Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
+import { Globe, Lock, Mail, ArrowRight, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 // ─── Login Page ───────────────────────────────────────────────────────────────
 // Clean, professional login page matching the GeoMonitor news aesthetic.
+// Supports email/password authentication and standard Google OAuth 2.0.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const { login, googleAuth } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
@@ -17,6 +18,25 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [oauthNotice, setOauthNotice] = useState(null);
+
+  // Check URL query params for OAuth redirect errors/notices
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const errParam = params.get('error');
+
+    if (errParam === 'GOOGLE_OAUTH_NOT_CONFIGURED') {
+      setOauthNotice(
+        'Google OAuth requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET configured in backend/.env. Please use email/password sign-in or configure Google Cloud credentials.'
+      );
+    } else if (errParam === 'OAUTH_CANCELLED') {
+      setError('Google authentication was cancelled by the user.');
+    } else if (errParam === 'INVALID_OAUTH_STATE') {
+      setError('OAuth state verification failed. Please try signing in again.');
+    } else if (errParam) {
+      setError(`Authentication error: ${errParam.replace(/_/g, ' ')}`);
+    }
+  }, [location.search]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,23 +53,9 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSimulated = async () => {
-    setError(null);
-    setIsLoading(true);
-    try {
-      // Direct Google Auth flow handler
-      await googleAuth({
-        name: 'Demo Reader',
-        email: `google-user-${Date.now()}@gmail.com`,
-        googleId: `google-id-${Date.now()}`,
-        avatar: '',
-      });
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.message || 'Google authentication failed');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleGoogleOAuthRedirect = () => {
+    // Navigates directly to the backend Google OAuth initiation route
+    window.location.href = '/api/v1/auth/google';
   };
 
   return (
@@ -76,6 +82,14 @@ export default function LoginPage() {
             Sign in to access your bookmarked intelligence dossier & preferences
           </p>
         </div>
+
+        {/* OAuth Notice Alert */}
+        {oauthNotice && (
+          <div className="p-3.5 rounded-xl border border-amber-900/80 bg-amber-950/30 text-xs text-amber-300 flex items-start gap-2.5 leading-relaxed">
+            <Info size={16} className="shrink-0 text-amber-400 mt-0.5" />
+            <span>{oauthNotice}</span>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
@@ -153,11 +167,11 @@ export default function LoginPage() {
 
         {/* Google OAuth Button */}
         <button
-          onClick={handleGoogleSimulated}
-          disabled={isLoading}
-          className="w-full py-2.5 px-4 rounded-lg text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-200 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center justify-center gap-2.5"
+          type="button"
+          onClick={handleGoogleOAuthRedirect}
+          className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-200 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center justify-center gap-2.5 shadow-sm active:scale-[0.99]"
         >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"

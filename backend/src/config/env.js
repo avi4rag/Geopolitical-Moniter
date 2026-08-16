@@ -37,6 +37,12 @@ const envSchema = z.object({
   // Auth & Security
   JWT_SECRET: z.string().default('geopolitical-monitor-jwt-secret-key-dev-2026'),
 
+  // Google OAuth 2.0
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_CALLBACK_URL: z.string().default('http://localhost:3000/api/v1/auth/google/callback'),
+  FRONTEND_URL: z.string().default('http://localhost:5173'),
+
   // CORS
   CORS_ORIGINS: z.string().default('http://localhost:5173'),
 });
@@ -67,8 +73,6 @@ export const env = {
 
   // LLM provider settings
   llmProvider: raw.LLM_PROVIDER,
-  // Gemini key: try GEMINI_API_KEY first, fall back to OPENAI_API_KEY slot
-  // (backward-compat for users who put their Gemini key in OPENAI_API_KEY)
   geminiApiKey: raw.GEMINI_API_KEY || raw.OPENAI_API_KEY || '',
   geminiModel: raw.GEMINI_MODEL,
   openaiApiKey: raw.OPENAI_API_KEY || '',
@@ -85,6 +89,12 @@ export const env = {
   enableCron: raw.ENABLE_CRON === 'true',
 
   jwtSecret: raw.JWT_SECRET,
+
+  // Google OAuth 2.0
+  googleClientId: raw.GOOGLE_CLIENT_ID || '',
+  googleClientSecret: raw.GOOGLE_CLIENT_SECRET || '',
+  googleCallbackUrl: raw.GOOGLE_CALLBACK_URL,
+  frontendUrl: raw.FRONTEND_URL,
 
   corsOrigins: raw.CORS_ORIGINS.split(',').map((o) => o.trim()),
 };

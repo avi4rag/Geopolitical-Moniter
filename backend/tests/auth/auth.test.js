@@ -4,7 +4,7 @@ import app from '../../src/app.js';
 import { User, Event, Article, Source } from '../../src/models/index.js';
 
 // ─── Authentication & User Bookmarks Integration Tests ───────────────────────
-// Tests registration, login, logout, profile checks, and bookmark management.
+// Tests registration, login, logout, profile checks, Google OAuth, and bookmark management.
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('Authentication & User API', () => {
@@ -141,6 +141,15 @@ describe('Authentication & User API', () => {
     });
   });
 
+  describe('POST /api/v1/auth/logout', () => {
+    it('clears the auth cookie on logout', async () => {
+      const res = await request(app).post('/api/v1/auth/logout');
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.headers['set-cookie']).toBeDefined();
+    });
+  });
+
   describe('GET /api/v1/auth/me', () => {
     it('returns null user for unauthenticated requests', async () => {
       const res = await request(app).get('/api/v1/auth/me');
@@ -165,6 +174,63 @@ describe('Authentication & User API', () => {
       expect(meRes.status).toBe(200);
       expect(meRes.body.success).toBe(true);
       expect(meRes.body.data.user.email).toBe('authuser@example.com');
+    });
+  });
+
+  describe('Google OAuth & User Provisioning', () => {
+    it('GET /api/v1/auth/google redirects to frontend notice when credentials not configured', async () => {
+      const res = await request(app).get('/api/v1/auth/google');
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toContain('error=GOOGLE_OAUTH_NOT_CONFIGURED');
+    });
+
+    it('GET /api/v1/auth/google/callback rejects state mismatch', async () => {
+      const res = await request(app)
+        .get('/api/v1/auth/google/callback?code=mock-code&state=forged-state')
+        .set('Cookie', ['oauth_state=real-state']);
+
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toContain('error=INVALID_OAUTH_STATE');
+    });
+
+    it('POST /api/v1/auth/google provisions a new Google user without password', async () => {
+      const res = await request(app).post('/api/v1/auth/google').send({
+        name: 'Alex Google',
+        email: 'alex@google-auth.com',
+        googleId: 'google-sub-1092837465',
+        avatar: 'https://lh3.googleusercontent.com/a/mock-pic',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.user.email).toBe('alex@google-auth.com');
+      expect(res.body.data.user.authProvider).toBe('GOOGLE');
+      expect(res.body.data.user.passwordHash).toBeUndefined();
+
+      // Check user in database
+      const dbUser = await User.findOne({ email: 'alex@google-auth.com' });
+      expect(dbUser).toBeDefined();
+      expect(dbUser.googleId).toBe('google-sub-1092837465');
+      expect(dbUser.passwordHash).toBeUndefined();
+    });
+
+    it('POST /api/v1/auth/google logs in existing Google user', async () => {
+      // First creation
+      await request(app).post('/api/v1/auth/google').send({
+        name: 'Alex Google',
+        email: 'alex@google-auth.com',
+        googleId: 'google-sub-1092837465',
+      });
+
+      // Second login
+      const res = await request(app).post('/api/v1/auth/google').send({
+        email: 'alex@google-auth.com',
+        googleId: 'google-sub-1092837465',
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.user.email).toBe('alex@google-auth.com');
     });
   });
 

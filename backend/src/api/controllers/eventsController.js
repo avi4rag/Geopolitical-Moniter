@@ -9,6 +9,14 @@ import { env } from '../../config/env.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
+ * Helper to safely escape special regular expression characters
+ * to prevent regex injection and syntax crashes on user query inputs.
+ */
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * GET /api/v1/events
  * Query events with pagination, sorting, and multi-field filtering.
  */
@@ -39,20 +47,21 @@ export async function listEvents(req, res, next) {
       filter.processingStatus = req.query.status.toUpperCase();
     }
 
-    if (req.query.country) {
-      filter.countries = { $regex: new RegExp(req.query.country, 'i') };
+    if (req.query.country && typeof req.query.country === 'string') {
+      filter.countries = { $regex: new RegExp(escapeRegex(req.query.country.trim()), 'i') };
     }
 
-    if (req.query.region) {
-      filter.regions = { $regex: new RegExp(req.query.region, 'i') };
+    if (req.query.region && typeof req.query.region === 'string') {
+      filter.regions = { $regex: new RegExp(escapeRegex(req.query.region.trim()), 'i') };
     }
 
-    if (req.query.sector) {
-      filter.sectors = { $regex: new RegExp(req.query.sector, 'i') };
+    if (req.query.sector && typeof req.query.sector === 'string') {
+      filter.sectors = { $regex: new RegExp(escapeRegex(req.query.sector.trim()), 'i') };
     }
 
-    if (req.query.search) {
-      const searchRegex = new RegExp(req.query.search, 'i');
+    if (req.query.search && typeof req.query.search === 'string') {
+      const escaped = escapeRegex(req.query.search.trim());
+      const searchRegex = new RegExp(escaped, 'i');
       filter.$or = [
         { summary: searchRegex },
         { entities: searchRegex },
@@ -79,7 +88,7 @@ export async function listEvents(req, res, next) {
       Event.countDocuments(filter),
     ]);
 
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = total > 0 ? Math.ceil(total / limit) : 0;
 
     res.status(200).json({
       success: true,
@@ -89,7 +98,8 @@ export async function listEvents(req, res, next) {
         limit,
         total,
         totalPages,
-        hasNextPage: page < totalPages,
+        pages: totalPages,
+        hasNextPage: totalPages > 0 && page < totalPages,
         hasPrevPage: page > 1,
       },
       error: null,
@@ -200,7 +210,7 @@ export async function getEventImpacts(req, res, next) {
 /**
  * POST /api/v1/events/ask
  * AI-powered natural language query engine that synthesizes intelligence
- * from MongoDB Atlas events using Gemini.
+ * from MongoDB Atlas events using GeoMonitor AI.
  */
 export async function askIntel(req, res, next) {
   try {
@@ -214,10 +224,10 @@ export async function askIntel(req, res, next) {
       });
     }
 
-    // Retrieve relevant events using regex keyword matching across summary, facts, countries, sectors
+    // Retrieve relevant events using escaped regex keyword matching across summary, facts, countries, sectors
     const words = query.trim().split(/\s+/).filter((w) => w.length > 2);
     const searchConditions = words.map((w) => {
-      const reg = new RegExp(w, 'i');
+      const reg = new RegExp(escapeRegex(w), 'i');
       return {
         $or: [
           { summary: reg },

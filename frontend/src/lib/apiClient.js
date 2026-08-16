@@ -2,12 +2,13 @@ import axios from 'axios';
 
 // ─── API Client ───────────────────────────────────────────────────────────────
 // Centralized Axios instance for all backend calls.
-// In development, Vite proxies /api to localhost:3000 automatically.
+// In development, Vite proxies /api to backend automatically.
 // In production, VITE_API_URL must point to the deployed backend.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api/v1',
+  withCredentials: true, // Required for HTTP-only JWT auth cookies
   timeout: 30_000,
   headers: {
     'Content-Type': 'application/json',
