@@ -9,6 +9,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 const NAV_LINKS = [
   { href: '/', label: 'News Feed' },
+  { href: '/search', label: 'Search' },
   { href: '/impacts', label: 'Domain Impacts' },
   { href: '/sources', label: 'Sources' },
   { href: '/stats', label: 'Analytics' },

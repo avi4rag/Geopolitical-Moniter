@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import Layout from './components/layout/Layout.jsx';
 import Home from './pages/Home.jsx';
+import SearchPage from './pages/SearchPage.jsx';
 import EventDetails from './pages/EventDetails.jsx';
 import ImpactsPage from './pages/ImpactsPage.jsx';
 import SourcesPage from './pages/SourcesPage.jsx';
@@ -23,6 +24,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/event/:id" element={<EventDetails />} />
           <Route path="/events/:id" element={<EventDetails />} />
           <Route path="/impacts" element={<ImpactsPage />} />
