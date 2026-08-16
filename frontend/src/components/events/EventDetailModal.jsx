@@ -347,12 +347,12 @@ export default function EventDetailModal({ eventId, onClose }) {
                 </div>
               </div>
 
-              {/* LLM Audit Metadata */}
+              {/* AI Extraction Audit Metadata */}
               {eventData.extractionMetadata && (
                 <div className="p-3 rounded-lg border border-slate-800/80 bg-slate-950 text-[10px] text-slate-500 font-mono flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-1.5">
                     <Cpu size={12} className="text-amber-500" />
-                    <span>Model: {eventData.extractionMetadata.modelName || 'gemini-3.6-flash'}</span>
+                    <span>Engine: GeoMonitor AI</span>
                   </div>
                   <div>
                     <span>Tokens: {eventData.extractionMetadata.inputTokens || 0} in / {eventData.extractionMetadata.outputTokens || 0} out</span>

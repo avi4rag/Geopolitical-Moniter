@@ -136,7 +136,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           {isLoading && (
             <div className="py-12 text-center text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-mono">Synthesizing grounded intelligence brief with Gemini...</p>
+              <p className="text-xs font-mono">Synthesizing grounded intelligence brief with GeoMonitor AI...</p>
             </div>
           )}
 
