@@ -206,6 +206,29 @@ describe('REST API (Phase 6 Endpoints)', () => {
     });
   });
 
+  describe('POST /api/v1/events/ask', () => {
+    it('synthesizes answers with cited events for natural language queries', async () => {
+      const res = await request(app)
+        .post('/api/v1/events/ask')
+        .send({ query: 'What are the trade sanctions?' });
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.answer).toBeDefined();
+      expect(Array.isArray(res.body.data.citedEvents)).toBe(true);
+    });
+
+    it('rejects empty query with 400', async () => {
+      const res = await request(app)
+        .post('/api/v1/events/ask')
+        .send({ query: '' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('EMPTY_QUERY');
+    });
+  });
+
   // ─── IMPACTS ENDPOINTS ───────────────────────────────────────────────────────
 
   describe('GET /api/v1/impacts', () => {
