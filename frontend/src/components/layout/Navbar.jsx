@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Globe, Bookmark, User, LogIn, UserPlus, LogOut, Search, Sparkles } from 'lucide-react';
+import { Globe, Bookmark, User, LogIn, UserPlus, LogOut, Search, Sparkles, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
 import EventDetailModal from '../events/EventDetailModal.jsx';
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
-// Top news masthead with brand, search trigger, AI Assistant trigger, bookmarks,
-// and user auth menu.
+// Fully responsive news masthead with desktop navigation, mobile drawer menu,
+// Ask AI Intel assistant trigger, bookmarks, and user auth management.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NAV_LINKS = [
@@ -22,7 +22,10 @@ export default function Navbar() {
   const location = useLocation();
   const { user, isAuthenticated, logout, bookmarks } = useAuth();
   const [isAskOpen, setIsAskOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
+
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
   return (
     <>
@@ -34,12 +37,13 @@ export default function Navbar() {
           backdropFilter: 'blur(12px)',
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14">
             {/* Brand */}
             <Link
               to="/"
-              className="flex items-center gap-2.5 group shrink-0"
+              onClick={closeMobileMenu}
+              className="flex items-center gap-2 group shrink-0"
               aria-label="Geopolitical Monitor Home"
             >
               <div
@@ -48,11 +52,11 @@ export default function Navbar() {
               >
                 <Globe size={14} color="#000" strokeWidth={2.5} />
               </div>
-              <span className="text-base font-extrabold tracking-tight hidden sm:block text-white">
+              <span className="text-base font-extrabold tracking-tight text-white">
                 GeoMonitor
               </span>
               <span
-                className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
+                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
                 style={{
                   background: 'var(--color-surface-3)',
                   color: 'var(--color-accent)',
@@ -63,8 +67,8 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {/* Main Navigation */}
-            <nav className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar" role="navigation" aria-label="Main navigation">
+            {/* Desktop Navigation (Hidden on Mobile) */}
+            <nav className="hidden md:flex items-center gap-1 lg:gap-2" role="navigation" aria-label="Main navigation">
               {NAV_LINKS.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
@@ -84,41 +88,45 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right Tools: Ask AI Intel + Auth / Profile & Bookmarks Menu */}
-            <div className="flex items-center gap-2 shrink-0">
-              {/* Ask AI Intel trigger */}
+            {/* Right Tools: Ask AI Intel + Auth Menu + Mobile Hamburger */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Ask AI Intel trigger button */}
               <button
-                onClick={() => setIsAskOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold transition cursor-pointer shadow-sm"
-                title="Ask AI Intelligence query assistant"
+                onClick={() => {
+                  closeMobileMenu();
+                  setIsAskOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold transition cursor-pointer shadow-sm"
+                title="Ask GeoMonitor AI Intelligence Assistant"
               >
                 <Sparkles size={13} />
-                <span className="hidden md:inline font-mono">Ask AI Intel</span>
+                <span className="hidden sm:inline font-mono">Ask AI Intel</span>
               </button>
 
+              {/* Desktop Auth Controls */}
               {isAuthenticated ? (
-                <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2">
                   <Link
                     to="/profile"
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold hover:border-amber-500/50 hover:text-white transition"
                     title="View Bookmarks & Profile"
                   >
                     <Bookmark size={13} className="text-amber-400" />
-                    <span className="hidden sm:inline font-mono">
-                      ({bookmarks.length})
+                    <span className="font-mono">
+                      ({bookmarks?.length || 0})
                     </span>
                   </Link>
 
                   <Link
                     to="/profile"
                     className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-mono font-bold text-xs hover:bg-amber-500/30 transition"
-                    title={user.name}
+                    title={user?.name}
                   >
-                    {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2">
                   <Link
                     to="/login"
                     className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition"
@@ -128,7 +136,7 @@ export default function Navbar() {
 
                   <Link
                     to="/signup"
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm hidden sm:inline-block"
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm"
                     style={{
                       backgroundColor: 'var(--color-accent)',
                       color: '#000',
@@ -138,9 +146,106 @@ export default function Navbar() {
                   </Link>
                 </div>
               )}
+
+              {/* Mobile Hamburger Toggle Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 transition cursor-pointer"
+                aria-label="Toggle mobile menu"
+              >
+                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Slide-Down Menu Drawer */}
+        {isMobileMenuOpen && (
+          <div
+            className="md:hidden border-t border-slate-800 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200"
+            style={{
+              backgroundColor: 'var(--color-surface-1)',
+            }}
+          >
+            {/* Mobile Navigation Links */}
+            <div className="grid grid-cols-2 gap-1.5">
+              {NAV_LINKS.map((link) => {
+                const isActive = location.pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={closeMobileMenu}
+                    className="px-3 py-2 rounded-lg text-xs font-semibold transition"
+                    style={{
+                      color: isActive ? '#fff' : 'var(--color-text-secondary)',
+                      background: isActive ? 'var(--color-surface-3)' : 'var(--color-surface-2)',
+                      border: isActive ? '1px solid var(--color-border)' : '1px solid transparent',
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Mobile Auth / Profile Section */}
+            <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    to="/profile"
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-white"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold font-mono">
+                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </div>
+                      <div>
+                        <div className="font-bold text-white">{user?.name || 'Reader'}</div>
+                        <div className="text-[10px] text-slate-400 font-mono">{user?.email}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 text-amber-400 font-mono text-xs">
+                      <Bookmark size={12} />
+                      <span>{bookmarks?.length || 0}</span>
+                    </div>
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      logout();
+                      closeMobileMenu();
+                    }}
+                    className="w-full py-2 px-3 rounded-lg border border-slate-800 text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-slate-900 flex items-center justify-center gap-1.5 transition cursor-pointer"
+                  >
+                    <LogOut size={13} />
+                    <span>Sign Out</span>
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    to="/login"
+                    onClick={closeMobileMenu}
+                    className="py-2.5 px-3 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-center text-slate-200 hover:text-white"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    onClick={closeMobileMenu}
+                    className="py-2.5 px-3 rounded-xl text-xs font-bold text-center text-slate-950 shadow-sm"
+                    style={{ backgroundColor: 'var(--color-accent)' }}
+                  >
+                    Create Account
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Ask AI Intel Modal */}

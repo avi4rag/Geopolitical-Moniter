@@ -34,13 +34,14 @@ export default function CredibilityBadge({ label, score }) {
   const cfg = CREDIBILITY_CONFIG[cred] || CREDIBILITY_CONFIG.UNVERIFIED;
   const { Icon } = cfg;
 
-  const percentage = score !== undefined && score !== null
+  // Only display percentage confidence if score > 0
+  const percentage = typeof score === 'number' && score > 0
     ? `${Math.round(score * 100)}%`
     : null;
 
   return (
     <span
-      className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-md"
+      className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-medium px-2 py-0.5 rounded-md shrink-0"
       style={{
         backgroundColor: cfg.bg,
         border: `1px solid ${cfg.border}`,
@@ -51,7 +52,7 @@ export default function CredibilityBadge({ label, score }) {
       <Icon size={12} className="shrink-0" />
       <span>{cfg.label}</span>
       {percentage && (
-        <span className="opacity-75 text-[11px] font-mono ml-0.5">({percentage})</span>
+        <span className="opacity-75 text-[10px] font-mono ml-0.5">({percentage})</span>
       )}
     </span>
   );
