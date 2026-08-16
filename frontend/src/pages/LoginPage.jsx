@@ -54,8 +54,8 @@ export default function LoginPage() {
   };
 
   const handleGoogleOAuthRedirect = () => {
-    // Navigates directly to the backend Google OAuth initiation route
-    window.location.href = '/api/v1/auth/google';
+    const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
+    window.location.href = `${apiUrl}/auth/google`;
   };
 
   return (
