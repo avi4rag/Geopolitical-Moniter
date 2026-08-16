@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import healthRouter from './health.js';
+import adminRouter from './admin.js';
 
 // ─── Root API Router ─────────────────────────────────────────────────────────
 // All v1 routes are mounted here.
@@ -9,6 +10,7 @@ import healthRouter from './health.js';
 const router = Router();
 
 router.use('/health', healthRouter);
+router.use('/admin', adminRouter);
 
 // Future routes (added in Phase 12):
 // router.use('/events', eventsRouter);
