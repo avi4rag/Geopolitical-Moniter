@@ -12,7 +12,9 @@ process.env.NODE_ENV = 'test';
 process.env.PORT = '3001';
 // Provide a sync placeholder — overwritten with real URI in beforeAll
 process.env.MONGO_URI = 'mongodb://localhost:27017/geopolitical_monitor_test';
-process.env.OPENAI_API_KEY = 'sk-test-key';
+process.env.LLM_PROVIDER = 'gemini';
+process.env.GEMINI_API_KEY = 'test-gemini-key';
+process.env.GEMINI_MODEL = 'gemini-2.0-flash';
 process.env.GUARDIAN_API_KEY = 'test-guardian-key';
 process.env.NEWS_API_KEY = 'test-newsapi-key';
 process.env.CORS_ORIGINS = 'http://localhost:5173';

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { triggerIngestion } from '../controllers/adminController.js';
+import { triggerIngestion, triggerExtraction } from '../controllers/adminController.js';
 import { env } from '../../config/env.js';
 
 // ─── Admin Router ─────────────────────────────────────────────────────────────
@@ -44,5 +44,8 @@ router.use(adminGuard);
 
 // Trigger full ingestion manually
 router.post('/ingest', triggerIngestion);
+
+// Trigger LLM extraction for STORED articles
+router.post('/extract', triggerExtraction);
 
 export default router;

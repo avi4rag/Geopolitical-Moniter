@@ -13,8 +13,16 @@ const envSchema = z.object({
   // MongoDB
   MONGO_URI: z.string().min(1, 'MONGO_URI is required'),
 
-  // OpenAI
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
+  // LLM Provider
+  LLM_PROVIDER: z.enum(['gemini', 'openai']).default('gemini'),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
+  OPENAI_API_KEY: z.string().optional(),
+  OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+  // Delay between LLM calls (ms). Gemini free tier = 15 RPM → 4000ms safe
+  LLM_DELAY_MS: z.string().default('4000'),
+  // Max articles to extract per run
+  LLM_BATCH_SIZE: z.string().default('10'),
 
   // News APIs
   GUARDIAN_API_KEY: z.string().min(1, 'GUARDIAN_API_KEY is required'),
@@ -53,7 +61,16 @@ export const env = {
 
   mongoUri: raw.MONGO_URI,
 
-  openaiApiKey: raw.OPENAI_API_KEY,
+  // LLM provider settings
+  llmProvider: raw.LLM_PROVIDER,
+  // Gemini key: try GEMINI_API_KEY first, fall back to OPENAI_API_KEY slot
+  // (backward-compat for users who put their Gemini key in OPENAI_API_KEY)
+  geminiApiKey: raw.GEMINI_API_KEY || raw.OPENAI_API_KEY || '',
+  geminiModel: raw.GEMINI_MODEL,
+  openaiApiKey: raw.OPENAI_API_KEY || '',
+  openaiModel: raw.OPENAI_MODEL,
+  llmDelayMs: parseInt(raw.LLM_DELAY_MS, 10),
+  llmBatchSize: parseInt(raw.LLM_BATCH_SIZE, 10),
 
   guardianApiKey: raw.GUARDIAN_API_KEY,
   newsApiKey: raw.NEWS_API_KEY,

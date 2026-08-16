@@ -20,7 +20,7 @@ export const EVENT_TYPES = Object.freeze([
   'OTHER',
 ]);
 
-export const SEVERITY_LEVELS = Object.freeze(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']);
+export const SEVERITY_LEVELS = Object.freeze(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL', 'MINIMAL']);
 
 export const PROCESSING_STATUSES = Object.freeze([
   'FETCHED',
