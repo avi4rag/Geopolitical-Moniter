@@ -16,15 +16,33 @@ const app = express();
 
 app.use(helmet());
 
-// CORS: allow configured origins + HTTP-only cookies (credentials: true)
+// CORS: allow configured origins, Vercel deployments, Render, and localhost
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (env.corsOrigins.includes(origin)) return callback(null, true);
+
+      try {
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        const isAllowedConfig = env.corsOrigins.some(
+          (allowed) => allowed.replace(/\/$/, '') === normalizedOrigin
+        );
+
+        const url = new URL(origin);
+        const isVercel = url.hostname.endsWith('.vercel.app') || url.hostname === 'vercel.app';
+        const isRender = url.hostname.endsWith('.onrender.com') || url.hostname === 'onrender.com';
+        const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+
+        if (isAllowedConfig || isVercel || isRender || isLocal) {
+          return callback(null, true);
+        }
+      } catch (err) {
+        // invalid URL format, proceed to reject
+      }
+
       callback(new Error(`CORS: Origin '${origin}' not allowed`));
     },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Required for HTTP-only cookies
   })
@@ -70,6 +88,21 @@ app.use((req, res, next) => {
 });
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+
+// Root API welcome endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: {
+      name: 'GeoMonitor Intelligence API',
+      version: '1.0.0',
+      status: 'operational',
+      health: '/api/v1/health',
+      events: '/api/v1/events',
+    },
+    error: null,
+  });
+});
 
 app.use('/api/v1', apiRouter);
 
