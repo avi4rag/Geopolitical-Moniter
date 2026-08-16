@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { triggerIngestion, triggerExtraction } from '../controllers/adminController.js';
+import { triggerIngestion, triggerExtraction, triggerImpactAssessment } from '../controllers/adminController.js';
 import { env } from '../../config/env.js';
 
 // ─── Admin Router ─────────────────────────────────────────────────────────────
@@ -47,5 +47,8 @@ router.post('/ingest', triggerIngestion);
 
 // Trigger LLM extraction for STORED articles
 router.post('/extract', triggerExtraction);
+
+// Trigger impact assessment for ANALYZED events
+router.post('/impact', triggerImpactAssessment);
 
 export default router;

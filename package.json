@@ -1,0 +1,17 @@
+{
+  "name": "geopolitical-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Automated Geopolitical Event Impact Monitoring System — monorepo root",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test": "npm --prefix backend test",
+    "test:backend": "npm --prefix backend test",
+    "seed": "npm --prefix backend run seed:sources",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

@@ -1,5 +1,6 @@
 import { runIngestion } from '../../services/ingestion/ingestionService.js';
 import { runExtraction } from '../../services/llm/extractionService.js';
+import { runImpactAssessment } from '../../services/impact/impactService.js';
 import { logger } from '../../config/logger.js';
 
 // ─── Admin Controller ─────────────────────────────────────────────────────────
@@ -89,6 +90,42 @@ export async function triggerExtraction(req, res, next) {
       data: result,
       error: null,
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/admin/impact
+ * Run impact assessment for ANALYZED events.
+ *
+ * Body (optional):
+ *   batchSize: number — events to process (default 50)
+ *   force: boolean   — re-process already-processed events with updated rules
+ */
+export async function triggerImpactAssessment(req, res, next) {
+  try {
+    const options = {};
+
+    if (req.body?.batchSize !== undefined) {
+      const batchSize = parseInt(req.body.batchSize, 10);
+      if (isNaN(batchSize) || batchSize < 1 || batchSize > 500) {
+        return res.status(400).json({
+          success: false,
+          data: null,
+          error: { code: 'INVALID_BATCH_SIZE', message: 'batchSize must be between 1 and 500' },
+        });
+      }
+      options.batchSize = batchSize;
+    }
+
+    if (req.body?.force === true) options.force = true;
+
+    logger.info({ body: req.body }, 'Admin: impact assessment triggered manually');
+
+    const result = await runImpactAssessment(options);
+
+    res.status(200).json({ success: true, data: result, error: null });
   } catch (err) {
     next(err);
   }
