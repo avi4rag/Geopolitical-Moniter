@@ -1,20 +1,22 @@
 import { Router } from 'express';
 import healthRouter from './health.js';
 import adminRouter from './admin.js';
+import eventsRouter from './events.js';
+import impactsRouter from './impacts.js';
+import statsRouter from './stats.js';
+import sourcesRouter from './sources.js';
 
 // ─── Root API Router ─────────────────────────────────────────────────────────
-// All v1 routes are mounted here.
-// Feature routers (events, sources, stats) will be added in later phases.
+// All v1 API endpoints are mounted here.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const router = Router();
 
 router.use('/health', healthRouter);
 router.use('/admin', adminRouter);
-
-// Future routes (added in Phase 12):
-// router.use('/events', eventsRouter);
-// router.use('/sources', sourcesRouter);
-// router.use('/stats', statsRouter);
+router.use('/events', eventsRouter);
+router.use('/impacts', impactsRouter);
+router.use('/stats', statsRouter);
+router.use('/sources', sourcesRouter);
 
 export default router;
