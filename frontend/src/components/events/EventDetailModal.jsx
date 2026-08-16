@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   X,
   ExternalLink,
@@ -10,11 +11,16 @@ import {
   Cpu,
   Clock,
   ShieldCheck,
+  Bookmark,
+  Share2,
+  Check,
+  Maximize2,
 } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import DirectionBadge from '../common/DirectionBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 // ─── Event Detail Modal ───────────────────────────────────────────────────────
 // Modal for in-depth inspection of an event and its cross-domain impacts.
@@ -24,6 +30,10 @@ export default function EventDetailModal({ eventId, onClose }) {
   const [eventData, setEventData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
+  const bookmarked = isBookmarked(eventId);
 
   useEffect(() => {
     if (!eventId) return;
@@ -58,10 +68,26 @@ export default function EventDetailModal({ eventId, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/event/${eventId}`;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleBookmarkToggle = async () => {
+    if (isAuthenticated) {
+      await toggleBookmark(eventId);
+    }
+  };
+
   if (!eventId) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div
         className="relative w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden"
         style={{
@@ -71,7 +97,7 @@ export default function EventDetailModal({ eventId, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
+        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2.5 py-1 rounded">
               {eventData?.eventType?.replace(/_/g, ' ') || 'EVENT DETAILS'}
@@ -87,13 +113,56 @@ export default function EventDetailModal({ eventId, onClose }) {
             )}
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-            aria-label="Close modal"
-          >
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Share / Copy link */}
+            <button
+              onClick={handleCopyLink}
+              title="Copy dossier link"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center gap-1 text-xs"
+            >
+              {copied ? (
+                <>
+                  <Check size={14} className="text-emerald-400" />
+                  <span className="text-[10px] text-emerald-400 font-mono">Copied</span>
+                </>
+              ) : (
+                <Share2 size={15} />
+              )}
+            </button>
+
+            {/* Bookmark */}
+            {isAuthenticated && (
+              <button
+                onClick={handleBookmarkToggle}
+                title={bookmarked ? 'Remove bookmark' : 'Bookmark dossier'}
+                className={`p-1.5 rounded-lg border transition cursor-pointer ${
+                  bookmarked
+                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                }`}
+              >
+                <Bookmark size={15} fill={bookmarked ? 'currentColor' : 'none'} />
+              </button>
+            )}
+
+            {/* Full page link */}
+            <Link
+              to={`/event/${eventId}`}
+              title="Open standalone dossier page"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition cursor-pointer"
+            >
+              <Maximize2 size={15} />
+            </Link>
+
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer ml-1"
+              aria-label="Close modal"
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {/* Modal Body */}
@@ -101,7 +170,7 @@ export default function EventDetailModal({ eventId, onClose }) {
           {isLoading ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs">Loading intelligence dossier...</p>
+              <p className="text-xs font-mono">Loading intelligence dossier...</p>
             </div>
           ) : error ? (
             <div className="py-12 text-center text-rose-400 text-sm">
@@ -112,7 +181,7 @@ export default function EventDetailModal({ eventId, onClose }) {
             <>
               {/* Event Summary */}
               <div>
-                <h3 className="text-lg font-semibold text-white leading-relaxed">
+                <h3 className="text-lg font-bold text-white leading-relaxed">
                   {eventData.summary}
                 </h3>
 
@@ -144,7 +213,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                     {[...(eventData.countries || []), ...(eventData.regions || [])].map((item, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-200 border border-slate-700"
+                        className="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-200 border border-slate-700 font-medium"
                       >
                         {item}
                       </span>
@@ -161,7 +230,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                     {(eventData.sectors || []).map((sector, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-200 border border-slate-700"
+                        className="px-2 py-0.5 rounded text-[11px] bg-slate-800 text-slate-200 border border-slate-700 font-mono"
                       >
                         {sector}
                       </span>
@@ -187,7 +256,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 </div>
               </div>
 
-              {/* ─── DOMAIN IMPACT ASSESSMENTS ───────────────────────────────── */}
+              {/* DOMAIN IMPACT ASSESSMENTS */}
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
@@ -208,10 +277,10 @@ export default function EventDetailModal({ eventId, onClose }) {
                       >
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-mono font-bold text-slate-200">
+                            <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/60">
                               {impact.domain}
                             </span>
-                            <DirectionBadge direction={impact.direction} />
+                            <DirectionBadge direction={impact.direction} size="sm" />
                           </div>
 
                           <p className="text-xs text-slate-300 leading-relaxed">
@@ -283,8 +352,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div className="p-3 rounded-lg border border-slate-800/80 bg-slate-950 text-[10px] text-slate-500 font-mono flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-1.5">
                     <Cpu size={12} className="text-amber-500" />
-                    <span>Model: {eventData.extractionMetadata.modelName || 'gemini-2.0-flash'}</span>
-                    <span>• Version: {eventData.extractionMetadata.promptVersion || 'v1.1'}</span>
+                    <span>Model: {eventData.extractionMetadata.modelName || 'gemini-3.6-flash'}</span>
                   </div>
                   <div>
                     <span>Tokens: {eventData.extractionMetadata.inputTokens || 0} in / {eventData.extractionMetadata.outputTokens || 0} out</span>
