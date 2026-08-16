@@ -3,6 +3,7 @@ import { RefreshCw, AlertCircle, FileQuestion, ChevronLeft, ChevronRight } from 
 import apiClient from '../lib/apiClient.js';
 import StatCards from '../components/dashboard/StatCards.jsx';
 import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
+import CountryRiskMatrix from '../components/dashboard/CountryRiskMatrix.jsx';
 import EventFilterBar from '../components/dashboard/EventFilterBar.jsx';
 import EventCard from '../components/dashboard/EventCard.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
@@ -170,6 +171,9 @@ export default function DashboardPage() {
         selectedDomain={selectedDomain}
         onSelectDomain={handleDomainSelect}
       />
+
+      {/* ── Country Risk Matrix ──────────────────────────────────────────────── */}
+      <CountryRiskMatrix />
 
       {/* ── Filter Toolbar ───────────────────────────────────────────────────── */}
       <EventFilterBar

@@ -291,6 +291,22 @@ describe('REST API (Phase 6 Endpoints)', () => {
     });
   });
 
+  describe('GET /api/v1/stats/countries', () => {
+    it('returns country-level event and severity activity breakdown', async () => {
+      const res = await request(app).get('/api/v1/stats/countries');
+
+      expect(res.status).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toBeGreaterThan(0);
+
+      const usStat = res.body.data.find((c) => c.country === 'United States');
+      expect(usStat).toBeDefined();
+      expect(usStat.eventCount).toBeGreaterThan(0);
+      expect(usStat.severityBreakdown).toBeDefined();
+    });
+  });
+
   // ─── SOURCES ENDPOINTS ───────────────────────────────────────────────────────
 
   describe('GET /api/v1/sources', () => {

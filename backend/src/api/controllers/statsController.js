@@ -1,7 +1,7 @@
 import { Event, Article, ImpactAssessment, Source } from '../../models/index.js';
 
 // ─── Stats Controller ─────────────────────────────────────────────────────────
-// Provides aggregated intelligence metrics and breakdown data for the dashboard.
+// Provides aggregated intelligence metrics, domain radars, and country risk breakdowns.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
@@ -111,6 +111,9 @@ export async function getDomainStats(req, res, next) {
           riskIncreaseCount: {
             $sum: { $cond: [{ $eq: ['$direction', 'RISK_INCREASE'] }, 1, 0] },
           },
+          riskDecreaseCount: {
+            $sum: { $cond: [{ $eq: ['$direction', 'RISK_DECREASE'] }, 1, 0] },
+          },
         },
       },
       { $sort: { totalCount: -1 } },
@@ -124,12 +127,64 @@ export async function getDomainStats(req, res, next) {
         negative: d.negativeCount,
         positive: d.positiveCount,
         riskIncrease: d.riskIncreaseCount,
+        riskDecrease: d.riskDecreaseCount,
       },
     }));
 
     res.status(200).json({
       success: true,
       data: domains,
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/stats/countries
+ * Returns geopolitical event activity aggregated by country.
+ */
+export async function getCountryStats(req, res, next) {
+  try {
+    const countryAggregation = await Event.aggregate([
+      { $unwind: '$countries' },
+      {
+        $group: {
+          _id: '$countries',
+          eventCount: { $sum: 1 },
+          criticalCount: {
+            $sum: { $cond: [{ $eq: ['$severity', 'CRITICAL'] }, 1, 0] },
+          },
+          highCount: {
+            $sum: { $cond: [{ $eq: ['$severity', 'HIGH'] }, 1, 0] },
+          },
+          mediumCount: {
+            $sum: { $cond: [{ $eq: ['$severity', 'MEDIUM'] }, 1, 0] },
+          },
+          lowCount: {
+            $sum: { $cond: [{ $eq: ['$severity', 'LOW'] }, 1, 0] },
+          },
+        },
+      },
+      { $sort: { eventCount: -1 } },
+      { $limit: 20 },
+    ]);
+
+    const countries = countryAggregation.map((c) => ({
+      country: c._id,
+      eventCount: c.eventCount,
+      severityBreakdown: {
+        critical: c.criticalCount,
+        high: c.highCount,
+        medium: c.mediumCount,
+        low: c.lowCount,
+      },
+    }));
+
+    res.status(200).json({
+      success: true,
+      data: countries,
       error: null,
     });
   } catch (err) {
