@@ -1,16 +1,10 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import { env } from '../../../config/env.js';
 import { logger } from '../../../config/logger.js';
 
 // ─── Gemini Client ────────────────────────────────────────────────────────────
-// Adapter for Google Gemini API.
-// Free tier: gemini-2.0-flash — 15 RPM, 1M tokens/day, no card required.
-//
-// JSON mode: We use responseMimeType='application/json' which forces Gemini
-// to return valid JSON. This eliminates markdown-wrapped JSON issues.
-//
-// Temperature: 0.1 — low temperature for factual extraction tasks.
-// We want deterministic, factual output, not creative generation.
+// Adapter for Google Gemini API using the @google/genai Interactions SDK.
+// Default model: gemini-3.6-flash.
 // ─────────────────────────────────────────────────────────────────────────────
 
 let _instance = null;
@@ -24,26 +18,14 @@ export class GeminiClient {
       );
     }
 
-    const genAI = new GoogleGenerativeAI(env.geminiApiKey);
+    this._client = new GoogleGenAI({ apiKey: env.geminiApiKey });
+    this._modelName = env.geminiModel || 'gemini-3.6-flash';
 
-    this._model = genAI.getGenerativeModel({
-      model: env.geminiModel,
-      generationConfig: {
-        // Force JSON output — prevents markdown wrapping
-        responseMimeType: 'application/json',
-        // Low temperature: we want facts, not creativity
-        temperature: 0.1,
-        // Cap tokens to control cost (our schema fits in ~512 output tokens)
-        maxOutputTokens: 1024,
-        // No top_k/top_p tweaking needed — temperature 0.1 is already sufficient
-      },
-    });
-
-    logger.info({ model: env.geminiModel }, 'GeminiClient: initialized');
+    logger.info({ model: this._modelName }, 'GeminiClient: initialized with @google/genai');
   }
 
   /**
-   * Send a prompt to Gemini and return the parsed response with token usage.
+   * Send a prompt to Gemini and return the parsed JSON output with token usage.
    *
    * @param {string} prompt - The full extraction prompt
    * @returns {Promise<{ rawText: string, inputTokens: number, outputTokens: number }>}
@@ -51,33 +33,22 @@ export class GeminiClient {
   async generateJSON(prompt) {
     const startMs = Date.now();
 
-    let result;
+    let interaction;
     try {
-      result = await this._model.generateContent(prompt);
+      interaction = await this._client.interactions.create({
+        model: this._modelName,
+        input: prompt,
+      });
     } catch (err) {
-      // Surface meaningful error messages
-      if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('401')) {
-        throw new Error('Gemini API key is invalid or expired. Check GEMINI_API_KEY in .env');
-      }
-      if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
-        throw new Error('Gemini rate limit exceeded. Reduce LLM_BATCH_SIZE or increase LLM_DELAY_MS');
-      }
-      if (err.message?.includes('SAFETY')) {
-        throw new Error(`Gemini blocked content for safety reasons: ${err.message}`);
-      }
-      throw new Error(`Gemini API error: ${err.message}`);
+      throw this._formatError(err);
     }
 
-    const rawText = result.response.text();
-    const usage = result.response.usageMetadata;
-
+    const rawText = interaction.output_text || '';
     const durationMs = Date.now() - startMs;
 
     logger.debug(
       {
-        model: env.geminiModel,
-        inputTokens: usage?.promptTokenCount,
-        outputTokens: usage?.candidatesTokenCount,
+        model: this._modelName,
         durationMs,
       },
       'GeminiClient: response received'
@@ -85,12 +56,25 @@ export class GeminiClient {
 
     return {
       rawText,
-      inputTokens: usage?.promptTokenCount || 0,
-      outputTokens: usage?.candidatesTokenCount || 0,
+      inputTokens: 0,
+      outputTokens: 0,
     };
   }
 
-  /** Singleton accessor — reuse the same model instance across calls */
+  _formatError(err) {
+    if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('401')) {
+      return new Error('Gemini API key is invalid or expired. Check GEMINI_API_KEY in .env');
+    }
+    if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
+      return new Error('Gemini rate limit exceeded. Reduce LLM_BATCH_SIZE or increase LLM_DELAY_MS');
+    }
+    if (err.message?.includes('SAFETY')) {
+      return new Error(`Gemini blocked content for safety reasons: ${err.message}`);
+    }
+    return new Error(`Gemini API error: ${err.message}`);
+  }
+
+  /** Singleton accessor */
   static getInstance() {
     if (!_instance) _instance = new GeminiClient();
     return _instance;

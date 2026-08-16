@@ -1,0 +1,342 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Clock,
+  ExternalLink,
+  ShieldCheck,
+  Globe,
+  MapPin,
+  Bookmark,
+  Layers,
+  CheckCircle2,
+  HelpCircle,
+  TrendingUp,
+} from 'lucide-react';
+import apiClient from '../lib/apiClient.js';
+import SeverityBadge from '../components/common/SeverityBadge.jsx';
+import CredibilityBadge from '../components/common/CredibilityBadge.jsx';
+import DirectionBadge from '../components/common/DirectionBadge.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
+
+// ─── Event Details Page ───────────────────────────────────────────────────────
+// Standalone page for inspecting full intelligence dossier on a specific event.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export default function EventDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
+
+  const [eventData, setEventData] = useState(null);
+  const [impacts, setImpacts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const [eventRes, impactsRes] = await Promise.all([
+          apiClient.get(`/events/${id}`),
+          apiClient.get(`/events/${id}/impacts`),
+        ]);
+
+        if (isMounted) {
+          setEventData(eventRes.data);
+          setImpacts(impactsRes.data || []);
+        }
+      } catch (err) {
+        if (isMounted) setError(err.message || 'Failed to load event dossier');
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+
+    if (id) loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="py-24 text-center text-slate-400">
+        <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-xs font-mono">Loading full intelligence dossier...</p>
+      </div>
+    );
+  }
+
+  if (error || !eventData) {
+    return (
+      <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
+        <h2 className="text-lg font-bold text-rose-400">Dossier Unavailable</h2>
+        <p className="text-xs text-slate-400">{error || 'Event not found'}</p>
+        <button
+          onClick={() => navigate('/')}
+          className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold hover:bg-slate-800 transition cursor-pointer"
+        >
+          Back to News Feed
+        </button>
+      </div>
+    );
+  }
+
+  const bookmarked = isBookmarked(eventData._id);
+  const primaryArticle = eventData.primaryArticleId;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Navigation Header */}
+      <div className="flex items-center justify-between gap-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
+        >
+          <ArrowLeft size={14} />
+          <span>Back</span>
+        </button>
+
+        {isAuthenticated && (
+          <button
+            onClick={() => toggleBookmark(eventData._id)}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition cursor-pointer ${
+              bookmarked
+                ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
+                : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+            }`}
+          >
+            <Bookmark size={14} fill={bookmarked ? 'currentColor' : 'none'} />
+            <span>{bookmarked ? 'Bookmarked' : 'Save Dossier'}</span>
+          </button>
+        )}
+      </div>
+
+      {/* Main Event Header Card */}
+      <div
+        className="p-6 sm:p-8 rounded-3xl border space-y-5"
+        style={{
+          backgroundColor: 'var(--color-surface-1)',
+          borderColor: 'var(--color-border)',
+        }}
+      >
+        <div className="flex items-center gap-2 flex-wrap">
+          <SeverityBadge severity={eventData.severity} />
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2.5 py-0.5 rounded">
+            {eventData.eventType?.replace(/_/g, ' ')}
+          </span>
+          <CredibilityBadge
+            label={eventData.credibilityLabel}
+            score={eventData.credibilityScore}
+          />
+        </div>
+
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+          {eventData.summary}
+        </h1>
+
+        <div className="flex items-center gap-4 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-4 flex-wrap">
+          <span className="flex items-center gap-1.5">
+            <Globe size={13} className="text-amber-400" />
+            <span>Source: {primaryArticle?.sourceId?.name || 'News Wire'}</span>
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-1.5">
+            <Clock size={13} />
+            <span>
+              {new Date(eventData.createdAt).toLocaleDateString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      {/* Section 1: Who Is Involved */}
+      <div
+        className="p-6 rounded-2xl border space-y-3"
+        style={{
+          backgroundColor: 'var(--color-surface-1)',
+          borderColor: 'var(--color-border)',
+        }}
+      >
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+          <MapPin size={16} className="text-amber-400" />
+          Key Entities & Geography
+        </h2>
+
+        <div className="flex items-center gap-2 flex-wrap pt-1">
+          {eventData.countries?.map((country) => (
+            <span
+              key={country}
+              className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-medium flex items-center gap-1.5"
+            >
+              <Globe size={12} className="text-amber-500" />
+              {country}
+            </span>
+          ))}
+
+          {eventData.sectors?.map((sector) => (
+            <span
+              key={sector}
+              className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs font-mono"
+            >
+              Sector: {sector}
+            </span>
+          ))}
+
+          {eventData.entities?.map((ent) => (
+            <span
+              key={ent}
+              className="px-3 py-1 rounded-lg bg-slate-900/60 border border-slate-800/80 text-slate-400 text-xs"
+            >
+              {ent}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 2: Potential Impact Assessment */}
+      <div className="space-y-4">
+        <h2 className="text-base font-bold text-white flex items-center gap-2">
+          <TrendingUp size={18} className="text-amber-400" />
+          <span>Domain Impact Evaluation ({impacts.length})</span>
+        </h2>
+
+        {impacts.length === 0 ? (
+          <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/20 text-center text-xs text-slate-400">
+            No specific domain impact rules triggered for this event.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {impacts.map((imp) => (
+              <div
+                key={imp._id}
+                className="p-5 rounded-2xl border space-y-3"
+                style={{
+                  backgroundColor: 'var(--color-surface-1)',
+                  borderColor: 'var(--color-border)',
+                }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-0.5 rounded border border-amber-900/60">
+                    {imp.domain}
+                  </span>
+                  <DirectionBadge direction={imp.direction} size="sm" />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                    <span>Severity Impact:</span>
+                    <span className="font-bold text-white">{imp.severity}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                    <span>Confidence Score:</span>
+                    <span className="font-bold text-amber-400">
+                      {Math.round(imp.confidenceScore * 100)}%
+                    </span>
+                  </div>
+                </div>
+
+                {imp.ruleExplanation && (
+                  <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
+                    {imp.ruleExplanation}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Section 3: Verified Facts & Evidence */}
+      <div
+        className="p-6 rounded-2xl border space-y-4"
+        style={{
+          backgroundColor: 'var(--color-surface-1)',
+          borderColor: 'var(--color-border)',
+        }}
+      >
+        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
+          <ShieldCheck size={16} className="text-amber-400" />
+          Extracted Factual Claims & Uncertainties
+        </h2>
+
+        {eventData.facts && eventData.facts.length > 0 && (
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
+              Confirmed Factual Statements
+            </h3>
+            <ul className="space-y-2">
+              {eventData.facts.map((fact, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs text-slate-200 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 flex items-start gap-2.5 leading-relaxed"
+                >
+                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <span>{fact}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {eventData.uncertainties && eventData.uncertainties.length > 0 && (
+          <div className="space-y-2 pt-2">
+            <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
+              Key Uncertainties / Unverified Elements
+            </h3>
+            <ul className="space-y-2">
+              {eventData.uncertainties.map((unc, idx) => (
+                <li
+                  key={idx}
+                  className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-900/40 flex items-start gap-2.5 leading-relaxed"
+                >
+                  <HelpCircle size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                  <span>{unc}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* Section 4: Primary Article Reference */}
+      {primaryArticle && (
+        <div
+          className="p-6 rounded-2xl border flex items-center justify-between gap-4"
+          style={{
+            backgroundColor: 'var(--color-surface-1)',
+            borderColor: 'var(--color-border)',
+          }}
+        >
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono text-slate-400 uppercase">
+              Original Report Article
+            </span>
+            <h3 className="text-sm font-bold text-white line-clamp-1">
+              {primaryArticle.title}
+            </h3>
+          </div>
+
+          <a
+            href={primaryArticle.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer shrink-0"
+          >
+            <span>Read Original</span>
+            <ExternalLink size={13} />
+          </a>
+        </div>
+      )}
+    </div>
+  );
+}

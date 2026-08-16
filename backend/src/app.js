@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
@@ -9,30 +10,23 @@ import { notFoundHandler } from './api/middleware/notFound.js';
 import { errorHandler } from './api/middleware/errorHandler.js';
 
 // ─── Express Application ──────────────────────────────────────────────────────
-// This file sets up Express middleware and routes.
-// It does NOT start the server (that's server.js).
-// Separating app from server makes it easier to test without binding to a port.
-// ─────────────────────────────────────────────────────────────────────────────
-
 const app = express();
 
-// ─── Security Middleware ──────────────────────────────────────────────────────
+// ─── Security & CORS Middleware ───────────────────────────────────────────────
 
-// Helmet: sets security-related HTTP headers
 app.use(helmet());
 
-// CORS: only allow configured origins
+// CORS: allow configured origins + HTTP-only cookies (credentials: true)
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (curl, Postman, server-to-server)
       if (!origin) return callback(null, true);
       if (env.corsOrigins.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: Origin '${origin}' not allowed`));
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
+    credentials: true, // Required for HTTP-only cookies
   })
 );
 
@@ -50,10 +44,11 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// ─── Body Parsing ─────────────────────────────────────────────────────────────
+// ─── Body & Cookie Parsing ───────────────────────────────────────────────────
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ─── Request Logging ──────────────────────────────────────────────────────────
 

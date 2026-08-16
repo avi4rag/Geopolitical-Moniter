@@ -16,7 +16,7 @@ const envSchema = z.object({
   // LLM Provider
   LLM_PROVIDER: z.enum(['gemini', 'openai']).default('gemini'),
   GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default('gemini-2.0-flash'),
+  GEMINI_MODEL: z.string().default('gemini-3.6-flash'),
   OPENAI_API_KEY: z.string().optional(),
   OPENAI_MODEL: z.string().default('gpt-4o-mini'),
   // Delay between LLM calls (ms). Gemini free tier = 15 RPM → 4000ms safe
@@ -33,6 +33,9 @@ const envSchema = z.object({
   MAX_PROCESSING_ATTEMPTS: z.string().default('3'),
   INGESTION_CRON: z.string().default('0 */2 * * *'),
   ENABLE_CRON: z.string().default('false'),
+
+  // Auth & Security
+  JWT_SECRET: z.string().default('geopolitical-monitor-jwt-secret-key-dev-2026'),
 
   // CORS
   CORS_ORIGINS: z.string().default('http://localhost:5173'),
@@ -80,6 +83,8 @@ export const env = {
   maxProcessingAttempts: parseInt(raw.MAX_PROCESSING_ATTEMPTS, 10),
   ingestionCron: raw.INGESTION_CRON,
   enableCron: raw.ENABLE_CRON === 'true',
+
+  jwtSecret: raw.JWT_SECRET,
 
   corsOrigins: raw.CORS_ORIGINS.split(',').map((o) => o.trim()),
 };
