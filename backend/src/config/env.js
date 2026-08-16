@@ -28,10 +28,11 @@ const envSchema = z.object({
   GUARDIAN_API_KEY: z.string().min(1, 'GUARDIAN_API_KEY is required'),
   NEWS_API_KEY: z.string().optional(),
 
-  // Ingestion Settings
+  // Ingestion & Automation Settings
   RELEVANCE_THRESHOLD: z.string().default('0.3'),
   MAX_PROCESSING_ATTEMPTS: z.string().default('3'),
   INGESTION_CRON: z.string().default('0 */2 * * *'),
+  ENABLE_CRON: z.string().default('false'),
 
   // CORS
   CORS_ORIGINS: z.string().default('http://localhost:5173'),
@@ -78,6 +79,7 @@ export const env = {
   relevanceThreshold: parseFloat(raw.RELEVANCE_THRESHOLD),
   maxProcessingAttempts: parseInt(raw.MAX_PROCESSING_ATTEMPTS, 10),
   ingestionCron: raw.INGESTION_CRON,
+  enableCron: raw.ENABLE_CRON === 'true',
 
   corsOrigins: raw.CORS_ORIGINS.split(',').map((o) => o.trim()),
 };

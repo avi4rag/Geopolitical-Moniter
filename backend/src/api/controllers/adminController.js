@@ -1,20 +1,17 @@
 import { runIngestion } from '../../services/ingestion/ingestionService.js';
 import { runExtraction } from '../../services/llm/extractionService.js';
 import { runImpactAssessment } from '../../services/impact/impactService.js';
+import { runFullPipeline, getPipelineStatus } from '../../services/pipeline/pipelineService.js';
+import { getSchedulerStatus } from '../../scheduler/cronScheduler.js';
 import { logger } from '../../config/logger.js';
 
 // ─── Admin Controller ─────────────────────────────────────────────────────────
-// Exposes internal operations for development and operations use.
-// In production, this route must be protected by auth middleware.
+// Exposes internal operations and pipeline control for development and operations.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * POST /api/v1/admin/ingest
  * Manually trigger the news ingestion pipeline.
- *
- * Body (optional):
- *   fromDate: ISO date string — override the default 24h lookback
- *   pageSize: number — override articles per section
  */
 export async function triggerIngestion(req, res, next) {
   try {
@@ -45,14 +42,9 @@ export async function triggerIngestion(req, res, next) {
     }
 
     logger.info({ body: req.body }, 'Admin: ingestion triggered manually');
-
     const result = await runIngestion(options);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      error: null,
-    });
+    res.status(200).json({ success: true, data: result, error: null });
   } catch (err) {
     next(err);
   }
@@ -61,9 +53,6 @@ export async function triggerIngestion(req, res, next) {
 /**
  * POST /api/v1/admin/extract
  * Manually trigger LLM extraction for STORED articles.
- *
- * Body (optional):
- *   batchSize: number — how many articles to process (default from env)
  */
 export async function triggerExtraction(req, res, next) {
   try {
@@ -82,14 +71,9 @@ export async function triggerExtraction(req, res, next) {
     }
 
     logger.info({ body: req.body }, 'Admin: extraction triggered manually');
-
     const result = await runExtraction(options);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      error: null,
-    });
+    res.status(200).json({ success: true, data: result, error: null });
   } catch (err) {
     next(err);
   }
@@ -98,10 +82,6 @@ export async function triggerExtraction(req, res, next) {
 /**
  * POST /api/v1/admin/impact
  * Run impact assessment for ANALYZED events.
- *
- * Body (optional):
- *   batchSize: number — events to process (default 50)
- *   force: boolean   — re-process already-processed events with updated rules
  */
 export async function triggerImpactAssessment(req, res, next) {
   try {
@@ -122,10 +102,72 @@ export async function triggerImpactAssessment(req, res, next) {
     if (req.body?.force === true) options.force = true;
 
     logger.info({ body: req.body }, 'Admin: impact assessment triggered manually');
-
     const result = await runImpactAssessment(options);
 
     res.status(200).json({ success: true, data: result, error: null });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/v1/admin/pipeline/run
+ * Trigger full 3-stage end-to-end intelligence cycle (Ingest -> Extract -> Impact).
+ */
+export async function triggerFullPipeline(req, res, next) {
+  try {
+    const options = {
+      triggerSource: 'API',
+    };
+
+    if (req.body?.extractBatchSize) {
+      options.extractBatchSize = parseInt(req.body.extractBatchSize, 10);
+    }
+    if (req.body?.impactBatchSize) {
+      options.impactBatchSize = parseInt(req.body.impactBatchSize, 10);
+    }
+    if (req.body?.forceImpact === true) {
+      options.forceImpact = true;
+    }
+
+    logger.info({ body: req.body }, 'Admin: full pipeline run requested');
+    const result = await runFullPipeline(options);
+
+    if (result.status === 'BUSY') {
+      return res.status(409).json({
+        success: false,
+        data: result,
+        error: { code: 'PIPELINE_BUSY', message: result.message },
+      });
+    }
+
+    res.status(200).json({
+      success: result.status === 'COMPLETED' || result.status === 'COMPLETED_WITH_ERRORS',
+      data: result,
+      error: result.errors.length > 0 ? { code: 'STAGE_ERRORS', errors: result.errors } : null,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * GET /api/v1/admin/pipeline/status
+ * Get current pipeline execution state, history, and scheduler configuration.
+ */
+export async function getPipelineAndSchedulerStatus(req, res, next) {
+  try {
+    const pipeline = getPipelineStatus();
+    const scheduler = getSchedulerStatus();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        pipeline,
+        scheduler,
+      },
+      error: null,
+    });
   } catch (err) {
     next(err);
   }
