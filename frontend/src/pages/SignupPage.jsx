@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Globe, Lock, Mail, User as UserIcon, ArrowRight, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -9,6 +10,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function SignupPage() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,20 +33,20 @@ export default function SignupPage() {
         'Google OAuth requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET configured in backend/.env. Please use email/password sign-up or configure Google Cloud credentials.'
       );
     } else if (errParam === 'OAUTH_CANCELLED') {
-      setError('Google authentication was cancelled by the user.');
+      setError(t('auth.googleAuthCancelled'));
     } else if (errParam === 'INVALID_OAUTH_STATE') {
-      setError('OAuth state verification failed. Please try signing in again.');
+      setError(t('auth.oauthFailed'));
     } else if (errParam) {
       setError(`Authentication error: ${errParam.replace(/_/g, ' ')}`);
     }
-  }, [location.search]);
+  }, [location.search, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -54,7 +56,7 @@ export default function SignupPage() {
       await register(name, email, password, confirmPassword);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Registration failed');
+      setError(err.message || t('auth.registrationFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -83,10 +85,10 @@ export default function SignupPage() {
             <Globe size={20} color="#000" strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">
-            Create your GeoMonitor account
+            {t('auth.createAccount')}
           </h1>
           <p className="text-xs text-slate-400">
-            Bookmark story dossiers, customize topic feeds, and track risk indicators
+            {t('auth.signupSubtitle')}
           </p>
         </div>
 
@@ -110,7 +112,7 @@ export default function SignupPage() {
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Full Name
+              {t('auth.fullName')}
             </label>
             <div className="relative">
               <UserIcon
@@ -131,7 +133,7 @@ export default function SignupPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Email Address
+              {t('auth.email')}
             </label>
             <div className="relative">
               <Mail
@@ -152,7 +154,7 @@ export default function SignupPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Password (min. 8 chars)
+              {t('auth.password')}
             </label>
             <div className="relative">
               <Lock
@@ -174,7 +176,7 @@ export default function SignupPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1">
-              Confirm Password
+              {t('auth.confirmPassword')}
             </label>
             <div className="relative">
               <Lock
@@ -203,7 +205,7 @@ export default function SignupPage() {
               color: '#000',
             }}
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? t('auth.creatingAccount') : t('auth.createAccountBtn')}
             <ArrowRight size={14} />
           </button>
         </form>
@@ -212,7 +214,7 @@ export default function SignupPage() {
         <div className="relative flex items-center justify-center">
           <div className="border-t border-slate-800 w-full" />
           <span className="bg-slate-900 px-3 text-[11px] text-slate-500 font-mono uppercase shrink-0">
-            or sign up with
+            {t('auth.orSignUpWith')}
           </span>
         </div>
 
@@ -240,14 +242,14 @@ export default function SignupPage() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>Sign up with Google</span>
+          <span>{t('auth.signupWithGoogle')}</span>
         </button>
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-400">
-          Already have an account?{' '}
+          {t('auth.alreadyHaveAccount')}{' '}
           <Link to="/login" className="text-amber-400 font-semibold hover:underline">
-            Sign in
+            {t('auth.signInLink')}
           </Link>
         </p>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Globe, AlertOctagon, TrendingUp, Newspaper, RefreshCw, CheckCircle, AlertTriangle } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 
@@ -7,6 +8,7 @@ import apiClient from '../../lib/apiClient.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function StatCards({ stats, onRefresh }) {
+  const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncStatus, setSyncStatus] = useState(null); // { type: 'success' | 'error', message: string }
 
@@ -44,19 +46,19 @@ export default function StatCards({ stats, onRefresh }) {
 
         setSyncStatus({
           type: 'success',
-          message: `Cycle complete: ${stored} ingested, ${analyzed} extracted, ${impacts} impacts assessed`,
+          message: t('analytics.syncCycleComplete', { stored, analyzed, impacts }),
         });
         if (onRefresh) onRefresh();
       } else {
         setSyncStatus({
           type: 'error',
-          message: response.data?.message || 'Pipeline execution completed with warnings',
+          message: response.data?.message || t('analytics.syncWarnings'),
         });
       }
     } catch (err) {
       setSyncStatus({
         type: 'error',
-        message: err.message || 'Failed to trigger intelligence cycle',
+        message: err.message || t('analytics.syncFailed'),
       });
     } finally {
       setIsSyncing(false);
@@ -78,7 +80,7 @@ export default function StatCards({ stats, onRefresh }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Tracked Events
+              {t('analytics.trackedEvents')}
             </span>
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -100,12 +102,12 @@ export default function StatCards({ stats, onRefresh }) {
                   border: '1px solid rgba(239, 68, 68, 0.3)',
                 }}
               >
-                {highCriticalCount} High / Critical
+                {t('analytics.highCriticalCount', { count: highCriticalCount })}
               </span>
             )}
           </div>
           <p className="mt-1.5 text-xs text-slate-400">
-            Real-time geopolitical intelligence
+            {t('analytics.realtimeIntel')}
           </p>
         </div>
 
@@ -119,7 +121,7 @@ export default function StatCards({ stats, onRefresh }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Domain Assessments
+              {t('analytics.domainAssessments')}
             </span>
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -132,10 +134,10 @@ export default function StatCards({ stats, onRefresh }) {
             <span className="text-2xl font-bold tracking-tight text-white font-mono">
               {totals.activeImpacts}
             </span>
-            <span className="text-xs text-emerald-400">Active Rules</span>
+            <span className="text-xs text-emerald-400">{t('analytics.activeRules')}</span>
           </div>
           <p className="mt-1.5 text-xs text-slate-400">
-            Cross-sector impact evaluations
+            {t('analytics.crossSectorEvaluations')}
           </p>
         </div>
 
@@ -149,7 +151,7 @@ export default function StatCards({ stats, onRefresh }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Ingested Articles
+              {t('analytics.ingestedArticles')}
             </span>
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -162,10 +164,10 @@ export default function StatCards({ stats, onRefresh }) {
             <span className="text-2xl font-bold tracking-tight text-white font-mono">
               {totals.articles}
             </span>
-            <span className="text-xs text-slate-400">Deduplicated</span>
+            <span className="text-xs text-slate-400">{t('analytics.deduplicated')}</span>
           </div>
           <p className="mt-1.5 text-xs text-slate-400">
-            From Guardian & NewsAPI feeds
+            {t('analytics.articleFeeds')}
           </p>
         </div>
 
@@ -179,7 +181,7 @@ export default function StatCards({ stats, onRefresh }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Intelligence Cycle
+              {t('analytics.pipelineCycle')}
             </span>
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -199,7 +201,7 @@ export default function StatCards({ stats, onRefresh }) {
               }}
             >
               <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-              {isSyncing ? 'Running Cycle...' : 'Run Pipeline Sync'}
+              {isSyncing ? t('analytics.runningCycle') : t('analytics.runPipelineSync')}
             </button>
           </div>
         </div>

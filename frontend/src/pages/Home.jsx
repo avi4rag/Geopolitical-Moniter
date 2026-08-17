@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, FileQuestion, ArrowDown } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import FeaturedStory from '../components/feed/FeaturedStory.jsx';
@@ -12,6 +13,7 @@ import EventDetailModal from '../components/events/EventDetailModal.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
+  const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [featuredEvent, setFeaturedEvent] = useState(null);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
@@ -66,12 +68,12 @@ export default function Home() {
         setPagination(res.pagination);
       }
     } catch (err) {
-      setError(err.message || 'Failed to load geopolitical news feed');
+      setError(err.message || t('feed.errorTitle'));
     } finally {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [search, domain, severity]);
+  }, [search, domain, severity, t]);
 
   useEffect(() => {
     setPage(1);
@@ -100,14 +102,14 @@ export default function Home() {
       <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400">
-            Real-Time World Intelligence
+            {t('feed.tagline')}
           </span>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-            Global Event & Impact Feed
+            {t('feed.title')}
           </h1>
         </div>
         <div className="text-xs text-slate-400 font-mono">
-          Updated continuously via multi-source ingestion
+          {t('feed.updatedContinuously')}
         </div>
       </div>
 
@@ -137,28 +139,28 @@ export default function Home() {
       ) : error ? (
         <div className="p-10 rounded-2xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400 space-y-3">
           <AlertCircle size={36} className="mx-auto text-rose-400" />
-          <h3 className="text-sm font-semibold">Could not load the latest news events</h3>
+          <h3 className="text-sm font-semibold">{t('feed.errorTitle')}</h3>
           <p className="text-xs text-rose-300/80">{error}</p>
           <button
             onClick={() => fetchFeed(1, false)}
             className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer"
           >
-            Try Again
+            {t('feed.tryAgain')}
           </button>
         </div>
       ) : events.length === 0 ? (
         <div className="p-12 rounded-2xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-3">
           <FileQuestion size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-sm font-semibold text-slate-300">No Geopolitical Stories Found</h3>
+          <h3 className="text-sm font-semibold text-slate-300">{t('feed.noStoriesTitle')}</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
-            No events match your current filter settings. Try searching for broader terms or clearing your topic filters.
+            {t('feed.noStoriesDesc')}
           </p>
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
               className="px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer"
             >
-              Reset All Filters
+              {t('feed.resetAllFilters')}
             </button>
           )}
         </div>
@@ -185,11 +187,11 @@ export default function Home() {
                 {isLoadingMore ? (
                   <>
                     <RefreshCw size={14} className="animate-spin text-amber-400" />
-                    <span>Loading More Stories...</span>
+                    <span>{t('feed.loadingMore')}</span>
                   </>
                 ) : (
                   <>
-                    <span>Load More Geopolitical Stories</span>
+                    <span>{t('feed.loadMore')}</span>
                     <ArrowDown size={14} />
                   </>
                 )}

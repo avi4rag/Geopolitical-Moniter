@@ -14,9 +14,12 @@
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.19.0",
     "clsx": "^2.1.1",
+    "i18next": "^24.2.2",
+    "i18next-browser-languagedetector": "^8.0.4",
     "lucide-react": "^1.31.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
+    "react-i18next": "^15.4.1",
     "react-router-dom": "^7.18.2",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3"

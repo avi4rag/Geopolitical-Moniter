@@ -27,7 +27,7 @@ export function AuthProvider({ children }) {
     } catch (err) {
       setUser(null);
       setBookmarks([]);
-    } fontFinally: {
+    } finally {
       setIsLoading(false);
     }
   }, []);

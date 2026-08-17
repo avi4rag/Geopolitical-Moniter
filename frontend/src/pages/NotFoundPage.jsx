@@ -1,15 +1,18 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle } from 'lucide-react';
 
 export default function NotFoundPage() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col items-center justify-center py-32 gap-4">
       <AlertTriangle size={36} style={{ color: 'var(--color-text-muted)' }} />
       <h1 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-        404 — Page Not Found
+        {t('errors.notFoundTitle')}
       </h1>
       <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-        The page you're looking for doesn't exist.
+        {t('errors.notFoundDesc')}
       </p>
       <Link
         to="/"
@@ -20,7 +23,7 @@ export default function NotFoundPage() {
           border: '1px solid var(--color-border)',
         }}
       >
-        Go to Dashboard
+        {t('errors.goHome')}
       </Link>
     </div>
   );

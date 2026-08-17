@@ -1,24 +1,19 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Globe, Bookmark, User, LogIn, UserPlus, LogOut, Search, Sparkles, Menu, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
 import EventDetailModal from '../events/EventDetailModal.jsx';
+import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 // Fully responsive news masthead with desktop navigation, mobile drawer menu,
-// Ask AI Intel assistant trigger, bookmarks, and user auth management.
+// Ask AI Intel assistant trigger, language switcher, bookmarks, and user auth.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const NAV_LINKS = [
-  { href: '/', label: 'News Feed' },
-  { href: '/search', label: 'Search' },
-  { href: '/impacts', label: 'Domain Impacts' },
-  { href: '/sources', label: 'Sources' },
-  { href: '/stats', label: 'Analytics' },
-];
-
 export default function Navbar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { user, isAuthenticated, logout, bookmarks } = useAuth();
   const [isAskOpen, setIsAskOpen] = useState(false);
@@ -26,6 +21,14 @@ export default function Navbar() {
   const [selectedEventId, setSelectedEventId] = useState(null);
 
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const navLinks = [
+    { href: '/', label: t('nav.newsFeed') },
+    { href: '/search', label: t('nav.search') },
+    { href: '/impacts', label: t('nav.domainImpacts') },
+    { href: '/sources', label: t('nav.sources') },
+    { href: '/stats', label: t('nav.analytics') },
+  ];
 
   return (
     <>
@@ -53,7 +56,7 @@ export default function Navbar() {
                 <Globe size={14} color="#000" strokeWidth={2.5} />
               </div>
               <span className="text-base font-extrabold tracking-tight text-white">
-                GeoMonitor
+                {t('nav.brand')}
               </span>
               <span
                 className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
@@ -63,13 +66,13 @@ export default function Navbar() {
                   border: '1px solid var(--color-border)',
                 }}
               >
-                NEWS
+                {t('nav.newsBadge')}
               </span>
             </Link>
 
             {/* Desktop Navigation (Hidden on Mobile) */}
             <nav className="hidden md:flex items-center gap-1 lg:gap-2" role="navigation" aria-label="Main navigation">
-              {NAV_LINKS.map((link) => {
+              {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
                   <Link
@@ -88,8 +91,13 @@ export default function Navbar() {
               })}
             </nav>
 
-            {/* Right Tools: Ask AI Intel + Auth Menu + Mobile Hamburger */}
+            {/* Right Tools: Language Switcher + Ask AI Intel + Auth Menu + Mobile Hamburger */}
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* Language Switcher (Desktop) */}
+              <div className="hidden sm:block">
+                <LanguageSwitcher variant="dropdown" />
+              </div>
+
               {/* Ask AI Intel trigger button */}
               <button
                 onClick={() => {
@@ -97,10 +105,10 @@ export default function Navbar() {
                   setIsAskOpen(true);
                 }}
                 className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold transition cursor-pointer shadow-sm"
-                title="Ask GeoMonitor AI Intelligence Assistant"
+                title={t('intel.title')}
               >
                 <Sparkles size={13} />
-                <span className="hidden sm:inline font-mono">Ask AI Intel</span>
+                <span className="hidden sm:inline font-mono">{t('nav.askAiIntel')}</span>
               </button>
 
               {/* Desktop Auth Controls */}
@@ -109,7 +117,7 @@ export default function Navbar() {
                   <Link
                     to="/profile"
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold hover:border-amber-500/50 hover:text-white transition"
-                    title="View Bookmarks & Profile"
+                    title={t('profile.accountProfile')}
                   >
                     <Bookmark size={13} className="text-amber-400" />
                     <span className="font-mono">
@@ -131,7 +139,7 @@ export default function Navbar() {
                     to="/login"
                     className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition"
                   >
-                    Sign In
+                    {t('nav.signIn')}
                   </Link>
 
                   <Link
@@ -142,7 +150,7 @@ export default function Navbar() {
                       color: '#000',
                     }}
                   >
-                    Create Account
+                    {t('nav.createAccount')}
                   </Link>
                 </div>
               )}
@@ -167,9 +175,14 @@ export default function Navbar() {
               backgroundColor: 'var(--color-surface-1)',
             }}
           >
+            {/* Mobile Language Switcher */}
+            <div className="pb-1">
+              <LanguageSwitcher variant="segmented" />
+            </div>
+
             {/* Mobile Navigation Links */}
             <div className="grid grid-cols-2 gap-1.5">
-              {NAV_LINKS.map((link) => {
+              {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
                   <Link
@@ -221,7 +234,7 @@ export default function Navbar() {
                     className="w-full py-2 px-3 rounded-lg border border-slate-800 text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-slate-900 flex items-center justify-center gap-1.5 transition cursor-pointer"
                   >
                     <LogOut size={13} />
-                    <span>Sign Out</span>
+                    <span>{t('nav.signOut')}</span>
                   </button>
                 </>
               ) : (
@@ -231,7 +244,7 @@ export default function Navbar() {
                     onClick={closeMobileMenu}
                     className="py-2.5 px-3 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-center text-slate-200 hover:text-white"
                   >
-                    Sign In
+                    {t('nav.signIn')}
                   </Link>
                   <Link
                     to="/signup"
@@ -239,7 +252,7 @@ export default function Navbar() {
                     className="py-2.5 px-3 rounded-xl text-xs font-bold text-center text-slate-950 shadow-sm"
                     style={{ backgroundColor: 'var(--color-accent)' }}
                   >
-                    Create Account
+                    {t('nav.createAccount')}
                   </Link>
                 </div>
               )}

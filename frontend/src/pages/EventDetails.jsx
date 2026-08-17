@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
   Clock,
@@ -27,6 +28,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventDetails() {
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
@@ -55,7 +57,7 @@ export default function EventDetails() {
           setImpacts(impactsRes.data || []);
         }
       } catch (err) {
-        if (isMounted) setError(err.message || 'Failed to load event dossier');
+        if (isMounted) setError(err.message || t('errors.generic'));
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -66,7 +68,7 @@ export default function EventDetails() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [id, t]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -132,7 +134,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
     return (
       <div className="py-24 text-center text-slate-400">
         <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-xs font-mono">Loading full intelligence dossier...</p>
+        <p className="text-xs font-mono">{t('eventDetail.loading')}</p>
       </div>
     );
   }
@@ -140,13 +142,13 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
   if (error || !eventData) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
-        <h2 className="text-lg font-bold text-rose-400">Dossier Unavailable</h2>
-        <p className="text-xs text-slate-400">{error || 'Event not found'}</p>
+        <h2 className="text-lg font-bold text-rose-400">{t('eventDetail.dossierUnavailable')}</h2>
+        <p className="text-xs text-slate-400">{error || t('eventDetail.eventNotFound')}</p>
         <button
           onClick={() => navigate('/')}
           className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold hover:bg-slate-800 transition cursor-pointer"
         >
-          Back to News Feed
+          {t('eventDetail.backToFeed')}
         </button>
       </div>
     );
@@ -154,6 +156,18 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
 
   const bookmarked = isBookmarked(eventData._id);
   const primaryArticle = eventData.primaryArticleId;
+
+  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
+  const formattedDate = eventData.createdAt
+    ? new Date(eventData.createdAt).toLocaleDateString(locale, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : '';
+
+  const eventTypeLabel = eventData.eventType
+    ? t(`eventTypes.${eventData.eventType}`, { defaultValue: eventData.eventType.replace(/_/g, ' ') })
+    : '';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -164,7 +178,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
         >
           <ArrowLeft size={14} />
-          <span>Back</span>
+          <span>{t('eventDetail.back')}</span>
         </button>
 
         <div className="flex items-center gap-2">
@@ -172,10 +186,10 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
           <button
             onClick={handleExportBriefing}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
-            title="Download text intelligence briefing"
+            title={t('eventDetail.exportBriefing')}
           >
             <Download size={13} />
-            <span>Export Briefing</span>
+            <span>{t('eventDetail.exportBriefing')}</span>
           </button>
 
           {/* Share / Copy */}
@@ -186,12 +200,12 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
             {copied ? (
               <>
                 <Check size={13} className="text-emerald-400" />
-                <span className="text-emerald-400">Copied Link</span>
+                <span className="text-emerald-400">{t('eventDetail.copied')}</span>
               </>
             ) : (
               <>
                 <Share2 size={13} />
-                <span>Share</span>
+                <span>{t('eventDetail.share')}</span>
               </>
             )}
           </button>
@@ -207,7 +221,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               }`}
             >
               <Bookmark size={14} fill={bookmarked ? 'currentColor' : 'none'} />
-              <span>{bookmarked ? 'Saved' : 'Save Dossier'}</span>
+              <span>{bookmarked ? t('eventDetail.saved') : t('eventDetail.saveDossier')}</span>
             </button>
           )}
         </div>
@@ -224,7 +238,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         <div className="flex items-center gap-2 flex-wrap">
           <SeverityBadge severity={eventData.severity} />
           <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2.5 py-0.5 rounded">
-            {eventData.eventType?.replace(/_/g, ' ')}
+            {eventTypeLabel}
           </span>
           <CredibilityBadge
             label={eventData.credibilityLabel}
@@ -239,17 +253,12 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         <div className="flex items-center gap-4 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-4 flex-wrap">
           <span className="flex items-center gap-1.5">
             <Globe size={13} className="text-amber-400" />
-            <span>Source: {primaryArticle?.sourceId?.name || 'News Wire'}</span>
+            <span>{t('eventDetail.source')}: {primaryArticle?.sourceId?.name || 'News Wire'}</span>
           </span>
           <span>•</span>
           <span className="flex items-center gap-1.5">
             <Clock size={13} />
-            <span>
-              {new Date(eventData.createdAt).toLocaleDateString('en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-              })}
-            </span>
+            <span>{formattedDate}</span>
           </span>
         </div>
       </div>
@@ -264,7 +273,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
       >
         <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
           <MapPin size={16} className="text-amber-400" />
-          Key Entities & Geography
+          {t('eventDetail.keyEntitiesGeography')}
         </h2>
 
         <div className="flex items-center gap-2 flex-wrap pt-1">
@@ -283,7 +292,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               key={sector}
               className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs font-mono"
             >
-              Sector: {sector}
+              {t('eventDetail.sectorLabel', { sector })}
             </span>
           ))}
 
@@ -302,51 +311,54 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
       <div className="space-y-4">
         <h2 className="text-base font-bold text-white flex items-center gap-2">
           <TrendingUp size={18} className="text-amber-400" />
-          <span>Domain Impact Evaluation ({impacts.length})</span>
+          <span>{t('eventDetail.domainImpactEvaluation', { count: impacts.length })}</span>
         </h2>
 
         {impacts.length === 0 ? (
           <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/20 text-center text-xs text-slate-400">
-            No specific domain impact rules triggered for this event.
+            {t('eventDetail.noImpactRules')}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {impacts.map((imp) => (
-              <div
-                key={imp._id}
-                className="p-5 rounded-2xl border space-y-3"
-                style={{
-                  backgroundColor: 'var(--color-surface-1)',
-                  borderColor: 'var(--color-border)',
-                }}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-0.5 rounded border border-amber-900/60">
-                    {imp.domain}
-                  </span>
-                  <DirectionBadge direction={imp.direction} size="sm" />
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-                    <span>Severity Impact:</span>
-                    <span className="font-bold text-white">{imp.severity}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-                    <span>Confidence Score:</span>
-                    <span className="font-bold text-amber-400">
-                      {Math.round(imp.confidenceScore * 100)}%
+            {impacts.map((imp) => {
+              const domainLabel = t(`domains.${imp.domain}`, { defaultValue: imp.domain });
+              return (
+                <div
+                  key={imp._id}
+                  className="p-5 rounded-2xl border space-y-3"
+                  style={{
+                    backgroundColor: 'var(--color-surface-1)',
+                    borderColor: 'var(--color-border)',
+                  }}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-0.5 rounded border border-amber-900/60">
+                      {domainLabel}
                     </span>
+                    <DirectionBadge direction={imp.direction} size="sm" />
                   </div>
-                </div>
 
-                {imp.ruleExplanation && (
-                  <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
-                    {imp.ruleExplanation}
-                  </p>
-                )}
-              </div>
-            ))}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                      <span>{t('eventDetail.severityImpact')}:</span>
+                      <span className="font-bold text-white">{t(`badges.severity.${imp.severity}`, { defaultValue: imp.severity })}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+                      <span>{t('eventDetail.confidenceScoreLabel')}:</span>
+                      <span className="font-bold text-amber-400">
+                        {Math.round(imp.confidenceScore * 100)}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {imp.ruleExplanation && (
+                    <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
+                      {imp.ruleExplanation}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -361,13 +373,13 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
       >
         <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
           <ShieldCheck size={16} className="text-amber-400" />
-          Extracted Factual Claims & Uncertainties
+          {t('eventDetail.extractedFactualClaims')}
         </h2>
 
         {eventData.facts && eventData.facts.length > 0 && (
           <div className="space-y-2">
             <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
-              Confirmed Factual Statements
+              {t('eventDetail.confirmedFactualStatements')}
             </h3>
             <ul className="space-y-2">
               {eventData.facts.map((fact, idx) => (
@@ -386,7 +398,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         {eventData.uncertainties && eventData.uncertainties.length > 0 && (
           <div className="space-y-2 pt-2">
             <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
-              Key Uncertainties / Unverified Elements
+              {t('eventDetail.keyUncertainties')}
             </h3>
             <ul className="space-y-2">
               {eventData.uncertainties.map((unc, idx) => (
@@ -414,7 +426,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         >
           <div className="space-y-1">
             <span className="text-[11px] font-mono text-slate-400 uppercase">
-              Original Report Article
+              {t('eventDetail.originalReport')}
             </span>
             <h3 className="text-sm font-bold text-white line-clamp-1">
               {primaryArticle.title}
@@ -427,7 +439,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer shrink-0"
           >
-            <span>Read Original</span>
+            <span>{t('eventDetail.readOriginal')}</span>
             <ExternalLink size={13} />
           </a>
         </div>

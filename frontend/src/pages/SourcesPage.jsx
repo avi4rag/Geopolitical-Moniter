@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Newspaper, ShieldCheck, CheckCircle2, AlertCircle, ExternalLink, Globe } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 
@@ -7,6 +8,7 @@ import apiClient from '../lib/apiClient.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function SourcesPage() {
+  const { t } = useTranslation();
   const [sources, setSources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -18,29 +20,29 @@ export default function SourcesPage() {
         setSources(res.data || []);
       })
       .catch((err) => {
-        setError(err.message || 'Failed to load news sources');
+        setError(err.message || t('sources.errorLoading'));
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [t]);
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
         <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
           <Newspaper size={20} className="text-amber-400" />
-          <span>News Providers & Source Reliability</span>
+          <span>{t('sources.title')}</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">
-          Curated and calibrated publisher reliability scores used in cross-source corroboration
+          {t('sources.subtitle')}
         </p>
       </div>
 
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
           <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs">Loading news sources...</p>
+          <p className="text-xs">{t('sources.loading')}</p>
         </div>
       ) : error ? (
         <div className="p-8 rounded-xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400">
@@ -69,7 +71,7 @@ export default function SourcesPage() {
                     </h3>
                     <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800/60 flex items-center gap-1">
                       <CheckCircle2 size={10} />
-                      Active Feed
+                      {t('sources.activeFeed')}
                     </span>
                   </div>
 
@@ -79,14 +81,14 @@ export default function SourcesPage() {
 
                   <div className="space-y-2 text-xs">
                     <div className="flex items-center justify-between text-slate-300">
-                      <span className="text-slate-500">Source Type:</span>
+                      <span className="text-slate-500">{t('sources.sourceType')}:</span>
                       <span className="font-medium text-slate-200">
                         {source.type?.replace(/_/g, ' ')}
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between text-slate-300">
-                      <span className="text-slate-500">Reliability Score:</span>
+                      <span className="text-slate-500">{t('sources.reliabilityScore')}:</span>
                       <span className="font-mono font-bold text-amber-400">
                         {reliabilityPercent}% ({source.reliabilityScore})
                       </span>
@@ -103,14 +105,14 @@ export default function SourcesPage() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>API Integration: Active</span>
+                  <span>{t('sources.apiIntegration')}</span>
                   <a
                     href={`https://${source.domain}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-amber-400 hover:underline inline-flex items-center gap-1"
                   >
-                    Visit Website
+                    {t('sources.visitWebsite')}
                     <ExternalLink size={10} />
                   </a>
                 </div>

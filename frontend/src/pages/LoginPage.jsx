@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Globe, Lock, Mail, ArrowRight, AlertCircle, Info } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -9,6 +10,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,13 +32,13 @@ export default function LoginPage() {
         'Google OAuth requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET configured in backend/.env. Please use email/password sign-in or configure Google Cloud credentials.'
       );
     } else if (errParam === 'OAUTH_CANCELLED') {
-      setError('Google authentication was cancelled by the user.');
+      setError(t('auth.googleAuthCancelled'));
     } else if (errParam === 'INVALID_OAUTH_STATE') {
-      setError('OAuth state verification failed. Please try signing in again.');
+      setError(t('auth.oauthFailed'));
     } else if (errParam) {
       setError(`Authentication error: ${errParam.replace(/_/g, ' ')}`);
     }
-  }, [location.search]);
+  }, [location.search, t]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +49,7 @@ export default function LoginPage() {
       await login(email, password);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err.message || 'Invalid email or password');
+      setError(err.message || t('auth.invalidCredentials'));
     } finally {
       setIsLoading(false);
     }
@@ -76,10 +78,10 @@ export default function LoginPage() {
             <Globe size={20} color="#000" strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">
-            Welcome back to GeoMonitor
+            {t('auth.welcomeBack')}
           </h1>
           <p className="text-xs text-slate-400">
-            Sign in to access your bookmarked intelligence dossier & preferences
+            {t('auth.loginSubtitle')}
           </p>
         </div>
 
@@ -103,7 +105,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Email Address
+              {t('auth.email')}
             </label>
             <div className="relative">
               <Mail
@@ -124,7 +126,7 @@ export default function LoginPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Password
+              {t('auth.password')}
             </label>
             <div className="relative">
               <Lock
@@ -152,7 +154,7 @@ export default function LoginPage() {
               color: '#000',
             }}
           >
-            {isLoading ? 'Signing in...' : 'Sign In to Account'}
+            {isLoading ? t('auth.signingIn') : t('auth.signIn')}
             <ArrowRight size={14} />
           </button>
         </form>
@@ -161,7 +163,7 @@ export default function LoginPage() {
         <div className="relative flex items-center justify-center">
           <div className="border-t border-slate-800 w-full" />
           <span className="bg-slate-900 px-3 text-[11px] text-slate-500 font-mono uppercase shrink-0">
-            or continue with
+            {t('auth.orContinueWith')}
           </span>
         </div>
 
@@ -189,14 +191,14 @@ export default function LoginPage() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
             />
           </svg>
-          <span>Continue with Google</span>
+          <span>{t('auth.continueWithGoogle')}</span>
         </button>
 
         {/* Footer */}
         <p className="text-center text-xs text-slate-400">
-          Don't have an account?{' '}
+          {t('auth.dontHaveAccount')}{' '}
           <Link to="/signup" className="text-amber-400 font-semibold hover:underline">
-            Create one free
+            {t('auth.createOneFree')}
           </Link>
         </p>
       </div>

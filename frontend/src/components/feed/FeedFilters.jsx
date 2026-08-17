@@ -1,19 +1,20 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 
 // ─── Feed Filters ──────────────────────────────────────────────────────────────
 // Sticky, mobile-responsive topic and severity filter toolbar.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DOMAINS = [
-  { value: 'ALL', label: 'All Intelligence' },
-  { value: 'ENERGY', label: 'Energy Security' },
-  { value: 'TRADE', label: 'Trade & Tariffs' },
-  { value: 'TECHNOLOGY', label: 'Tech & Chips' },
-  { value: 'DEFENSE', label: 'Defense' },
-  { value: 'FOOD_AGRICULTURE', label: 'Food & Ag' },
-  { value: 'DIPLOMACY', label: 'Diplomacy' },
-  { value: 'FINANCIAL_MARKETS', label: 'Markets & FX' },
+const DOMAIN_KEYS = [
+  'ALL',
+  'ENERGY',
+  'TRADE',
+  'TECHNOLOGY',
+  'DEFENSE',
+  'FOOD_AGRICULTURE',
+  'DIPLOMACY',
+  'FINANCIAL_MARKETS',
 ];
 
 const SEVERITIES = ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
@@ -28,6 +29,8 @@ export default function FeedFilters({
   onReset,
   hasActiveFilters,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="p-3 sm:p-4 rounded-2xl border space-y-2.5 sticky top-14 sm:top-16 z-30 shadow-lg backdrop-blur-md"
@@ -38,19 +41,20 @@ export default function FeedFilters({
     >
       {/* Top Bar: Topic Category Pills */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-        {DOMAINS.map((item) => {
-          const isSelected = domain === item.value;
+        {DOMAIN_KEYS.map((key) => {
+          const isSelected = domain === key;
+          const label = t(`domains.${key}`, { defaultValue: key });
           return (
             <button
-              key={item.value}
-              onClick={() => onDomainChange(item.value)}
+              key={key}
+              onClick={() => onDomainChange(key)}
               className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold whitespace-nowrap transition cursor-pointer shrink-0 ${
                 isSelected
                   ? 'bg-amber-400 text-slate-950 font-bold shadow-md'
                   : 'bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 hover:text-white'
               }`}
             >
-              {item.label}
+              {label}
             </button>
           );
         })}
@@ -68,7 +72,7 @@ export default function FeedFilters({
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search events, countries, leaders..."
+            placeholder={t('filters.searchPlaceholder')}
             className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
             style={{ borderColor: 'var(--color-border)' }}
           />
@@ -86,10 +90,14 @@ export default function FeedFilters({
         <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
           <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
             <SlidersHorizontal size={10} />
-            <span className="hidden sm:inline">Severity:</span>
+            <span className="hidden sm:inline">{t('filters.severityLabel')}</span>
           </span>
           {SEVERITIES.map((sev) => {
             const isSelected = severity === sev;
+            const sevLabel = sev === 'ALL'
+              ? t('filters.all')
+              : t(`badges.severity.${sev}`, { defaultValue: sev });
+
             return (
               <button
                 key={sev}
@@ -100,7 +108,7 @@ export default function FeedFilters({
                     : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
                 }`}
               >
-                {sev}
+                {sevLabel}
               </button>
             );
           })}
@@ -111,7 +119,7 @@ export default function FeedFilters({
               className="px-1.5 py-0.5 text-[10px] sm:text-[11px] rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center gap-0.5 ml-1 shrink-0"
             >
               <X size={10} />
-              Reset
+              {t('filters.reset')}
             </button>
           )}
         </div>

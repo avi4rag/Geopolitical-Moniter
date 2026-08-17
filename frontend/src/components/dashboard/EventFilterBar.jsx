@@ -1,5 +1,6 @@
 import React from 'react';
-import { Search, X, Filter, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
 
 // ─── Event Filter Bar ─────────────────────────────────────────────────────────
 // Controls search, severity pills, event-type selector, and sort ordering.
@@ -7,18 +8,18 @@ import { Search, X, Filter, SlidersHorizontal } from 'lucide-react';
 
 const SEVERITIES = ['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 
-const EVENT_TYPES = [
-  { value: 'ALL', label: 'All Event Types' },
-  { value: 'SANCTION', label: 'Sanctions' },
-  { value: 'MILITARY_CONFLICT', label: 'Military Conflict' },
-  { value: 'TRADE_RESTRICTION', label: 'Trade Restrictions' },
-  { value: 'EXPORT_RESTRICTION', label: 'Export Controls' },
-  { value: 'DIPLOMATIC_AGREEMENT', label: 'Diplomatic Agreements' },
-  { value: 'TREATY', label: 'Treaties & Pacts' },
-  { value: 'POLITICAL_CRISIS', label: 'Political Crises' },
-  { value: 'RESOURCE_DISRUPTION', label: 'Resource Shocks' },
-  { value: 'POLICY_CHANGE', label: 'Policy Changes' },
-  { value: 'ELECTION', label: 'Elections' },
+const EVENT_TYPE_KEYS = [
+  'ALL',
+  'SANCTION',
+  'MILITARY_CONFLICT',
+  'TRADE_RESTRICTION',
+  'EXPORT_RESTRICTION',
+  'DIPLOMATIC_AGREEMENT',
+  'TREATY',
+  'POLITICAL_CRISIS',
+  'RESOURCE_DISRUPTION',
+  'POLICY_CHANGE',
+  'ELECTION',
 ];
 
 export default function EventFilterBar({
@@ -33,6 +34,8 @@ export default function EventFilterBar({
   onResetFilters,
   hasActiveFilters,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="p-4 rounded-xl border space-y-3"
@@ -53,7 +56,7 @@ export default function EventFilterBar({
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search events, countries, entities, summaries..."
+            placeholder={t('search.searchPlaceholder')}
             className="w-full pl-9 pr-8 py-2 text-xs rounded-lg border bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
             style={{ borderColor: 'var(--color-border)' }}
           />
@@ -74,9 +77,9 @@ export default function EventFilterBar({
             onChange={(e) => onEventTypeChange(e.target.value)}
             className="px-3 py-2 text-xs rounded-lg border bg-slate-950 text-slate-200 border-slate-700 focus:border-amber-500 focus:outline-none cursor-pointer"
           >
-            {EVENT_TYPES.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
+            {EVENT_TYPE_KEYS.map((key) => (
+              <option key={key} value={key}>
+                {t(`eventTypes.${key}`, { defaultValue: key })}
               </option>
             ))}
           </select>
@@ -87,8 +90,8 @@ export default function EventFilterBar({
             onChange={(e) => onSortByChange(e.target.value)}
             className="px-3 py-2 text-xs rounded-lg border bg-slate-950 text-slate-200 border-slate-700 focus:border-amber-500 focus:outline-none cursor-pointer"
           >
-            <option value="createdAt">Most Recent</option>
-            <option value="credibilityScore">Highest Credibility</option>
+            <option value="createdAt">{t('analytics.mostRecent')}</option>
+            <option value="credibilityScore">{t('analytics.highestCredibility')}</option>
           </select>
 
           {/* Reset Filters button */}
@@ -96,10 +99,10 @@ export default function EventFilterBar({
             <button
               onClick={onResetFilters}
               className="px-2.5 py-2 text-xs rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center gap-1 shrink-0"
-              title="Reset all filters"
+              title={t('filters.reset')}
             >
               <X size={13} />
-              <span className="hidden md:inline">Reset</span>
+              <span className="hidden md:inline">{t('filters.reset')}</span>
             </button>
           )}
         </div>
@@ -109,10 +112,14 @@ export default function EventFilterBar({
       <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-slate-800/80">
         <span className="text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1">
           <SlidersHorizontal size={11} />
-          Severity:
+          {t('filters.severityLabel')}
         </span>
         {SEVERITIES.map((sev) => {
           const isSelected = severity === sev;
+          const sevLabel = sev === 'ALL'
+            ? t('filters.all')
+            : t(`badges.severity.${sev}`, { defaultValue: sev });
+
           return (
             <button
               key={sev}
@@ -123,7 +130,7 @@ export default function EventFilterBar({
                   : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
               }`}
             >
-              {sev}
+              {sevLabel}
             </button>
           );
         })}

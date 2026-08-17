@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   X,
   ExternalLink,
@@ -27,6 +28,7 @@ import { useAuth } from '../../context/AuthContext.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventDetailModal({ eventId, onClose }) {
+  const { t } = useTranslation();
   const [eventData, setEventData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -48,7 +50,7 @@ export default function EventDetailModal({ eventId, onClose }) {
         if (isMounted) setEventData(res.data);
       })
       .catch((err) => {
-        if (isMounted) setError(err.message || 'Failed to load event details');
+        if (isMounted) setError(err.message || t('errors.generic'));
       })
       .finally(() => {
         if (isMounted) setIsLoading(false);
@@ -57,7 +59,7 @@ export default function EventDetailModal({ eventId, onClose }) {
     return () => {
       isMounted = false;
     };
-  }, [eventId]);
+  }, [eventId, t]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -83,6 +85,10 @@ export default function EventDetailModal({ eventId, onClose }) {
 
   if (!eventId) return null;
 
+  const eventTypeLabel = eventData?.eventType
+    ? t(`eventTypes.${eventData.eventType}`, { defaultValue: eventData.eventType.replace(/_/g, ' ') })
+    : t('eventDetail.headerBadge');
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
@@ -100,7 +106,7 @@ export default function EventDetailModal({ eventId, onClose }) {
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2.5 py-1 rounded">
-              {eventData?.eventType?.replace(/_/g, ' ') || 'EVENT DETAILS'}
+              {eventTypeLabel}
             </span>
             {eventData && (
               <>
@@ -117,13 +123,13 @@ export default function EventDetailModal({ eventId, onClose }) {
             {/* Share / Copy link */}
             <button
               onClick={handleCopyLink}
-              title="Copy dossier link"
+              title={t('eventDetail.copyLink')}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center gap-1 text-xs"
             >
               {copied ? (
                 <>
                   <Check size={14} className="text-emerald-400" />
-                  <span className="text-[10px] text-emerald-400 font-mono">Copied</span>
+                  <span className="text-[10px] text-emerald-400 font-mono">{t('eventDetail.copied')}</span>
                 </>
               ) : (
                 <Share2 size={15} />
@@ -134,7 +140,7 @@ export default function EventDetailModal({ eventId, onClose }) {
             {isAuthenticated && (
               <button
                 onClick={handleBookmarkToggle}
-                title={bookmarked ? 'Remove bookmark' : 'Bookmark dossier'}
+                title={bookmarked ? t('eventDetail.removeBookmark') : t('eventDetail.bookmark')}
                 className={`p-1.5 rounded-lg border transition cursor-pointer ${
                   bookmarked
                     ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
@@ -148,7 +154,7 @@ export default function EventDetailModal({ eventId, onClose }) {
             {/* Full page link */}
             <Link
               to={`/event/${eventId}`}
-              title="Open standalone dossier page"
+              title={t('eventDetail.openStandalone')}
               className="p-1.5 rounded-lg text-slate-400 hover:text-amber-400 hover:bg-slate-800 transition cursor-pointer"
             >
               <Maximize2 size={15} />
@@ -158,7 +164,7 @@ export default function EventDetailModal({ eventId, onClose }) {
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer ml-1"
-              aria-label="Close modal"
+              aria-label={t('eventDetail.close')}
             >
               <X size={18} />
             </button>
@@ -170,7 +176,7 @@ export default function EventDetailModal({ eventId, onClose }) {
           {isLoading ? (
             <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-xs font-mono">Loading intelligence dossier...</p>
+              <p className="text-xs font-mono">{t('eventDetail.loading')}</p>
             </div>
           ) : error ? (
             <div className="py-12 text-center text-rose-400 text-sm">
@@ -188,14 +194,14 @@ export default function EventDetailModal({ eventId, onClose }) {
                 {/* Primary Source Attribution */}
                 {eventData.primaryArticleId && (
                   <div className="mt-2 text-xs text-slate-400 flex items-center gap-2">
-                    <span>Source:</span>
+                    <span>{t('eventDetail.source')}</span>
                     <a
                       href={eventData.primaryArticleId.url}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-amber-400 hover:underline inline-flex items-center gap-1 font-medium"
                     >
-                      {eventData.primaryArticleId.sourceId?.name || 'Original Article'}
+                      {eventData.primaryArticleId.sourceId?.name || t('eventDetail.originalArticle')}
                       <ExternalLink size={11} />
                     </a>
                   </div>
@@ -207,7 +213,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div>
                   <div className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mb-1.5">
                     <MapPin size={12} className="text-amber-400" />
-                    Countries & Regions
+                    {t('eventDetail.countriesRegions')}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {[...(eventData.countries || []), ...(eventData.regions || [])].map((item, idx) => (
@@ -224,7 +230,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div>
                   <div className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mb-1.5">
                     <Layers size={12} className="text-sky-400" />
-                    Affected Sectors
+                    {t('eventDetail.affectedSectors')}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {(eventData.sectors || []).map((sector, idx) => (
@@ -241,7 +247,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div>
                   <div className="text-[11px] font-semibold text-slate-400 flex items-center gap-1 mb-1.5">
                     <Building2 size={12} className="text-purple-400" />
-                    Key Named Entities
+                    {t('eventDetail.keyEntities')}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {(eventData.entities || []).map((entity, idx) => (
@@ -261,45 +267,48 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-bold text-white flex items-center gap-2">
                     <ShieldCheck size={16} className="text-amber-400" />
-                    Domain Impact Assessments ({eventData.impacts?.length || 0})
+                    {t('eventDetail.domainImpacts')} ({eventData.impacts?.length || 0})
                   </h4>
                   <span className="text-[11px] text-slate-400 font-mono">
-                    Qualitative Causal Rules
+                    {t('eventDetail.qualitativeRules')}
                   </span>
                 </div>
 
                 {eventData.impacts && eventData.impacts.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {eventData.impacts.map((impact) => (
-                      <div
-                        key={impact._id}
-                        className="p-4 rounded-xl border bg-slate-900/40 border-slate-800/90 flex flex-col justify-between"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/60">
-                              {impact.domain}
-                            </span>
-                            <DirectionBadge direction={impact.direction} size="sm" />
+                    {eventData.impacts.map((impact) => {
+                      const domainLabel = t(`domains.${impact.domain}`, { defaultValue: impact.domain });
+                      return (
+                        <div
+                          key={impact._id}
+                          className="p-4 rounded-xl border bg-slate-900/40 border-slate-800/90 flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-900/60">
+                                {domainLabel}
+                              </span>
+                              <DirectionBadge direction={impact.direction} size="sm" />
+                            </div>
+
+                            <p className="text-xs text-slate-300 leading-relaxed">
+                              {impact.explanation}
+                            </p>
                           </div>
 
-                          <p className="text-xs text-slate-300 leading-relaxed">
-                            {impact.explanation}
-                          </p>
+                          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                            <span>{t('eventDetail.rule', { ruleId: impact.ruleId })}</span>
+                            <span className="text-amber-400 font-semibold">
+                              {t('eventDetail.confidenceScore', { score: Math.round(impact.confidenceScore * 100) })}
+                            </span>
+                          </div>
                         </div>
-
-                        <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-                          <span>Rule: {impact.ruleId}</span>
-                          <span className="text-amber-400 font-semibold">
-                            {Math.round(impact.confidenceScore * 100)}% Confidence
-                          </span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/30 text-xs text-slate-400 text-center">
-                    No domain impacts assessed for this event yet.
+                    {t('eventDetail.noImpacts')}
                   </div>
                 )}
               </div>
@@ -310,7 +319,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/30">
                   <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
                     <AlertCircle size={13} className="text-emerald-400" />
-                    Verified Claims & Facts
+                    {t('eventDetail.verifiedFacts')}
                   </div>
                   <ul className="space-y-1.5 text-xs text-slate-300">
                     {eventData.facts && eventData.facts.length > 0 ? (
@@ -321,7 +330,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                         </li>
                       ))
                     ) : (
-                      <li className="text-slate-500 italic">No specific facts extracted.</li>
+                      <li className="text-slate-500 italic">{t('eventDetail.noFacts')}</li>
                     )}
                   </ul>
                 </div>
@@ -330,7 +339,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div className="p-4 rounded-xl border border-slate-800 bg-slate-900/30">
                   <div className="text-xs font-semibold text-slate-300 mb-2 flex items-center gap-1.5">
                     <HelpCircle size={13} className="text-amber-400" />
-                    Reported Uncertainties
+                    {t('eventDetail.reportedUncertainties')}
                   </div>
                   <ul className="space-y-1.5 text-xs text-slate-300">
                     {eventData.uncertainties && eventData.uncertainties.length > 0 ? (
@@ -341,7 +350,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                         </li>
                       ))
                     ) : (
-                      <li className="text-slate-500 italic">No reported uncertainties.</li>
+                      <li className="text-slate-500 italic">{t('eventDetail.noUncertainties')}</li>
                     )}
                   </ul>
                 </div>
@@ -352,10 +361,10 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <div className="p-3 rounded-lg border border-slate-800/80 bg-slate-950 text-[10px] text-slate-500 font-mono flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-1.5">
                     <Cpu size={12} className="text-amber-500" />
-                    <span>Engine: GeoMonitor AI</span>
+                    <span>{t('eventDetail.engine')}</span>
                   </div>
                   <div>
-                    <span>Tokens: {eventData.extractionMetadata.inputTokens || 0} in / {eventData.extractionMetadata.outputTokens || 0} out</span>
+                    <span>{t('eventDetail.tokens', { input: eventData.extractionMetadata.inputTokens || 0, output: eventData.extractionMetadata.outputTokens || 0 })}</span>
                   </div>
                 </div>
               )}

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User, Bookmark, LogOut, Shield, Mail, Calendar, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import apiClient from '../lib/apiClient.js';
@@ -10,6 +11,7 @@ import EventDetailModal from '../components/events/EventDetailModal.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { user, logout, toggleBookmark } = useAuth();
   const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +83,7 @@ export default function ProfilePage() {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold border border-rose-900/60 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 transition cursor-pointer self-start sm:self-auto"
         >
           <LogOut size={13} />
-          <span>Sign Out</span>
+          <span>{t('profile.signOut')}</span>
         </button>
       </div>
 
@@ -90,21 +92,21 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Bookmark size={18} className="text-amber-400" />
-            <span>Saved Dossiers ({bookmarkedEvents.length})</span>
+            <span>{t('profile.savedDossiers')} ({bookmarkedEvents.length})</span>
           </h2>
         </div>
 
         {isLoading ? (
           <div className="py-16 text-center text-slate-400 text-xs">
             <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            Loading saved bookmarks...
+            {t('profile.loadingBookmarks')}
           </div>
         ) : bookmarkedEvents.length === 0 ? (
           <div className="p-12 rounded-xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-2">
             <Bookmark size={32} className="mx-auto text-slate-600 mb-1" />
-            <h3 className="text-sm font-semibold text-slate-300">No Saved Events Yet</h3>
+            <h3 className="text-sm font-semibold text-slate-300">{t('profile.noBookmarksTitle')}</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              When reading story dossiers on the news feed, click the bookmark icon to save them here for offline reference.
+              {t('profile.noBookmarksDesc')}
             </p>
           </div>
         ) : (
@@ -117,7 +119,7 @@ export default function ProfilePage() {
                 />
                 <button
                   onClick={(e) => handleRemoveBookmark(event._id, e)}
-                  title="Remove bookmark"
+                  title={t('eventDetail.removeBookmark')}
                   className="absolute top-3 right-3 p-1.5 rounded-lg bg-slate-900/90 text-slate-400 hover:text-rose-400 hover:bg-rose-950 border border-slate-800 transition cursor-pointer"
                 >
                   <Trash2 size={13} />

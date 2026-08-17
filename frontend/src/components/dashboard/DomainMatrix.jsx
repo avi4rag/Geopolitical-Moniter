@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Flame,
   Fuel,
@@ -21,22 +22,24 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOMAIN_METADATA = {
-  ENERGY: { label: 'Energy', Icon: Flame, color: '#f97316' },
-  OIL_AND_GAS: { label: 'Oil & Gas', Icon: Fuel, color: '#fb923c' },
-  TRADE: { label: 'Trade & Tariffs', Icon: ArrowLeftRight, color: '#38bdf8' },
-  SUPPLY_CHAIN: { label: 'Supply Chain', Icon: Truck, color: '#a78bfa' },
-  CURRENCY: { label: 'Currency / FX', Icon: DollarSign, color: '#34d399' },
-  INFLATION: { label: 'Inflation', Icon: Percent, color: '#f87171' },
-  DEFENSE: { label: 'Defense & Security', Icon: Shield, color: '#e879f9' },
-  TECHNOLOGY: { label: 'Technology', Icon: Cpu, color: '#818cf8' },
-  SEMICONDUCTORS: { label: 'Semiconductors', Icon: Microchip, color: '#2dd4bf' },
-  FOOD_AGRICULTURE: { label: 'Food & Ag', Icon: Wheat, color: '#facc15' },
-  DIPLOMACY: { label: 'Diplomacy', Icon: Handshake, color: '#60a5fa' },
-  GLOBAL_STABILITY: { label: 'Global Stability', Icon: Globe2, color: '#ec4899' },
-  FINANCIAL_MARKETS: { label: 'Financial Markets', Icon: BarChart3, color: '#4ade80' },
+  ENERGY: { Icon: Flame, color: '#f97316' },
+  OIL_AND_GAS: { Icon: Fuel, color: '#fb923c' },
+  TRADE: { Icon: ArrowLeftRight, color: '#38bdf8' },
+  SUPPLY_CHAIN: { Icon: Truck, color: '#a78bfa' },
+  CURRENCY: { Icon: DollarSign, color: '#34d399' },
+  INFLATION: { Icon: Percent, color: '#f87171' },
+  DEFENSE: { Icon: Shield, color: '#e879f9' },
+  TECHNOLOGY: { Icon: Cpu, color: '#818cf8' },
+  SEMICONDUCTORS: { Icon: Microchip, color: '#2dd4bf' },
+  FOOD_AGRICULTURE: { Icon: Wheat, color: '#facc15' },
+  DIPLOMACY: { Icon: Handshake, color: '#60a5fa' },
+  GLOBAL_STABILITY: { Icon: Globe2, color: '#ec4899' },
+  FINANCIAL_MARKETS: { Icon: BarChart3, color: '#4ade80' },
 };
 
 export default function DomainMatrix({ domainStats = [], selectedDomain, onSelectDomain }) {
+  const { t } = useTranslation();
+
   // Build lookup by domain name
   const statsMap = (domainStats || []).reduce((acc, curr) => {
     acc[curr.domain] = curr;
@@ -55,9 +58,9 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
     >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-white">Cross-Domain Impact Radar</h3>
+          <h3 className="text-sm font-semibold text-white">{t('analytics.domainRadarTitle')}</h3>
           <p className="text-xs text-slate-400">
-            Click any domain to filter geopolitical events and assessed risks
+            {t('analytics.domainRadarDesc')}
           </p>
         </div>
         {selectedDomain && (
@@ -65,7 +68,7 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
             onClick={() => onSelectDomain(null)}
             className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer"
           >
-            Clear Domain Filter (Showing: {selectedDomain})
+            {t('analytics.clearDomainFilter', { domain: t(`domains.${selectedDomain}`, { defaultValue: selectedDomain }) })}
           </button>
         )}
       </div>
@@ -77,6 +80,7 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
           const count = stat?.totalCount || 0;
           const isSelected = selectedDomain === domainKey;
           const { Icon } = meta;
+          const domainLabel = t(`domains.${domainKey}`, { defaultValue: domainKey });
 
           return (
             <button
@@ -105,11 +109,11 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
               </div>
               <div className="mt-2">
                 <div className="text-[11px] font-medium text-slate-300 truncate">
-                  {meta.label}
+                  {domainLabel}
                 </div>
                 {stat && stat.avgConfidence && (
                   <div className="text-[9px] text-slate-500 font-mono mt-0.5">
-                    {Math.round(stat.avgConfidence * 100)}% conf
+                    {Math.round(stat.avgConfidence * 100)}% {t('analytics.confidence')}
                   </div>
                 )}
               </div>

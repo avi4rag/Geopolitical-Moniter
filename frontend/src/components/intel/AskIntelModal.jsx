@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, X, Send, ArrowRight, Bot, ShieldCheck, ExternalLink, RefreshCw } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
@@ -7,20 +8,21 @@ import SeverityBadge from '../common/SeverityBadge.jsx';
 // AI-powered executive synthesis tool grounded in live geopolitical events.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SUGGESTIONS = [
-  'What are the latest energy & oil market risks?',
-  'Summarize recent diplomatic agreements & trade accords',
-  'What are the key military conflict developments in Eastern Europe?',
-  'Are there any positive economic de-escalation opportunities?',
-];
-
 export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
 
   if (!isOpen) return null;
+
+  const suggestions = [
+    t('intel.suggestions.0'),
+    t('intel.suggestions.1'),
+    t('intel.suggestions.2'),
+    t('intel.suggestions.3'),
+  ];
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
@@ -34,7 +36,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
       const res = await apiClient.post('/events/ask', { query: query.trim() });
       setResponse(res.data);
     } catch (err) {
-      setError(err.message || 'Failed to synthesize intelligence inquiry');
+      setError(err.message || t('intel.error'));
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +51,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
     apiClient
       .post('/events/ask', { query: sug })
       .then((res) => setResponse(res.data))
-      .catch((err) => setError(err.message || 'Failed to synthesize inquiry'))
+      .catch((err) => setError(err.message || t('intel.error')))
       .finally(() => setIsLoading(false));
   };
 
@@ -74,9 +76,9 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
             </div>
             <div>
               <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Ask GeoMonitor Intelligence</span>
+                <span>{t('intel.title')}</span>
                 <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-bold">
-                  AI ASSISTANT
+                  {t('intel.badge')}
                 </span>
               </h2>
             </div>
@@ -85,6 +87,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+            aria-label={t('eventDetail.close')}
           >
             <X size={18} />
           </button>
@@ -98,7 +101,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask any geopolitical inquiry (e.g. energy security, treaties, sanctions)..."
+              placeholder={t('intel.placeholder')}
               className="w-full pl-4 pr-12 py-3 text-xs rounded-xl border bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
               style={{ borderColor: 'var(--color-border)' }}
             />
@@ -115,10 +118,10 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           {!response && !isLoading && (
             <div className="space-y-2">
               <span className="text-[11px] font-mono text-slate-400 uppercase">
-                Suggested Intelligence Inquiries:
+                {t('intel.suggestedTitle')}:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {SUGGESTIONS.map((sug, i) => (
+                {suggestions.map((sug, i) => (
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(sug)}
@@ -136,7 +139,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           {isLoading && (
             <div className="py-12 text-center text-slate-400 space-y-3">
               <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-mono">Synthesizing grounded intelligence brief with GeoMonitor AI...</p>
+              <p className="text-xs font-mono">{t('intel.synthesizing')}</p>
             </div>
           )}
 
@@ -160,7 +163,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
               >
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase">
                   <Bot size={14} />
-                  <span>Synthesized Executive Briefing</span>
+                  <span>{t('intel.title')}</span>
                 </div>
 
                 <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-line font-normal">
@@ -173,7 +176,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                 <div className="space-y-2.5">
                   <h4 className="text-xs font-bold text-slate-400 font-mono uppercase flex items-center gap-1.5">
                     <ShieldCheck size={13} className="text-amber-400" />
-                    Grounded Source Dossiers ({response.citedEvents.length})
+                    {t('intel.referencedDossiers')} ({response.citedEvents.length})
                   </h4>
 
                   <div className="space-y-2">
@@ -193,7 +196,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                             </span>
                             <SeverityBadge severity={event.severity} size="sm" />
                             <span className="text-[10px] font-mono uppercase text-slate-400">
-                              {event.eventType?.replace(/_/g, ' ')}
+                              {t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType?.replace(/_/g, ' ') })}
                             </span>
                           </div>
                           <p className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors truncate">
@@ -202,7 +205,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                         </div>
 
                         <span className="text-amber-400 text-xs font-semibold shrink-0 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                          <span>Inspect</span>
+                          <span>{t('intel.inspect')}</span>
                           <ArrowRight size={12} />
                         </span>
                       </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, AlertCircle, FileQuestion, ChevronLeft, ChevronRight } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import StatCards from '../components/dashboard/StatCards.jsx';
@@ -13,6 +14,7 @@ import EventDetailModal from '../components/events/EventDetailModal.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   // Data state
   const [stats, setStats] = useState(null);
   const [domainStats, setDomainStats] = useState([]);
@@ -74,12 +76,12 @@ export default function DashboardPage() {
         setPagination(res.pagination);
       }
     } catch (err) {
-      setError(err.message || 'Failed to fetch geopolitical events');
+      setError(err.message || t('errors.generic'));
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [page, search, severity, eventType, selectedDomain, sortBy]);
+  }, [page, search, severity, eventType, selectedDomain, sortBy, t]);
 
   // Initial load
   useEffect(() => {
@@ -133,10 +135,10 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>Global Event & Impact Monitor</span>
+            <span>{t('analytics.title')}</span>
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Automated intelligence extraction & deterministic cross-domain impact analysis
+            {t('analytics.subtitle')}
           </p>
         </div>
 
@@ -151,7 +153,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
           >
             <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-            <span>Refresh Feed</span>
+            <span>{t('analytics.refresh')}</span>
           </button>
         </div>
       </div>
@@ -193,29 +195,29 @@ export default function DashboardPage() {
       {isLoading && events.length === 0 ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
           <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs">Loading real-time event feed...</p>
+          <p className="text-xs">{t('feed.loading')}</p>
         </div>
       ) : error ? (
         <div className="p-8 rounded-xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400 space-y-2">
           <AlertCircle size={32} className="mx-auto text-rose-400" />
-          <h3 className="text-sm font-semibold">Error Loading Events</h3>
+          <h3 className="text-sm font-semibold">{t('feed.errorTitle')}</h3>
           <p className="text-xs text-rose-300/80">{error}</p>
         </div>
       ) : events.length === 0 ? (
         <div className="p-12 rounded-xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-3">
           <FileQuestion size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-sm font-semibold text-slate-300">No Geopolitical Events Found</h3>
+          <h3 className="text-sm font-semibold text-slate-300">{t('analytics.noEventsTitle')}</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
             {hasActiveFilters
-              ? 'No events match the current filter criteria. Try clearing your filters or changing search keywords.'
-              : 'No articles have been analyzed yet. Click "Run Pipeline Sync" above to ingest and analyze current world news.'}
+              ? t('analytics.noEventsDescFiltered')
+              : t('analytics.noEventsDescEmpty')}
           </p>
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
               className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition cursor-pointer"
             >
-              Clear Filters
+              {t('filters.clearFilters')}
             </button>
           )}
         </div>
@@ -223,11 +225,12 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between text-xs text-slate-400 px-1">
             <span>
-              Showing {events.length} of {pagination.total} events
-              {selectedDomain ? ` (Filtered by domain: ${selectedDomain})` : ''}
+              {selectedDomain
+                ? t('analytics.showingOfFiltered', { count: events.length, total: pagination.total, domain: t(`domains.${selectedDomain}`, { defaultValue: selectedDomain }) })
+                : t('analytics.showingOf', { count: events.length, total: pagination.total })}
             </span>
             <span>
-              Page {pagination.page} of {pagination.totalPages}
+              {t('analytics.pageOf', { page: pagination.page, totalPages: pagination.totalPages })}
             </span>
           </div>
 
@@ -250,7 +253,7 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
               >
                 <ChevronLeft size={13} />
-                <span>Previous</span>
+                <span>{t('analytics.previous')}</span>
               </button>
 
               <div className="flex items-center gap-1">
@@ -290,7 +293,7 @@ export default function DashboardPage() {
                 disabled={!pagination.hasNextPage}
                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
               >
-                <span>Next</span>
+                <span>{t('analytics.next')}</span>
                 <ChevronRight size={13} />
               </button>
             </div>

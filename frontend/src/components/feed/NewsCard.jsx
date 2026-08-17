@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Clock, MapPin, Layers, ExternalLink, Bookmark, ChevronRight } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
@@ -12,11 +13,13 @@ import { useAuth } from '../../context/AuthContext.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function NewsCard({ event, onSelect }) {
+  const { t, i18n } = useTranslation();
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
   const bookmarked = isBookmarked(event._id);
 
+  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString('en-US', {
+    ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -35,6 +38,10 @@ export default function NewsCard({ event, onSelect }) {
     }
   };
 
+  const eventTypeLabel = event.eventType
+    ? t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType.replace(/_/g, ' ') })
+    : '';
+
   return (
     <article
       onClick={() => onSelect && onSelect(event)}
@@ -50,7 +57,7 @@ export default function NewsCard({ event, onSelect }) {
           <div className="flex items-center gap-2 flex-wrap">
             <SeverityBadge severity={event.severity} size="sm" />
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2 py-0.5 rounded">
-              {event.eventType?.replace(/_/g, ' ')}
+              {eventTypeLabel}
             </span>
             <CredibilityBadge
               label={event.credibilityLabel}
@@ -74,7 +81,7 @@ export default function NewsCard({ event, onSelect }) {
                     ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
                     : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
                 }`}
-                title={bookmarked ? 'Remove bookmark' : 'Bookmark event'}
+                title={bookmarked ? t('eventDetail.removeBookmark') : t('eventDetail.bookmark')}
               >
                 <Bookmark size={13} fill={bookmarked ? 'currentColor' : 'none'} />
               </button>
@@ -129,11 +136,11 @@ export default function NewsCard({ event, onSelect }) {
       {/* Card Footer CTA */}
       <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
         <span className="text-[11px] text-slate-500 font-mono">
-          {event.articleIds?.length || 1} Supporting Source Report{(event.articleIds?.length || 1) > 1 ? 's' : ''}
+          {event.articleIds?.length || 1} {t('sources.articlesIngested')}
         </span>
 
         <span className="inline-flex items-center gap-1 text-amber-400 font-semibold group-hover:translate-x-0.5 transition-transform text-xs">
-          <span>Read Dossier</span>
+          <span>{t('feed.inspectDossier')}</span>
           <ChevronRight size={13} />
         </span>
       </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { MapPin, ChevronRight, Clock } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
@@ -8,10 +9,12 @@ import CredibilityBadge from '../common/CredibilityBadge.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function FeaturedStory({ event, onSelect }) {
+  const { t, i18n } = useTranslation();
   if (!event) return null;
 
+  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString('en-US', {
+    ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -36,7 +39,7 @@ export default function FeaturedStory({ event, onSelect }) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <span className="text-[10px] sm:text-xs font-mono font-bold text-amber-950 bg-amber-400 px-2 py-0.5 rounded-full uppercase tracking-wide">
-              Top Story
+              {t('feed.topStory')}
             </span>
             <SeverityBadge severity={event.severity} />
             <CredibilityBadge
@@ -87,7 +90,7 @@ export default function FeaturedStory({ event, onSelect }) {
           </div>
 
           <div className="flex items-center gap-1 text-amber-400 font-semibold text-xs group-hover:translate-x-1 transition-transform ml-auto">
-            <span>Inspect Dossier</span>
+            <span>{t('feed.inspectDossier')}</span>
             <ChevronRight size={14} />
           </div>
         </div>

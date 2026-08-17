@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ExternalLink, ChevronRight, MapPin, Layers, Clock, AlertCircle } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
@@ -9,8 +10,11 @@ import CredibilityBadge from '../common/CredibilityBadge.jsx';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventCard({ event, onSelect }) {
+  const { t, i18n } = useTranslation();
+
+  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString('en-US', {
+    ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -20,6 +24,10 @@ export default function EventCard({ event, onSelect }) {
 
   const article = event.primaryArticleId;
   const sourceName = article?.sourceId?.name || 'News Wire';
+
+  const eventTypeLabel = event.eventType
+    ? t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType.replace(/_/g, ' ') })
+    : '';
 
   return (
     <div
@@ -35,7 +43,7 @@ export default function EventCard({ event, onSelect }) {
         <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2 py-0.5 rounded">
-              {event.eventType?.replace(/_/g, ' ')}
+              {eventTypeLabel}
             </span>
             <SeverityBadge severity={event.severity} size="sm" />
             <CredibilityBadge
@@ -101,7 +109,7 @@ export default function EventCard({ event, onSelect }) {
       {/* Footer: Source link + View Details CTA */}
       <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
         <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-slate-500">Source:</span>
+          <span className="text-[11px] text-slate-500">{t('eventDetail.source')}</span>
           {article?.url ? (
             <a
               href={article.url}
@@ -119,7 +127,7 @@ export default function EventCard({ event, onSelect }) {
         </div>
 
         <button className="inline-flex items-center gap-1 text-amber-400 font-medium group-hover:translate-x-0.5 transition-transform text-xs cursor-pointer">
-          <span>Inspect Impacts</span>
+          <span>{t('analytics.inspectImpacts')}</span>
           <ChevronRight size={13} />
         </button>
       </div>

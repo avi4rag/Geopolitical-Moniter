@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Globe, AlertTriangle, ShieldAlert, ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../lib/apiClient.js';
@@ -8,6 +9,7 @@ import apiClient from '../../lib/apiClient.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function CountryRiskMatrix() {
+  const { t } = useTranslation();
   const [countryStats, setCountryStats] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,22 +63,20 @@ export default function CountryRiskMatrix() {
         <div>
           <h2 className="text-base font-bold text-white flex items-center gap-2">
             <Globe size={18} className="text-amber-400" />
-            <span>Country Risk & Activity Matrix</span>
+            <span>{t('analytics.countryRiskTitle')}</span>
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Geopolitical event distribution and severity concentration by nation
+            {t('analytics.countryRiskSubtitle')}
           </p>
         </div>
         <span className="text-[11px] font-mono text-slate-500">
-          Top {countryStats.length} Nations
+          {t('analytics.topNations', { count: countryStats.length })}
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
         {countryStats.map((item) => {
           const { country, eventCount, severityBreakdown } = item;
-          const hasCritical = severityBreakdown?.critical > 0;
-          const hasHigh = severityBreakdown?.high > 0;
 
           return (
             <Link
@@ -92,7 +92,7 @@ export default function CountryRiskMatrix() {
                   </h3>
 
                   <span className="text-xs font-mono font-bold text-slate-200 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                    {eventCount} Event{eventCount !== 1 ? 's' : ''}
+                    {t('analytics.eventCount', { count: eventCount })}
                   </span>
                 </div>
 
@@ -100,22 +100,22 @@ export default function CountryRiskMatrix() {
                 <div className="flex items-center gap-1.5 flex-wrap pt-1">
                   {severityBreakdown?.critical > 0 && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 flex items-center gap-1">
-                      <ShieldAlert size={10} /> {severityBreakdown.critical} Critical
+                      <ShieldAlert size={10} /> {severityBreakdown.critical} {t('badges.severity.CRITICAL')}
                     </span>
                   )}
                   {severityBreakdown?.high > 0 && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 flex items-center gap-1">
-                      <AlertTriangle size={10} /> {severityBreakdown.high} High
+                      <AlertTriangle size={10} /> {severityBreakdown.high} {t('badges.severity.HIGH')}
                     </span>
                   )}
                   {severityBreakdown?.medium > 0 && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">
-                      {severityBreakdown.medium} Med
+                      {severityBreakdown.medium} {t('badges.severity.MEDIUM')}
                     </span>
                   )}
                   {severityBreakdown?.low > 0 && (
                     <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                      {severityBreakdown.low} Low
+                      {severityBreakdown.low} {t('badges.severity.LOW')}
                     </span>
                   )}
                 </div>
