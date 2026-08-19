@@ -24,6 +24,9 @@ describe('GET /api/v1/health', () => {
     expect(res.body.data).toHaveProperty('uptime');
     expect(res.body.data).toHaveProperty('timestamp');
     expect(res.body.data).toHaveProperty('database');
+    expect(res.body.data).toHaveProperty('scheduler');
+    expect(res.body.data.scheduler).toHaveProperty('active');
+    expect(res.body.data.scheduler).toHaveProperty('cronPattern');
   });
 
   it('returns 503 when database is not connected', async () => {

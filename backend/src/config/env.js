@@ -32,10 +32,12 @@ const envSchema = z.object({
   RELEVANCE_THRESHOLD: z.string().default('0.3'),
   MAX_PROCESSING_ATTEMPTS: z.string().default('3'),
   INGESTION_CRON: z.string().default('0 */2 * * *'),
-  ENABLE_CRON: z.string().default('false'),
+  ENABLE_CRON: z.string().default('true'),
+  RUN_PIPELINE_ON_START: z.string().default('true'),
 
   // Auth & Security
   JWT_SECRET: z.string().default('geopolitical-monitor-jwt-secret-key-dev-2026'),
+  ADMIN_API_KEY: z.string().optional(),
 
   // Google OAuth 2.0
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -86,9 +88,11 @@ export const env = {
   relevanceThreshold: parseFloat(raw.RELEVANCE_THRESHOLD),
   maxProcessingAttempts: parseInt(raw.MAX_PROCESSING_ATTEMPTS, 10),
   ingestionCron: raw.INGESTION_CRON,
-  enableCron: raw.ENABLE_CRON === 'true',
+  enableCron: raw.ENABLE_CRON !== 'false',
+  runPipelineOnStart: raw.RUN_PIPELINE_ON_START !== 'false',
 
   jwtSecret: raw.JWT_SECRET,
+  adminApiKey: raw.ADMIN_API_KEY || '',
 
   // Google OAuth 2.0
   googleClientId: raw.GOOGLE_CLIENT_ID || '',

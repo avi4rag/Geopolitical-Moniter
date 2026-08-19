@@ -1,15 +1,17 @@
 import { Router } from 'express';
 import { getConnectionState } from '../../db/connection.js';
+import { getSchedulerStatus } from '../../scheduler/cronScheduler.js';
 
 // ─── Health Route ─────────────────────────────────────────────────────────────
 // GET /api/v1/health
-// Returns server status, uptime, and database connection state.
+// Returns server status, uptime, database connection state, and scheduler status.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const router = Router();
 
 router.get('/', (req, res) => {
   const db = getConnectionState();
+  const scheduler = getSchedulerStatus();
 
   const status = {
     service: 'geopolitical-monitor-api',
@@ -20,6 +22,13 @@ router.get('/', (req, res) => {
     database: {
       connected: db.isConnected,
       readyState: db.readyState,
+    },
+    scheduler: {
+      active: scheduler.isActive,
+      cronPattern: scheduler.cronPattern,
+      lastRunAt: scheduler.lastScheduledRunAt,
+      lastRunStatus: scheduler.lastScheduledRunStatus,
+      totalRuns: scheduler.totalScheduledRuns,
     },
     environment: process.env.NODE_ENV || 'development',
   };

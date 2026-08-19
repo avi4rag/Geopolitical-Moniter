@@ -14,14 +14,30 @@ import { env } from '../../config/env.js';
 
 const router = Router();
 
-// Development-only check in production without auth
+// Admin authentication middleware
 router.use((req, res, next) => {
-  if (env.isProduction && !req.headers['x-admin-key']) {
-    return res.status(403).json({
-      success: false,
-      data: null,
-      error: { code: 'FORBIDDEN', message: 'Admin key required in production' },
-    });
+  if (env.isProduction) {
+    const providedKey =
+      req.headers['x-admin-key'] ||
+      (req.headers.authorization?.startsWith('Bearer ')
+        ? req.headers.authorization.slice(7)
+        : null);
+
+    if (!providedKey) {
+      return res.status(403).json({
+        success: false,
+        data: null,
+        error: { code: 'FORBIDDEN', message: 'Admin key required in production' },
+      });
+    }
+
+    if (env.adminApiKey && providedKey !== env.adminApiKey) {
+      return res.status(401).json({
+        success: false,
+        data: null,
+        error: { code: 'UNAUTHORIZED', message: 'Invalid admin API key' },
+      });
+    }
   }
   next();
 });

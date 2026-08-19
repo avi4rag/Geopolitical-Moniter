@@ -141,6 +141,17 @@ describe('Cron Scheduler (cronScheduler)', () => {
     stopScheduler();
     expect(getSchedulerStatus().isActive).toBe(false);
   });
+
+  it('triggers startup catch-up run when runOnStart is enabled', async () => {
+    startScheduler('*/5 * * * *', { runOnStart: true, startDelayMs: 20 });
+    const status = getSchedulerStatus();
+    expect(status.isActive).toBe(true);
+    expect(status.startedAt).toBeDefined();
+
+    // Wait for the startup timer to fire
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(runIngestion).toHaveBeenCalled();
+  });
 });
 
 describe('Admin Pipeline API Endpoints', () => {
