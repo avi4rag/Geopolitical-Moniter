@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sparkles, X, Send, ArrowRight, Bot, ShieldCheck, ExternalLink, RefreshCw } from 'lucide-react';
+import { Sparkles, X, Send, ArrowRight, Bot, ShieldCheck, RefreshCw } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
 // ─── Ask Intel Modal ──────────────────────────────────────────────────────────
 // AI-powered executive synthesis tool grounded in live geopolitical events.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState(null);
   const [error, setError] = useState(null);
 
   if (!isOpen) return null;
+
+  const lang = i18n.language || 'en';
 
   const suggestions = [
     t('intel.suggestions.0'),
@@ -185,7 +188,9 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                         key={event._id}
                         onClick={() => {
                           onClose();
-                          onSelectEvent && onSelectEvent(event._id);
+                          if (onSelectEvent) {
+                            onSelectEvent(event._id);
+                          }
                         }}
                         className="p-3.5 rounded-xl border bg-slate-950/60 border-slate-800/80 hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer flex items-center justify-between gap-3 group"
                       >
@@ -200,7 +205,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                             </span>
                           </div>
                           <p className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors truncate">
-                            {event.summary}
+                            {translateNewsText(event.summary, lang)}
                           </p>
                         </div>
 

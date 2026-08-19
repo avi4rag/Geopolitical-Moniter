@@ -17,6 +17,7 @@ import apiClient from '../lib/apiClient.js';
 import DirectionBadge from '../components/common/DirectionBadge.jsx';
 import SeverityBadge from '../components/common/SeverityBadge.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
+import { translateNewsText } from '../i18n/newsContentTranslations.js';
 
 // ─── Impacts Page ─────────────────────────────────────────────────────────────
 // Cross-domain qualitative impact assessments view with positive opportunities
@@ -41,7 +42,7 @@ const DOMAIN_KEYS = [
 ];
 
 export default function ImpactsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [impacts, setImpacts] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 16, total: 0, totalPages: 1 });
   const [selectedDomain, setSelectedDomain] = useState('ALL');
@@ -176,6 +177,11 @@ export default function ImpactsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {impacts.map((impact) => {
             const domainLabel = t(`domains.${impact.domain}`, { defaultValue: impact.domain });
+            const lang = i18n.language || 'en';
+            const localizedExplanation = translateNewsText(impact.explanation, lang);
+            const localizedEventSummary = impact.eventId?.summary
+              ? translateNewsText(impact.eventId.summary, lang)
+              : '';
             return (
               <div
                 key={impact._id}
@@ -198,7 +204,7 @@ export default function ImpactsPage() {
                   </div>
 
                   <p className="text-xs text-slate-200 leading-relaxed font-medium mb-3">
-                    {impact.explanation}
+                    {localizedExplanation}
                   </p>
                 </div>
 
@@ -211,7 +217,7 @@ export default function ImpactsPage() {
                   {impact.eventId && (
                     <div className="text-[11px] text-slate-400 flex items-center justify-between truncate pt-1">
                       <span className="truncate text-slate-300 group-hover:text-amber-300 transition-colors">
-                        {impact.eventId.summary || t('impacts.viewAssociatedDossier')}
+                        {localizedEventSummary || t('impacts.viewAssociatedDossier')}
                       </span>
                     </div>
                   )}

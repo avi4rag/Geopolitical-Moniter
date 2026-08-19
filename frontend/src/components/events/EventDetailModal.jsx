@@ -10,30 +10,32 @@ import {
   AlertCircle,
   HelpCircle,
   Cpu,
-  Clock,
   ShieldCheck,
   Bookmark,
   Share2,
   Check,
   Maximize2,
+  Newspaper,
 } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import DirectionBadge from '../common/DirectionBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { translateNewsText, translateNewsArray } from '../../i18n/newsContentTranslations.js';
 
 // ─── Event Detail Modal ───────────────────────────────────────────────────────
 // Modal for in-depth inspection of an event and its cross-domain impacts.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventDetailModal({ eventId, onClose }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [eventData, setEventData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  const lang = i18n.language || 'en';
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
   const bookmarked = isBookmarked(eventId);
 
@@ -185,10 +187,10 @@ export default function EventDetailModal({ eventId, onClose }) {
             </div>
           ) : eventData ? (
             <>
-              {/* Event Summary */}
+              {/* Event Headline */}
               <div>
                 <h3 className="text-lg font-bold text-white leading-relaxed">
-                  {eventData.summary}
+                  {translateNewsText(eventData.summary, lang)}
                 </h3>
 
                 {/* Primary Source Attribution */}
@@ -204,6 +206,56 @@ export default function EventDetailModal({ eventId, onClose }) {
                       {eventData.primaryArticleId.sourceId?.name || t('eventDetail.originalArticle')}
                       <ExternalLink size={11} />
                     </a>
+                  </div>
+                )}
+              </div>
+
+              {/* ARTICLE SUMMARY SECTION */}
+              <div className="p-4 sm:p-5 rounded-xl border bg-slate-900/60 border-slate-800 space-y-2.5">
+                <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-800/80">
+                  <div className="flex items-center gap-2">
+                    <Newspaper size={15} className="text-amber-400" />
+                    <h4 className="text-xs font-bold font-mono tracking-wide text-white uppercase">
+                      {t('eventDetail.articleSummary')}
+                    </h4>
+                    {eventData.primaryArticleId?.sourceId?.name && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                        {eventData.primaryArticleId.sourceId.name}
+                      </span>
+                    )}
+                  </div>
+
+                  {eventData.primaryArticleId?.url && (
+                    <a
+                      href={eventData.primaryArticleId.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-amber-400 hover:underline inline-flex items-center gap-1 font-medium transition-colors"
+                    >
+                      <span>{t('eventDetail.readOriginal')}</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+
+                {eventData.primaryArticleId?.excerpt ? (
+                  <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                    {translateNewsText(eventData.primaryArticleId.excerpt, lang)}
+                  </p>
+                ) : (
+                  <div className="text-xs text-slate-500 italic flex items-center gap-1.5">
+                    {eventData.primaryArticleId?.url ? (
+                      <a
+                        href={eventData.primaryArticleId.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-amber-400/90 hover:text-amber-300 hover:underline inline-flex items-center gap-1 font-medium not-italic"
+                      >
+                        {t('eventDetail.summaryUnavailable')}
+                      </a>
+                    ) : (
+                      <span>{t('eventDetail.summaryUnavailable')}</span>
+                    )}
                   </div>
                 )}
               </div>
@@ -278,6 +330,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {eventData.impacts.map((impact) => {
                       const domainLabel = t(`domains.${impact.domain}`, { defaultValue: impact.domain });
+                      const localizedExplanation = translateNewsText(impact.explanation, lang);
                       return (
                         <div
                           key={impact._id}
@@ -292,7 +345,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                             </div>
 
                             <p className="text-xs text-slate-300 leading-relaxed">
-                              {impact.explanation}
+                              {localizedExplanation}
                             </p>
                           </div>
 
@@ -323,7 +376,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                   </div>
                   <ul className="space-y-1.5 text-xs text-slate-300">
                     {eventData.facts && eventData.facts.length > 0 ? (
-                      eventData.facts.map((fact, idx) => (
+                      translateNewsArray(eventData.facts, lang).map((fact, idx) => (
                         <li key={idx} className="flex items-start gap-1.5">
                           <span className="text-emerald-400">•</span>
                           <span>{fact}</span>
@@ -343,7 +396,7 @@ export default function EventDetailModal({ eventId, onClose }) {
                   </div>
                   <ul className="space-y-1.5 text-xs text-slate-300">
                     {eventData.uncertainties && eventData.uncertainties.length > 0 ? (
-                      eventData.uncertainties.map((unc, idx) => (
+                      translateNewsArray(eventData.uncertainties, lang).map((unc, idx) => (
                         <li key={idx} className="flex items-start gap-1.5">
                           <span className="text-amber-400">•</span>
                           <span>{unc}</span>

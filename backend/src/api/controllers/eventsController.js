@@ -81,7 +81,7 @@ export async function listEvents(req, res, next) {
         .limit(limit)
         .populate({
           path: 'primaryArticleId',
-          select: 'title url publishedAt relevanceScore sourceId',
+          select: 'title url excerpt publishedAt relevanceScore sourceId',
           populate: { path: 'sourceId', select: 'name domain reliabilityScore type' },
         })
         .lean(),
