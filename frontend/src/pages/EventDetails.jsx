@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowLeft,
@@ -9,19 +9,20 @@ import {
   Globe,
   MapPin,
   Bookmark,
-  Layers,
   CheckCircle2,
   HelpCircle,
   TrendingUp,
   Share2,
   Download,
   Check,
+  Newspaper,
 } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import SeverityBadge from '../components/common/SeverityBadge.jsx';
 import CredibilityBadge from '../components/common/CredibilityBadge.jsx';
 import DirectionBadge from '../components/common/DirectionBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { translateNewsText, translateNewsArray } from '../i18n/newsContentTranslations.js';
 
 // ─── Event Details Page ───────────────────────────────────────────────────────
 // Standalone page for inspecting full intelligence dossier on a specific event.
@@ -157,7 +158,8 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
   const bookmarked = isBookmarked(eventData._id);
   const primaryArticle = eventData.primaryArticleId;
 
-  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
+  const lang = i18n.language || 'en';
+  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = eventData.createdAt
     ? new Date(eventData.createdAt).toLocaleDateString(locale, {
         dateStyle: 'medium',
@@ -167,6 +169,14 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
 
   const eventTypeLabel = eventData.eventType
     ? t(`eventTypes.${eventData.eventType}`, { defaultValue: eventData.eventType.replace(/_/g, ' ') })
+    : '';
+
+  const localizedSummary = translateNewsText(eventData.summary, lang);
+  const localizedArticleExcerpt = primaryArticle?.excerpt
+    ? translateNewsText(primaryArticle.excerpt, lang)
+    : '';
+  const localizedArticleTitle = primaryArticle?.title
+    ? translateNewsText(primaryArticle.title, lang)
     : '';
 
   return (
@@ -247,7 +257,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
-          {eventData.summary}
+          {localizedSummary}
         </h1>
 
         <div className="flex items-center gap-4 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-4 flex-wrap">
@@ -261,6 +271,62 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
             <span>{formattedDate}</span>
           </span>
         </div>
+      </div>
+
+      {/* ARTICLE SUMMARY SECTION */}
+      <div
+        className="p-6 rounded-2xl border space-y-3"
+        style={{
+          backgroundColor: 'var(--color-surface-1)',
+          borderColor: 'var(--color-border)',
+        }}
+      >
+        <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-800/80">
+          <div className="flex items-center gap-2">
+            <Newspaper size={16} className="text-amber-400" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+              {t('eventDetail.articleSummary')}
+            </h2>
+            {primaryArticle?.sourceId?.name && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-700">
+                {primaryArticle.sourceId.name}
+              </span>
+            )}
+          </div>
+
+          {primaryArticle?.url && (
+            <a
+              href={primaryArticle.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-amber-400 hover:underline inline-flex items-center gap-1 font-medium transition-colors"
+            >
+              <span>{t('eventDetail.readOriginal')}</span>
+              <ExternalLink size={13} />
+            </a>
+          )}
+        </div>
+
+        {localizedArticleExcerpt ? (
+          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+            {localizedArticleExcerpt}
+          </p>
+        ) : (
+          <div className="text-xs text-slate-500 italic">
+            {primaryArticle?.url ? (
+              <a
+                href={primaryArticle.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-400/90 hover:text-amber-300 hover:underline inline-flex items-center gap-1 font-medium not-italic"
+              >
+                {t('eventDetail.summaryUnavailable')}
+              </a>
+            ) : (
+              <span>{t('eventDetail.summaryUnavailable')}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Section 1: Who Is Involved */}
@@ -322,6 +388,8 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {impacts.map((imp) => {
               const domainLabel = t(`domains.${imp.domain}`, { defaultValue: imp.domain });
+              const explanationText = imp.explanation || imp.ruleExplanation || '';
+              const localizedImpExplanation = translateNewsText(explanationText, lang);
               return (
                 <div
                   key={imp._id}
@@ -351,9 +419,9 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
                     </div>
                   </div>
 
-                  {imp.ruleExplanation && (
+                  {localizedImpExplanation && (
                     <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
-                      {imp.ruleExplanation}
+                      {localizedImpExplanation}
                     </p>
                   )}
                 </div>
@@ -382,7 +450,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               {t('eventDetail.confirmedFactualStatements')}
             </h3>
             <ul className="space-y-2">
-              {eventData.facts.map((fact, idx) => (
+              {translateNewsArray(eventData.facts, lang).map((fact, idx) => (
                 <li
                   key={idx}
                   className="text-xs text-slate-200 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 flex items-start gap-2.5 leading-relaxed"
@@ -401,7 +469,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               {t('eventDetail.keyUncertainties')}
             </h3>
             <ul className="space-y-2">
-              {eventData.uncertainties.map((unc, idx) => (
+              {translateNewsArray(eventData.uncertainties, lang).map((unc, idx) => (
                 <li
                   key={idx}
                   className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-900/40 flex items-start gap-2.5 leading-relaxed"
@@ -429,7 +497,7 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               {t('eventDetail.originalReport')}
             </span>
             <h3 className="text-sm font-bold text-white line-clamp-1">
-              {primaryArticle.title}
+              {localizedArticleTitle || primaryArticle.title}
             </h3>
           </div>
 

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { MapPin, ChevronRight, Clock } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
+import { translateNewsText, translateNewsArray } from '../../i18n/newsContentTranslations.js';
 
 // ─── Featured Story ───────────────────────────────────────────────────────────
 // Responsive hero card for top critical/high severity geopolitical events.
@@ -12,7 +13,8 @@ export default function FeaturedStory({ event, onSelect }) {
   const { t, i18n } = useTranslation();
   if (!event) return null;
 
-  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
+  const lang = i18n.language || 'en';
+  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
     ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
@@ -21,6 +23,9 @@ export default function FeaturedStory({ event, onSelect }) {
         minute: '2-digit',
       })
     : '';
+
+  const localizedSummary = translateNewsText(event.summary, lang);
+  const localizedFacts = translateNewsArray(event.facts || [], lang);
 
   return (
     <div
@@ -56,13 +61,13 @@ export default function FeaturedStory({ event, onSelect }) {
 
         {/* Headline */}
         <h2 className="text-base sm:text-xl md:text-2xl font-bold text-white leading-snug sm:leading-tight group-hover:text-amber-300 transition-colors">
-          {event.summary}
+          {localizedSummary}
         </h2>
 
         {/* Verified Facts preview */}
-        {event.facts && event.facts.length > 0 && (
+        {localizedFacts && localizedFacts.length > 0 && (
           <p className="text-xs sm:text-sm text-slate-300/90 leading-relaxed max-w-3xl line-clamp-2">
-            {event.facts.join(' • ')}
+            {localizedFacts.join(' • ')}
           </p>
         )}
 

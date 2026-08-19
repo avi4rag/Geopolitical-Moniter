@@ -1,11 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Clock, MapPin, Layers, ExternalLink, Bookmark, ChevronRight } from 'lucide-react';
+import { Clock, MapPin, Layers, Bookmark, ChevronRight } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
-import DirectionBadge from '../common/DirectionBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
 // ─── News Card ────────────────────────────────────────────────────────────────
 // Consumer news story card for the main feed.
@@ -17,7 +16,8 @@ export default function NewsCard({ event, onSelect }) {
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
   const bookmarked = isBookmarked(event._id);
 
-  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
+  const lang = i18n.language || 'en';
+  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
     ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
@@ -29,6 +29,11 @@ export default function NewsCard({ event, onSelect }) {
 
   const article = event.primaryArticleId;
   const sourceName = article?.sourceId?.name || 'Reuters';
+
+  const localizedSummary = translateNewsText(event.summary, lang);
+  const localizedFirstFact = event.facts && event.facts.length > 0
+    ? translateNewsText(event.facts[0], lang)
+    : '';
 
   const handleBookmarkClick = async (e) => {
     e.stopPropagation();
@@ -91,13 +96,13 @@ export default function NewsCard({ event, onSelect }) {
 
         {/* Headline / Factual Summary */}
         <h3 className="text-base font-bold text-white leading-snug group-hover:text-amber-300 transition-colors mb-2">
-          {event.summary}
+          {localizedSummary}
         </h3>
 
         {/* Facts Preview */}
-        {event.facts && event.facts.length > 0 && (
+        {localizedFirstFact && (
           <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-3">
-            {event.facts[0]}
+            {localizedFirstFact}
           </p>
         )}
 

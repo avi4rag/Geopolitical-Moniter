@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, ChevronRight, MapPin, Layers, Clock, AlertCircle } from 'lucide-react';
+import { ExternalLink, ChevronRight, MapPin, Layers, Clock } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
+import { translateNewsText, translateNewsArray } from '../../i18n/newsContentTranslations.js';
 
 // ─── Event Card ───────────────────────────────────────────────────────────────
 // Information-dense card representing an extracted geopolitical event.
@@ -12,7 +12,8 @@ import CredibilityBadge from '../common/CredibilityBadge.jsx';
 export default function EventCard({ event, onSelect }) {
   const { t, i18n } = useTranslation();
 
-  const locale = i18n.language?.startsWith('hi') ? 'hi-IN' : 'en-US';
+  const lang = i18n.language || 'en';
+  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
     ? new Date(event.createdAt).toLocaleDateString(locale, {
         month: 'short',
@@ -24,6 +25,9 @@ export default function EventCard({ event, onSelect }) {
 
   const article = event.primaryArticleId;
   const sourceName = article?.sourceId?.name || 'News Wire';
+
+  const localizedSummary = translateNewsText(event.summary, lang);
+  const localizedFacts = translateNewsArray(event.facts || [], lang);
 
   const eventTypeLabel = event.eventType
     ? t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType.replace(/_/g, ' ') })
@@ -60,13 +64,13 @@ export default function EventCard({ event, onSelect }) {
 
         {/* Factual Summary */}
         <h4 className="text-sm font-medium text-slate-100 leading-snug group-hover:text-amber-300 transition-colors">
-          {event.summary}
+          {localizedSummary}
         </h4>
 
         {/* Key Extracted Facts Preview */}
-        {event.facts && event.facts.length > 0 && (
+        {localizedFacts && localizedFacts.length > 0 && (
           <ul className="mt-2.5 space-y-1 text-xs text-slate-300 border-l-2 border-slate-700/80 pl-2.5 py-0.5">
-            {event.facts.slice(0, 2).map((fact, idx) => (
+            {localizedFacts.slice(0, 2).map((fact, idx) => (
               <li key={idx} className="line-clamp-1">
                 • {fact}
               </li>
