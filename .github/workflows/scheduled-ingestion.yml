@@ -1,0 +1,35 @@
+﻿name: Automated News Ingestion Pipeline
+
+on:
+  schedule:
+    # Run every 2 hours
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  trigger-ingestion:
+    name: Trigger Ingestion & Health Keep-Alive
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend Health Endpoint
+        run: |
+          BACKEND_URL="${{ vars.BACKEND_URL || 'https://geomoniter.onrender.com' }}"
+          echo "Pinging health endpoint at $BACKEND_URL/api/v1/health"
+          curl -s -f -m 30 "$BACKEND_URL/api/v1/health" || echo "Health ping completed"
+
+      - name: Trigger End-to-End Pipeline
+        env:
+          ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+          BACKEND_URL: ${{ vars.BACKEND_URL || 'https://geomoniter.onrender.com' }}
+        run: |
+          echo "Triggering pipeline run at $BACKEND_URL/api/v1/admin/pipeline/run"
+          if [ -n "$ADMIN_API_KEY" ]; then
+            curl -s -f -X POST "$BACKEND_URL/api/v1/admin/pipeline/run" \
+              -H "Content-Type: application/json" \
+              -H "x-admin-key: $ADMIN_API_KEY" \
+              -d '{"extractBatchSize": 10, "impactBatchSize": 30}' || echo "Pipeline trigger finished"
+          else
+            curl -s -f -X POST "$BACKEND_URL/api/v1/admin/pipeline/run" \
+              -H "Content-Type: application/json" \
+              -d '{"extractBatchSize": 10, "impactBatchSize": 30}' || echo "Pipeline trigger finished"
+          fi

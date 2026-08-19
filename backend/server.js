@@ -19,7 +19,7 @@ async function startServer() {
 
     // 2. Start automated cron scheduler (if enabled)
     if (env.enableCron) {
-      startScheduler(env.ingestionCron);
+      startScheduler(env.ingestionCron, { runOnStart: env.runPipelineOnStart });
     } else {
       logger.info('Scheduler: Background cron is disabled (ENABLE_CRON=false)');
     }
@@ -32,6 +32,7 @@ async function startServer() {
           env: env.nodeEnv,
           url: `http://localhost:${env.port}`,
           cronEnabled: env.enableCron,
+          runOnStart: env.runPipelineOnStart,
         },
         '🚀 Server started'
       );

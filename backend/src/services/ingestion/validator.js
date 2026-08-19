@@ -34,7 +34,9 @@ export const NormalizedArticleSchema = z.object({
   publishedAt: z
     .date()
     .refine((d) => !isNaN(d.getTime()), { message: 'publishedAt must be a valid date' })
-    .refine((d) => d <= new Date(), { message: 'publishedAt cannot be in the future' })
+    .refine((d) => d.getTime() <= Date.now() + 10 * 60 * 1000, {
+      message: 'publishedAt cannot be in the future',
+    })
     .refine(
       (d) => d >= new Date('2000-01-01'),
       { message: 'publishedAt seems too old (before 2000)' }

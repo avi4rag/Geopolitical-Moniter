@@ -43,7 +43,9 @@ Complete instructions for deploying the GeoMonitor backend on **Render** and the
 | `GUARDIAN_API_KEY` | Your Guardian API key |
 | `NEWS_API_KEY` | Your NewsAPI key |
 | `RELEVANCE_THRESHOLD` | `0.3` |
-| `ENABLE_CRON` | `false` |
+| `ENABLE_CRON` | `true` |
+| `RUN_PIPELINE_ON_START` | `true` (Runs catch-up ingestion on container startup/wake) |
+| `ADMIN_API_KEY` | Secret token for automated/admin pipeline triggers |
 | `FRONTEND_URL` | `https://geopolitical-moniter.vercel.app` |
 | `CORS_ORIGINS` | `https://geopolitical-moniter.vercel.app` |
 | `GOOGLE_CLIENT_ID` | Your Google Cloud Client ID |
@@ -51,6 +53,15 @@ Complete instructions for deploying the GeoMonitor backend on **Render** and the
 | `GOOGLE_CALLBACK_URL` | `https://geomoniter.onrender.com/api/v1/auth/google/callback` |
 
 5. Click **Create Web Service** and wait for deployment to complete.
+
+---
+
+## 2.1 Automated Ingestion on Render Free Tier
+
+Render Free Tier web services spin down after 15 minutes of inactivity. To ensure 24/7 automated news ingestion:
+- **`RUN_PIPELINE_ON_START=true`**: Automatically fetches new articles whenever the container starts or wakes up.
+- **Automated GitHub Action (`.github/workflows/scheduled-ingestion.yml`)**: Runs every 2 hours to ping `https://geomoniter.onrender.com/api/v1/health` and trigger `https://geomoniter.onrender.com/api/v1/admin/pipeline/run` with `x-admin-key: <ADMIN_API_KEY>`, keeping the service active and fetching news on schedule.
+- **Alternative (cron-job.org)**: Create a free recurring HTTP request to `https://geomoniter.onrender.com/api/v1/health` every 10 minutes to prevent container sleep.
 
 ---
 
