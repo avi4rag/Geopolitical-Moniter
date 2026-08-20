@@ -7,8 +7,8 @@ import NewsCard from '../components/feed/NewsCard.jsx';
 import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
-// ─── Editorial Search Page ────────────────────────────────────────────────────
-// Multi-faceted geopolitical exploration and query engine.
+// ─── Full-Width Search & Exploration Page ─────────────────────────────────────
+// Multi-faceted search across global events, countries, and sectors.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EVENT_TYPES = [
@@ -70,7 +70,7 @@ export default function SearchPage() {
   const [error, setError] = useState(null);
   const [selectedEventId, setSelectedEventId] = useState(null);
 
-  // Sync URL search param if changed
+  // Sync URL query param
   useEffect(() => {
     if (searchParams.get('q')) {
       setQuery(searchParams.get('q'));
@@ -98,7 +98,7 @@ export default function SearchPage() {
       setResults(res.data || []);
       setTotalCount(res.pagination?.total || (res.data || []).length);
     } catch (err) {
-      setError(err.message || t('search.searchFailed'));
+      setError(err.message || t('search.searchFailed', { defaultValue: 'Search failed' }));
     } finally {
       setIsLoading(false);
     }
@@ -124,22 +124,25 @@ export default function SearchPage() {
     query !== '' || eventType !== 'ALL' || sector !== 'ALL' || severity !== 'ALL' || country !== '';
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Masthead Header */}
-      <div className="border-b border-slate-800/80 pb-5">
+    <div className="space-y-8 w-full">
+      {/* Header Banner */}
+      <div className="border-b border-slate-200 pb-5">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-amber-400" />
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
+          <div className="h-3 w-1 bg-indigo-600 rounded-full" />
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-indigo-700">
             {t('search.tagline', { defaultValue: 'GEOPOLITICAL INTELLIGENCE ARCHIVE' })}
           </span>
         </div>
-        <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight mt-1.5">
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-950 tracking-tight mt-1.5">
           {t('search.title', { defaultValue: 'Intelligence Search & Exploration' })}
         </h1>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
+          {t('search.subtitle', { defaultValue: 'Multi-facet search across global events, countries, and domains.' })}
+        </p>
       </div>
 
       {/* Main Search Controls Box */}
-      <div className="p-6 rounded-3xl border border-slate-800/90 bg-slate-900/60 backdrop-blur-md shadow-2xl space-y-5">
+      <div className="p-6 rounded-3xl border border-slate-200 bg-white shadow-xs space-y-5">
         {/* Large Search Input */}
         <div className="relative">
           <Search
@@ -150,13 +153,13 @@ export default function SearchPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('search.searchPlaceholder', { defaultValue: 'Search headlines, countries, treaties, sectors...' })}
-            className="w-full pl-12 pr-10 py-3.5 text-sm sm:text-base rounded-2xl border border-slate-800 bg-slate-950/90 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
+            placeholder={t('search.searchPlaceholder', { defaultValue: 'Search events, countries, treaties, sectors...' })}
+            className="w-full pl-12 pr-10 py-3.5 text-sm sm:text-base rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer p-1"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-1"
             >
               <X size={16} />
             </button>
@@ -164,16 +167,16 @@ export default function SearchPage() {
         </div>
 
         {/* Facet Dropdowns / Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 pt-1">
-          {/* Event Type */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-1">
+          {/* Event Classification */}
           <div>
-            <label className="block text-xs font-mono font-semibold text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               {t('search.eventType', { defaultValue: 'Event Classification' })}
             </label>
             <select
               value={eventType}
               onChange={(e) => setEventType(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-200 focus:outline-none focus:border-amber-500 transition cursor-pointer"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
             >
               {EVENT_TYPES.map((type) => (
                 <option key={type} value={type}>
@@ -183,15 +186,15 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Sector */}
+          {/* Affected Sector */}
           <div>
-            <label className="block text-xs font-mono font-semibold text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               {t('search.affectedSector', { defaultValue: 'Affected Sector' })}
             </label>
             <select
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-200 focus:outline-none focus:border-amber-500 transition cursor-pointer"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
             >
               {SECTORS.map((sec) => (
                 <option key={sec} value={sec}>
@@ -201,15 +204,15 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Severity */}
+          {/* Severity Threshold */}
           <div>
-            <label className="block text-xs font-mono font-semibold text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               {t('search.severityLevel', { defaultValue: 'Severity Threshold' })}
             </label>
             <select
               value={severity}
               onChange={(e) => setSeverity(e.target.value)}
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-200 focus:outline-none focus:border-amber-500 transition cursor-pointer"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
             >
               {SEVERITIES.map((sev) => (
                 <option key={sev} value={sev}>
@@ -219,9 +222,9 @@ export default function SearchPage() {
             </select>
           </div>
 
-          {/* Country */}
+          {/* Country / Region */}
           <div>
-            <label className="block text-xs font-mono font-semibold text-slate-400 mb-1.5">
+            <label className="block text-xs font-semibold text-slate-600 mb-1.5">
               {t('search.country', { defaultValue: 'Country / Region' })}
             </label>
             <input
@@ -229,15 +232,15 @@ export default function SearchPage() {
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               placeholder="e.g. United States, Japan..."
-              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-800 bg-slate-950 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 transition"
             />
           </div>
         </div>
 
         {/* Quick Country Pills */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-3 border-t border-slate-800/80">
-          <span className="text-[11px] font-mono text-slate-400 mr-1 flex items-center gap-1">
-            <Globe size={11} className="text-amber-400" /> {t('search.popular', { defaultValue: 'Key Nations' })}:
+        <div className="flex items-center gap-2 flex-wrap pt-3 border-t border-slate-100">
+          <span className="text-xs font-mono font-medium text-slate-500 mr-1 flex items-center gap-1">
+            <Globe size={12} className="text-indigo-600" /> {t('search.popular', { defaultValue: 'Key Nations' })}:
           </span>
           {POPULAR_COUNTRIES.map((c) => {
             const isActive = country.toLowerCase() === c.toLowerCase();
@@ -245,10 +248,10 @@ export default function SearchPage() {
               <button
                 key={c}
                 onClick={() => setCountry(isActive ? '' : c)}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition cursor-pointer ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
                   isActive
-                    ? 'bg-amber-400 text-slate-950 font-bold shadow-sm'
-                    : 'bg-slate-950 text-slate-300 border border-slate-800 hover:text-white hover:bg-slate-800'
+                    ? 'bg-slate-900 text-white font-bold'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
                 }`}
               >
                 {c}
@@ -259,7 +262,7 @@ export default function SearchPage() {
           {hasActiveFilters && (
             <button
               onClick={handleReset}
-              className="px-3 py-1 text-xs rounded-full border border-rose-800/60 bg-rose-950/40 text-rose-300 hover:bg-rose-900/60 transition cursor-pointer ml-auto flex items-center gap-1"
+              className="px-3 py-1 text-xs rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer ml-auto flex items-center gap-1"
             >
               <X size={11} /> {t('filters.reset', { defaultValue: 'Reset Filters' })}
             </button>
@@ -267,13 +270,13 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* Results Count Header */}
-      <div className="flex items-center justify-between text-xs text-slate-400 font-mono border-b border-slate-800 pb-2">
-        <span className="text-white font-bold">
+      {/* Results Header Count */}
+      <div className="flex items-center justify-between text-xs text-slate-500 font-mono border-b border-slate-200 pb-2">
+        <span className="text-slate-900 font-bold">
           {t('search.foundReports', { count: totalCount, defaultValue: `Found ${totalCount} intelligence dossiers` })}
         </span>
         {isLoading && (
-          <span className="flex items-center gap-1 text-amber-400">
+          <span className="flex items-center gap-1 text-indigo-600 font-semibold">
             <RefreshCw size={12} className="animate-spin" /> {t('search.searching', { defaultValue: 'Searching archive...' })}
           </span>
         )}
@@ -283,20 +286,20 @@ export default function SearchPage() {
       {isLoading && results.length === 0 ? (
         <FeedSkeleton count={6} />
       ) : error ? (
-        <div className="p-10 rounded-3xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400 space-y-3">
+        <div className="p-10 rounded-2xl border border-rose-200 bg-rose-50 text-center text-rose-700 space-y-3">
           <AlertCircle size={36} className="mx-auto" />
           <p className="text-xs">{error}</p>
         </div>
       ) : results.length === 0 ? (
-        <div className="p-14 rounded-3xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-3">
-          <Globe size={40} className="mx-auto text-slate-600 mb-1" />
-          <h3 className="text-base font-bold text-slate-200">{t('search.noMatchesTitle', { defaultValue: 'No Matching Dossiers' })}</h3>
+        <div className="p-14 rounded-2xl border border-slate-200 bg-white text-center text-slate-500 space-y-3">
+          <Globe size={40} className="mx-auto text-slate-400 mb-1" />
+          <h3 className="text-base font-bold text-slate-800">{t('search.noMatchesTitle', { defaultValue: 'No Matching Dossiers' })}</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto">
             {t('search.noMatchesDesc', { defaultValue: 'Try adjusting your search terms or clearing specific facet filters.' })}
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {results.map((event) => (
             <NewsCard
               key={event._id}

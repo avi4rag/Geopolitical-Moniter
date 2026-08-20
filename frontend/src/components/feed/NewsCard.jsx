@@ -5,9 +5,9 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 import { getNewsEditorialImage } from '../../lib/newsImages.js';
 
-// ─── Reference Design News Card ───────────────────────────────────────────────
-// Clean, bright editorial story card with rounded corners, subtle border,
-// high-contrast typography, and smooth hover elevation.
+// ─── Editorial News Card ──────────────────────────────────────────────────────
+// Clean, bright editorial story card with subtle border, high-contrast
+// headline typography, factual summary, source attribution, and bookmarking.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function NewsCard({ event, onSelect }) {
@@ -19,15 +19,23 @@ export default function NewsCard({ event, onSelect }) {
 
   const lang = i18n.language || 'en';
   const localizedHeadline = translateNewsText(event.summary, lang);
+  const localizedFact = event.facts && event.facts.length > 0
+    ? translateNewsText(event.facts[0], lang)
+    : null;
+
   const bookmarked = isBookmarked ? isBookmarked(event._id) : false;
   const imageUrl = getNewsEditorialImage(event);
+  const sourceName = event.primaryArticleId?.sourceId?.name || 'World News Wire';
 
   const categoryName = event.sectors && event.sectors.length > 0
     ? event.sectors[0]
     : 'World News';
 
   const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString()
+    ? new Date(event.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      })
     : 'Recent';
 
   const handleBookmarkClick = async (e) => {
@@ -46,11 +54,11 @@ export default function NewsCard({ event, onSelect }) {
   return (
     <article
       onClick={() => onSelect && onSelect(event)}
-      className="group cursor-pointer bg-white rounded-2xl border border-slate-200/80 p-3.5 sm:p-4 hover:border-slate-300 hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+      className="group cursor-pointer bg-white rounded-2xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-lg transition-all duration-200 flex flex-col justify-between"
     >
       <div className="space-y-3">
-        {/* Thumbnail Image */}
-        <div className="relative h-44 w-full rounded-xl overflow-hidden bg-slate-100">
+        {/* Editorial Photo Frame */}
+        <div className="relative h-44 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-100">
           <img
             src={imageUrl}
             alt={event.summary}
@@ -58,7 +66,7 @@ export default function NewsCard({ event, onSelect }) {
             loading="lazy"
           />
 
-          {/* Bookmark Action */}
+          {/* Bookmark Button */}
           {isAuthenticated && (
             <button
               onClick={handleBookmarkClick}
@@ -76,26 +84,33 @@ export default function NewsCard({ event, onSelect }) {
         </div>
 
         {/* Category & Timestamp */}
-        <div className="text-xs font-semibold text-indigo-600 flex items-center gap-1.5">
+        <div className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5 pt-0.5">
           <span>{categoryName}</span>
           <span className="text-slate-300">•</span>
           <span className="text-slate-400 font-normal">{formattedDate}</span>
         </div>
 
         {/* Headline */}
-        <h3 className="text-sm sm:text-base font-bold text-slate-950 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
+        <h3 className="text-base font-bold text-slate-950 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
           {localizedHeadline}
         </h3>
+
+        {/* Short Summary / Fact */}
+        {localizedFact && (
+          <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
+            {localizedFact}
+          </p>
+        )}
       </div>
 
-      {/* Footer Read Indicator */}
+      {/* Footer Bar */}
       <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
         <span className="text-[11px] font-medium text-slate-500">
-          {event.primaryArticleId?.sourceId?.name || 'Wire Report'}
+          {sourceName}
         </span>
 
-        <span className="text-indigo-600 font-semibold text-xs flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-          <span>{t('feed.readArticle', { defaultValue: 'Read article' })}</span>
+        <span className="text-indigo-700 font-semibold text-xs flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span>{t('feed.readArticle', { defaultValue: 'Read Article' })}</span>
           <ArrowRight size={12} />
         </span>
       </div>

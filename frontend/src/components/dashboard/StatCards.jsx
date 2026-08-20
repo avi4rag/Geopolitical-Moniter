@@ -10,7 +10,7 @@ import apiClient from '../../lib/apiClient.js';
 export default function StatCards({ stats, onRefresh }) {
   const { t } = useTranslation();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [syncStatus, setSyncStatus] = useState(null); // { type: 'success' | 'error', message: string }
+  const [syncStatus, setSyncStatus] = useState(null);
 
   const totals = stats?.totals || {
     events: 0,
@@ -35,7 +35,7 @@ export default function StatCards({ stats, onRefresh }) {
           impactBatchSize: 50,
         },
         {
-          timeout: 180_000, // 3 minutes for full cycle
+          timeout: 180_000,
         }
       );
 
@@ -46,182 +46,128 @@ export default function StatCards({ stats, onRefresh }) {
 
         setSyncStatus({
           type: 'success',
-          message: t('analytics.syncCycleComplete', { stored, analyzed, impacts }),
+          message: `Pipeline synced: ${stored} stored, ${analyzed} analyzed, ${impacts} impacts evaluated.`,
         });
         if (onRefresh) onRefresh();
       } else {
         setSyncStatus({
           type: 'error',
-          message: response.data?.message || t('analytics.syncWarnings'),
+          message: response.data?.message || 'Sync completed with warnings.',
         });
       }
     } catch (err) {
       setSyncStatus({
         type: 'error',
-        message: err.message || t('analytics.syncFailed'),
+        message: err.message || 'Sync request failed.',
       });
     } finally {
       setIsSyncing(false);
-      setTimeout(() => setSyncStatus(null), 8000);
     }
   };
 
+  const cards = [
+    {
+      title: t('analytics.statTotal', { defaultValue: 'Total Events' }),
+      value: totals.events,
+      sub: `${totals.articles} articles ingested`,
+      Icon: Globe,
+      color: 'text-indigo-600',
+      bg: 'bg-indigo-50',
+    },
+    {
+      title: t('analytics.statCritical', { defaultValue: 'High / Critical Alerts' }),
+      value: highCriticalCount,
+      sub: `${stats?.breakdowns?.bySeverity?.CRITICAL || 0} critical severity`,
+      Icon: AlertOctagon,
+      color: 'text-rose-600',
+      bg: 'bg-rose-50',
+    },
+    {
+      title: t('analytics.statDomains', { defaultValue: 'Active Impacts' }),
+      value: totals.activeImpacts,
+      sub: 'evaluated ripple effects',
+      Icon: TrendingUp,
+      color: 'text-amber-600',
+      bg: 'bg-amber-50',
+    },
+    {
+      title: t('sources.title', { defaultValue: 'Monitored Sources' }),
+      value: totals.sources,
+      sub: 'live wire feeds',
+      Icon: Newspaper,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50',
+    },
+  ];
+
   return (
     <div className="space-y-4">
-      {/* ── Metric Cards Grid ────────────────────────────────────────────────── */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Active Events */}
-        <div
-          className="p-5 rounded-xl border transition-all duration-200"
-          style={{
-            backgroundColor: 'var(--color-surface-1)',
-            borderColor: 'var(--color-border)',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {t('analytics.trackedEvents')}
-            </span>
+        {cards.map((card) => {
+          const { Icon } = card;
+          return (
             <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' }}
+              key={card.title}
+              className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all flex items-start justify-between"
             >
-              <Globe size={16} />
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-slate-500 font-mono">
+                  {card.title}
+                </span>
+                <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+                  {card.value}
+                </div>
+                <span className="text-[11px] text-slate-400 font-mono">
+                  {card.sub}
+                </span>
+              </div>
+              <div className={`p-2.5 rounded-xl ${card.bg} ${card.color} shrink-0`}>
+                <Icon size={20} />
+              </div>
             </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white font-mono">
-              {totals.events}
-            </span>
-            {highCriticalCount > 0 && (
-              <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{
-                  backgroundColor: 'rgba(239, 68, 68, 0.15)',
-                  color: '#f87171',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}
-              >
-                {t('analytics.highCriticalCount', { count: highCriticalCount })}
-              </span>
-            )}
-          </div>
-          <p className="mt-1.5 text-xs text-slate-400">
-            {t('analytics.realtimeIntel')}
-          </p>
-        </div>
-
-        {/* Card 2: Cross-Domain Impacts */}
-        <div
-          className="p-5 rounded-xl border transition-all duration-200"
-          style={{
-            backgroundColor: 'var(--color-surface-1)',
-            borderColor: 'var(--color-border)',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {t('analytics.domainAssessments')}
-            </span>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' }}
-            >
-              <TrendingUp size={16} />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white font-mono">
-              {totals.activeImpacts}
-            </span>
-            <span className="text-xs text-emerald-400">{t('analytics.activeRules')}</span>
-          </div>
-          <p className="mt-1.5 text-xs text-slate-400">
-            {t('analytics.crossSectorEvaluations')}
-          </p>
-        </div>
-
-        {/* Card 3: Articles Analyzed */}
-        <div
-          className="p-5 rounded-xl border transition-all duration-200"
-          style={{
-            backgroundColor: 'var(--color-surface-1)',
-            borderColor: 'var(--color-border)',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {t('analytics.ingestedArticles')}
-            </span>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(168, 85, 247, 0.15)', color: '#c084fc' }}
-            >
-              <Newspaper size={16} />
-            </div>
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-white font-mono">
-              {totals.articles}
-            </span>
-            <span className="text-xs text-slate-400">{t('analytics.deduplicated')}</span>
-          </div>
-          <p className="mt-1.5 text-xs text-slate-400">
-            {t('analytics.articleFeeds')}
-          </p>
-        </div>
-
-        {/* Card 4: Intelligence Pipeline & Sync Button */}
-        <div
-          className="p-5 rounded-xl border flex flex-col justify-between"
-          style={{
-            backgroundColor: 'var(--color-surface-1)',
-            borderColor: 'var(--color-border)',
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              {t('analytics.pipelineCycle')}
-            </span>
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: 'rgba(34, 197, 94, 0.15)', color: '#4ade80' }}
-            >
-              <AlertOctagon size={16} />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between gap-2">
-            <button
-              onClick={handleSyncNow}
-              disabled={isSyncing}
-              className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-              style={{
-                backgroundColor: 'var(--color-accent)',
-                color: '#000',
-              }}
-            >
-              <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
-              {isSyncing ? t('analytics.runningCycle') : t('analytics.runPipelineSync')}
-            </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* ── Status Toast / Banner ────────────────────────────────────────────── */}
+      {/* Sync Pipeline Bar */}
+      <div className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-bold text-slate-900 font-mono">
+              REAL-TIME INGESTION & IMPACT PIPELINE
+            </span>
+          </div>
+          <p className="text-xs text-slate-500">
+            Triggers multi-source RSS harvester, entity extractor, and causal assessment models.
+          </p>
+        </div>
+
+        <button
+          onClick={handleSyncNow}
+          disabled={isSyncing}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
+        >
+          <RefreshCw size={13} className={isSyncing ? 'animate-spin text-indigo-400' : ''} />
+          <span>{isSyncing ? 'Syncing Pipeline...' : 'Run Pipeline Sync'}</span>
+        </button>
+      </div>
+
       {syncStatus && (
         <div
-          className={`p-3 rounded-lg border text-xs flex items-center gap-2 transition-all ${
+          className={`p-4 rounded-xl text-xs flex items-center gap-2.5 border ${
             syncStatus.type === 'success'
-              ? 'bg-emerald-950/40 border-emerald-800/60 text-emerald-300'
-              : 'bg-rose-950/40 border-rose-800/60 text-rose-300'
+              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border-rose-200'
           }`}
         >
           {syncStatus.type === 'success' ? (
-            <CheckCircle size={14} className="shrink-0 text-emerald-400" />
+            <CheckCircle size={16} className="text-emerald-600 shrink-0" />
           ) : (
-            <AlertTriangle size={14} className="shrink-0 text-rose-400" />
+            <AlertTriangle size={16} className="text-rose-600 shrink-0" />
           )}
-          <span>{syncStatus.message}</span>
+          <span className="font-medium">{syncStatus.message}</span>
         </div>
       )}
     </div>

@@ -5,7 +5,7 @@ import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
-// ─── Ask Intel Modal ──────────────────────────────────────────────────────────
+// ─── Editorial Ask Intel Modal ────────────────────────────────────────────────
 // AI-powered executive synthesis tool grounded in live geopolitical events.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -21,10 +21,10 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
   const lang = i18n.language || 'en';
 
   const suggestions = [
-    t('intel.suggestions.0'),
-    t('intel.suggestions.1'),
-    t('intel.suggestions.2'),
-    t('intel.suggestions.3'),
+    t('intel.suggestions.0', { defaultValue: 'What are the latest energy & oil market risks?' }),
+    t('intel.suggestions.1', { defaultValue: 'Summarize recent diplomatic agreements & trade accords' }),
+    t('intel.suggestions.2', { defaultValue: 'What are the key military conflict developments in Eastern Europe?' }),
+    t('intel.suggestions.3', { defaultValue: 'Are there any positive economic de-escalation opportunities?' }),
   ];
 
   const handleSubmit = async (e) => {
@@ -39,7 +39,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
       const res = await apiClient.post('/events/ask', { query: query.trim() });
       setResponse(res.data);
     } catch (err) {
-      setError(err.message || t('intel.error'));
+      setError(err.message || t('intel.error', { defaultValue: 'Failed to synthesize intelligence inquiry' }));
     } finally {
       setIsLoading(false);
     }
@@ -54,34 +54,30 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
     apiClient
       .post('/events/ask', { query: sug })
       .then((res) => setResponse(res.data))
-      .catch((err) => setError(err.message || t('intel.error')))
+      .catch((err) => setError(err.message || t('intel.error', { defaultValue: 'Failed to synthesize intelligence inquiry' })))
       .finally(() => setIsLoading(false));
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border shadow-2xl overflow-hidden"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
-              <Sparkles size={15} />
+        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+              <Sparkles size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>{t('intel.title')}</span>
-                <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-amber-400/10 text-amber-400 border border-amber-400/20 font-bold">
-                  {t('intel.badge')}
+              <h2 className="text-sm font-black text-slate-950 flex items-center gap-2">
+                <span>{t('intel.title', { defaultValue: 'Ask GeoMonitor Intelligence' })}</span>
+                <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold">
+                  {t('intel.badge', { defaultValue: 'AI ASSISTANT' })}
                 </span>
               </h2>
             </div>
@@ -89,29 +85,28 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
-            aria-label={t('eventDetail.close')}
+            className="p-1.5 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+            aria-label={t('eventDetail.close', { defaultValue: 'Close' })}
           >
             <X size={18} />
           </button>
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 overflow-y-auto space-y-5 flex-1">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
           {/* Query Form */}
           <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder={t('intel.placeholder')}
-              className="w-full pl-4 pr-12 py-3 text-xs rounded-xl border bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition shadow-inner"
-              style={{ borderColor: 'var(--color-border)' }}
+              placeholder={t('intel.placeholder', { defaultValue: 'Ask about geopolitical risks, commodities, trade pacts...' })}
+              className="w-full pl-4 pr-12 py-3 text-xs sm:text-sm rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition shadow-inner"
             />
             <button
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 disabled:opacity-40 transition cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 transition cursor-pointer"
             >
               {isLoading ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
             </button>
@@ -120,18 +115,18 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           {/* Quick Suggestions */}
           {!response && !isLoading && (
             <div className="space-y-2">
-              <span className="text-[11px] font-mono text-slate-400 uppercase">
-                {t('intel.suggestedTitle')}:
+              <span className="text-[11px] font-mono font-bold text-slate-400 uppercase">
+                {t('intel.suggestedTitle', { defaultValue: 'Suggested Inquiries' })}:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {suggestions.map((sug, i) => (
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(sug)}
-                    className="p-2.5 rounded-xl border border-slate-800/80 bg-slate-950/60 hover:bg-slate-900 hover:border-slate-700 text-left text-xs text-slate-300 transition cursor-pointer flex items-center justify-between group"
+                    className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-200 text-left text-xs text-slate-700 hover:text-slate-950 transition cursor-pointer flex items-center justify-between group"
                   >
-                    <span className="line-clamp-1">{sug}</span>
-                    <ArrowRight size={12} className="text-slate-500 group-hover:text-amber-400 shrink-0 ml-1" />
+                    <span className="line-clamp-2 leading-relaxed">{sug}</span>
+                    <ArrowRight size={12} className="text-slate-400 group-hover:text-indigo-600 shrink-0 ml-2" />
                   </button>
                 ))}
               </div>
@@ -140,15 +135,15 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
           {/* Loading State */}
           {isLoading && (
-            <div className="py-12 text-center text-slate-400 space-y-3">
-              <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-mono">{t('intel.synthesizing')}</p>
+            <div className="py-12 text-center text-slate-500 space-y-3">
+              <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-xs font-mono">{t('intel.synthesizing', { defaultValue: 'Synthesizing intelligence inquiry...' })}</p>
             </div>
           )}
 
           {/* Error State */}
           {error && (
-            <div className="p-4 rounded-xl border border-rose-900/60 bg-rose-950/20 text-rose-400 text-xs">
+            <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs">
               {error}
             </div>
           )}
@@ -157,62 +152,51 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           {response && (
             <div className="space-y-5">
               {/* Answer Card */}
-              <div
-                className="p-5 rounded-2xl border space-y-3"
-                style={{
-                  backgroundColor: 'var(--color-surface-2)',
-                  borderColor: 'var(--color-border)',
-                }}
-              >
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 uppercase">
-                  <Bot size={14} />
-                  <span>{t('intel.title')}</span>
+              <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-indigo-700">
+                  <Bot size={15} />
+                  <span>SYNTHESIZED INTELLIGENCE ASSESSMENT</span>
                 </div>
-
-                <div className="text-xs text-slate-200 leading-relaxed whitespace-pre-line font-normal">
+                <div className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
                   {response.answer}
                 </div>
               </div>
 
-              {/* Cited Intelligence Dossiers */}
-              {response.citedEvents && response.citedEvents.length > 0 && (
-                <div className="space-y-2.5">
-                  <h4 className="text-xs font-bold text-slate-400 font-mono uppercase flex items-center gap-1.5">
-                    <ShieldCheck size={13} className="text-amber-400" />
-                    {t('intel.referencedDossiers')} ({response.citedEvents.length})
-                  </h4>
+              {/* Grounded Event Sources */}
+              {response.referencedEvents && response.referencedEvents.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 uppercase">
+                    <ShieldCheck size={14} className="text-emerald-600" />
+                    <span>{t('intel.referencedDossiers', { defaultValue: 'Referenced Intelligence Dossiers' })}</span>
+                  </div>
 
                   <div className="space-y-2">
-                    {response.citedEvents.map((event, idx) => (
+                    {response.referencedEvents.map((ev) => (
                       <div
-                        key={event._id}
-                        onClick={() => {
-                          onClose();
-                          if (onSelectEvent) {
-                            onSelectEvent(event._id);
-                          }
-                        }}
-                        className="p-3.5 rounded-xl border bg-slate-950/60 border-slate-800/80 hover:border-amber-500/50 hover:bg-slate-900 transition cursor-pointer flex items-center justify-between gap-3 group"
+                        key={ev._id}
+                        className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex items-center justify-between gap-3 text-xs"
                       >
-                        <div className="space-y-1 truncate">
+                        <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono text-amber-400 font-bold">
-                              [Event {idx + 1}]
-                            </span>
-                            <SeverityBadge severity={event.severity} size="sm" />
-                            <span className="text-[10px] font-mono uppercase text-slate-400">
-                              {t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType?.replace(/_/g, ' ') })}
+                            <SeverityBadge severity={ev.severity} size="sm" />
+                            <span className="text-slate-400 font-mono text-[10px]">
+                              {ev.createdAt ? new Date(ev.createdAt).toLocaleDateString() : ''}
                             </span>
                           </div>
-                          <p className="text-xs font-medium text-white group-hover:text-amber-300 transition-colors truncate">
-                            {translateNewsText(event.summary, lang)}
+                          <p className="font-semibold text-slate-900 truncate">
+                            {translateNewsText(ev.summary, lang)}
                           </p>
                         </div>
 
-                        <span className="text-amber-400 text-xs font-semibold shrink-0 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
-                          <span>{t('intel.inspect')}</span>
-                          <ArrowRight size={12} />
-                        </span>
+                        <button
+                          onClick={() => {
+                            onClose();
+                            if (onSelectEvent) onSelectEvent(ev._id);
+                          }}
+                          className="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shrink-0 cursor-pointer transition"
+                        >
+                          {t('intel.inspect', { defaultValue: 'Inspect' })}
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -220,6 +204,12 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
               )}
             </div>
           )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+          <span>{t('intel.groundedNotice', { defaultValue: 'Responses are synthesized from live, verified event dossiers.' })}</span>
+          <span>GeoMonitor AI v2.4</span>
         </div>
       </div>
     </div>

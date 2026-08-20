@@ -16,31 +16,29 @@ import {
   BarChart3,
 } from 'lucide-react';
 
-// ─── Domain Matrix ────────────────────────────────────────────────────────────
+// ─── Domain Impact Radar / Matrix ─────────────────────────────────────────────
 // Visual breakdown of economic and geopolitical impact domains.
-// Clicking a domain filters the event stream.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOMAIN_METADATA = {
-  ENERGY: { Icon: Flame, color: '#f97316' },
-  OIL_AND_GAS: { Icon: Fuel, color: '#fb923c' },
-  TRADE: { Icon: ArrowLeftRight, color: '#38bdf8' },
-  SUPPLY_CHAIN: { Icon: Truck, color: '#a78bfa' },
-  CURRENCY: { Icon: DollarSign, color: '#34d399' },
-  INFLATION: { Icon: Percent, color: '#f87171' },
-  DEFENSE: { Icon: Shield, color: '#e879f9' },
-  TECHNOLOGY: { Icon: Cpu, color: '#818cf8' },
-  SEMICONDUCTORS: { Icon: Microchip, color: '#2dd4bf' },
-  FOOD_AGRICULTURE: { Icon: Wheat, color: '#facc15' },
-  DIPLOMACY: { Icon: Handshake, color: '#60a5fa' },
-  GLOBAL_STABILITY: { Icon: Globe2, color: '#ec4899' },
-  FINANCIAL_MARKETS: { Icon: BarChart3, color: '#4ade80' },
+  ENERGY: { Icon: Flame, color: 'text-amber-600', bg: 'bg-amber-50' },
+  OIL_AND_GAS: { Icon: Fuel, color: 'text-orange-600', bg: 'bg-orange-50' },
+  TRADE: { Icon: ArrowLeftRight, color: 'text-sky-600', bg: 'bg-sky-50' },
+  SUPPLY_CHAIN: { Icon: Truck, color: 'text-purple-600', bg: 'bg-purple-50' },
+  CURRENCY: { Icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  INFLATION: { Icon: Percent, color: 'text-rose-600', bg: 'bg-rose-50' },
+  DEFENSE: { Icon: Shield, color: 'text-pink-600', bg: 'bg-pink-50' },
+  TECHNOLOGY: { Icon: Cpu, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+  SEMICONDUCTORS: { Icon: Microchip, color: 'text-teal-600', bg: 'bg-teal-50' },
+  FOOD_AGRICULTURE: { Icon: Wheat, color: 'text-amber-600', bg: 'bg-amber-50' },
+  DIPLOMACY: { Icon: Handshake, color: 'text-blue-600', bg: 'bg-blue-50' },
+  GLOBAL_STABILITY: { Icon: Globe2, color: 'text-violet-600', bg: 'bg-violet-50' },
+  FINANCIAL_MARKETS: { Icon: BarChart3, color: 'text-emerald-600', bg: 'bg-emerald-50' },
 };
 
 export default function DomainMatrix({ domainStats = [], selectedDomain, onSelectDomain }) {
   const { t } = useTranslation();
 
-  // Build lookup by domain name
   const statsMap = (domainStats || []).reduce((acc, curr) => {
     acc[curr.domain] = curr;
     return acc;
@@ -49,26 +47,23 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
   const allDomains = Object.keys(DOMAIN_METADATA);
 
   return (
-    <div
-      className="p-5 rounded-xl border"
-      style={{
-        backgroundColor: 'var(--color-surface-1)',
-        borderColor: 'var(--color-border)',
-      }}
-    >
+    <div className="p-6 rounded-2xl border border-slate-200 bg-white shadow-xs">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold text-white">{t('analytics.domainRadarTitle')}</h3>
-          <p className="text-xs text-slate-400">
-            {t('analytics.domainRadarDesc')}
+          <h2 className="text-base font-bold text-slate-950">
+            {t('analytics.domainRadar', { defaultValue: 'Domain Impact Radar' })}
+          </h2>
+          <p className="text-xs text-slate-500">
+            {t('analytics.domainRadarSub', { defaultValue: 'Real-time distribution across strategic economic sectors' })}
           </p>
         </div>
+
         {selectedDomain && (
           <button
             onClick={() => onSelectDomain(null)}
-            className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 hover:text-white transition cursor-pointer"
+            className="text-xs font-semibold text-rose-600 hover:underline cursor-pointer"
           >
-            {t('analytics.clearDomainFilter', { domain: t(`domains.${selectedDomain}`, { defaultValue: selectedDomain }) })}
+            Clear Filter
           </button>
         )}
       </div>
@@ -76,47 +71,33 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
         {allDomains.map((domainKey) => {
           const meta = DOMAIN_METADATA[domainKey];
+          const { Icon, color, bg } = meta;
           const stat = statsMap[domainKey];
-          const count = stat?.totalCount || 0;
+          const count = stat?.count || 0;
           const isSelected = selectedDomain === domainKey;
-          const { Icon } = meta;
           const domainLabel = t(`domains.${domainKey}`, { defaultValue: domainKey });
 
           return (
             <button
               key={domainKey}
               onClick={() => onSelectDomain(isSelected ? null : domainKey)}
-              className={`p-2.5 rounded-lg border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between ${
+              className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                 isSelected
-                  ? 'border-amber-500/80 bg-amber-500/10 shadow-sm shadow-amber-500/10 ring-1 ring-amber-500/50'
-                  : 'border-slate-800/80 bg-slate-900/40 hover:bg-slate-800/60 hover:border-slate-700'
+                  ? 'border-indigo-600 bg-indigo-50/80 shadow-2xs scale-[1.02]'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
               }`}
             >
-              <div className="flex items-center justify-between w-full">
-                <div
-                  className="w-6 h-6 rounded flex items-center justify-center"
-                  style={{ backgroundColor: `${meta.color}20`, color: meta.color }}
-                >
-                  <Icon size={13} />
+              <div className="flex items-center justify-between mb-2">
+                <div className={`p-1.5 rounded-lg ${bg} ${color}`}>
+                  <Icon size={14} />
                 </div>
-                <span
-                  className={`text-xs font-mono font-bold px-1.5 py-0.5 rounded ${
-                    count > 0 ? 'bg-slate-800 text-white' : 'text-slate-500'
-                  }`}
-                >
+                <span className="text-xs font-mono font-bold text-slate-900">
                   {count}
                 </span>
               </div>
-              <div className="mt-2">
-                <div className="text-[11px] font-medium text-slate-300 truncate">
-                  {domainLabel}
-                </div>
-                {stat && stat.avgConfidence && (
-                  <div className="text-[9px] text-slate-500 font-mono mt-0.5">
-                    {Math.round(stat.avgConfidence * 100)}% {t('analytics.confidence')}
-                  </div>
-                )}
-              </div>
+              <span className="text-[11px] font-semibold text-slate-700 leading-tight truncate">
+                {domainLabel}
+              </span>
             </button>
           );
         })}

@@ -32,17 +32,11 @@ export default function CountryRiskMatrix() {
 
   if (isLoading) {
     return (
-      <div
-        className="p-6 rounded-2xl border space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
-        <div className="h-4 w-40 bg-slate-800 rounded animate-pulse" />
+      <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4">
+        <div className="h-4 w-40 bg-slate-100 rounded animate-pulse" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-16 bg-slate-900 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -52,73 +46,64 @@ export default function CountryRiskMatrix() {
   if (countryStats.length === 0) return null;
 
   return (
-    <div
-      className="p-6 rounded-2xl border space-y-5 shadow-lg"
-      style={{
-        backgroundColor: 'var(--color-surface-1)',
-        borderColor: 'var(--color-border)',
-      }}
-    >
+    <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Globe size={18} className="text-amber-400" />
-            <span>{t('analytics.countryRiskTitle')}</span>
+          <h2 className="text-base font-bold text-slate-950 flex items-center gap-2">
+            <Globe size={18} className="text-indigo-600" />
+            <span>{t('analytics.countryMatrix', { defaultValue: 'Country Risk Matrix' })}</span>
           </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
-            {t('analytics.countryRiskSubtitle')}
+          <p className="text-xs text-slate-500">
+            {t('analytics.countryMatrixSub', { defaultValue: 'Geopolitical activity and risk density by nation' })}
           </p>
         </div>
-        <span className="text-[11px] font-mono text-slate-500">
-          {t('analytics.topNations', { count: countryStats.length })}
+        <span className="text-xs font-mono text-slate-400">
+          {countryStats.length} Nations Tracked
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
-        {countryStats.map((item) => {
-          const { country, eventCount, severityBreakdown } = item;
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {countryStats.slice(0, 8).map((stat) => {
+          const hasCritical = (stat.criticalEvents || 0) > 0;
+          const hasHigh = (stat.highEvents || 0) > 0;
 
           return (
             <Link
-              key={country}
-              to={`/search?country=${encodeURIComponent(country)}`}
-              className="p-4 rounded-xl border bg-slate-950/60 border-slate-800/80 hover:border-amber-500/50 hover:bg-slate-900/60 transition group flex flex-col justify-between"
+              key={stat.country}
+              to={`/search?country=${encodeURIComponent(stat.country)}`}
+              className={`p-4 rounded-xl border transition-all flex items-center justify-between group cursor-pointer ${
+                hasCritical
+                  ? 'border-rose-200 bg-rose-50/50 hover:bg-rose-50'
+                  : hasHigh
+                  ? 'border-amber-200 bg-amber-50/50 hover:bg-amber-50'
+                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
+              }`}
             >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors flex items-center gap-1.5">
-                    <span>{country}</span>
-                    <ArrowUpRight size={13} className="text-slate-500 group-hover:text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </h3>
-
-                  <span className="text-xs font-mono font-bold text-slate-200 px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                    {t('analytics.eventCount', { count: eventCount })}
+              <div className="space-y-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-slate-950 group-hover:text-indigo-600 transition-colors">
+                    {stat.country}
                   </span>
+                  {hasCritical && (
+                    <ShieldAlert size={12} className="text-rose-600" title="Critical Events Active" />
+                  )}
+                  {!hasCritical && hasHigh && (
+                    <AlertTriangle size={12} className="text-amber-600" title="High Severity Events Active" />
+                  )}
                 </div>
 
-                {/* Severity Pills */}
-                <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                  {severityBreakdown?.critical > 0 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-800 flex items-center gap-1">
-                      <ShieldAlert size={10} /> {severityBreakdown.critical} {t('badges.severity.CRITICAL')}
-                    </span>
-                  )}
-                  {severityBreakdown?.high > 0 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 flex items-center gap-1">
-                      <AlertTriangle size={10} /> {severityBreakdown.high} {t('badges.severity.HIGH')}
-                    </span>
-                  )}
-                  {severityBreakdown?.medium > 0 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800">
-                      {severityBreakdown.medium} {t('badges.severity.MEDIUM')}
-                    </span>
-                  )}
-                  {severityBreakdown?.low > 0 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                      {severityBreakdown.low} {t('badges.severity.LOW')}
+                <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
+                  <span>{stat.totalEvents} events</span>
+                  {hasCritical && (
+                    <span className="text-rose-600 font-bold">
+                      ({stat.criticalEvents} critical)
                     </span>
                   )}
                 </div>
+              </div>
+
+              <div className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 transition-all">
+                <ArrowUpRight size={13} />
               </div>
             </Link>
           );

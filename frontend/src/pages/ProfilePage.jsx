@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Bookmark, LogOut, Shield, Mail, Calendar, Trash2 } from 'lucide-react';
+import { Bookmark, LogOut, Shield, Mail, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import apiClient from '../lib/apiClient.js';
-import EventCard from '../components/dashboard/EventCard.jsx';
+import NewsCard from '../components/feed/NewsCard.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
-// ─── Profile Page ─────────────────────────────────────────────────────────────
+// ─── Editorial Profile & Bookmarks Page ───────────────────────────────────────
 // User account profile and saved bookmarks management.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -45,34 +45,27 @@ export default function ProfilePage() {
   if (!user) return null;
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-8 max-w-5xl mx-auto w-full">
       {/* Account Info Header */}
-      <div
-        className="p-6 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
+      <div className="p-6 rounded-3xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-xl font-bold font-mono shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 text-xl font-bold font-mono shrink-0">
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
 
           <div className="space-y-1">
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>{user.name}</span>
-              <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
-                {user.role}
-              </span>
+            <h1 className="text-xl font-black text-slate-950">
+              {user.name}
             </h1>
-            <div className="flex items-center gap-3 text-xs text-slate-400 font-mono">
+            <div className="flex items-center gap-3 text-xs text-slate-500 font-mono flex-wrap">
               <span className="flex items-center gap-1">
-                <Mail size={12} /> {user.email}
+                <Mail size={12} className="text-slate-400" />
+                <span>{user.email}</span>
               </span>
               <span>•</span>
-              <span className="flex items-center gap-1">
-                <Shield size={12} /> {user.authProvider}
+              <span className="flex items-center gap-1 text-indigo-700 font-bold">
+                <Shield size={12} />
+                <span>{user.role ? user.role.toUpperCase() : 'ANALYST'}</span>
               </span>
             </div>
           </div>
@@ -80,47 +73,48 @@ export default function ProfilePage() {
 
         <button
           onClick={logout}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold border border-rose-900/60 bg-rose-950/30 text-rose-300 hover:bg-rose-900/50 transition cursor-pointer self-start sm:self-auto"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 text-xs font-bold transition cursor-pointer self-start sm:self-center"
         >
           <LogOut size={13} />
-          <span>{t('profile.signOut')}</span>
+          <span>{t('nav.signOut', { defaultValue: 'Sign Out' })}</span>
         </button>
       </div>
 
-      {/* Saved Bookmarks Section */}
+      {/* Bookmarked Dossiers Section */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-white flex items-center gap-2">
-            <Bookmark size={18} className="text-amber-400" />
-            <span>{t('profile.savedDossiers')} ({bookmarkedEvents.length})</span>
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <h2 className="text-lg font-black text-slate-950 flex items-center gap-2">
+            <Bookmark size={18} className="text-indigo-600" />
+            <span>{t('profile.savedDossiers', { count: bookmarkedEvents.length, defaultValue: `Saved Dossiers (${bookmarkedEvents.length})` })}</span>
           </h2>
         </div>
 
         {isLoading ? (
           <div className="py-16 text-center text-slate-400 text-xs">
-            <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-            {t('profile.loadingBookmarks')}
+            {t('profile.loadingBookmarks', { defaultValue: 'Loading saved bookmarks...' })}
           </div>
         ) : bookmarkedEvents.length === 0 ? (
-          <div className="p-12 rounded-xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-2">
-            <Bookmark size={32} className="mx-auto text-slate-600 mb-1" />
-            <h3 className="text-sm font-semibold text-slate-300">{t('profile.noBookmarksTitle')}</h3>
+          <div className="p-12 rounded-2xl border border-slate-200 bg-white text-center text-slate-500 space-y-2">
+            <Bookmark size={36} className="mx-auto text-slate-300" />
+            <h3 className="text-sm font-bold text-slate-800">
+              {t('profile.noBookmarks', { defaultValue: 'No saved dossiers yet' })}
+            </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              {t('profile.noBookmarksDesc')}
+              {t('profile.noBookmarksDesc', { defaultValue: 'Bookmark geopolitical events from the news feed to review and track them here.' })}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {bookmarkedEvents.map((event) => (
               <div key={event._id} className="relative group">
-                <EventCard
+                <NewsCard
                   event={event}
                   onSelect={(e) => setSelectedEventId(e._id)}
                 />
                 <button
                   onClick={(e) => handleRemoveBookmark(event._id, e)}
-                  title={t('eventDetail.removeBookmark')}
-                  className="absolute top-3 right-3 p-1.5 rounded-lg bg-slate-900/90 text-slate-400 hover:text-rose-400 hover:bg-rose-950 border border-slate-800 transition cursor-pointer"
+                  title={t('profile.remove', { defaultValue: 'Remove' })}
+                  className="absolute top-6 right-6 p-1.5 rounded-lg bg-white/90 border border-slate-200 text-slate-500 hover:text-rose-600 transition shadow-xs cursor-pointer z-10 opacity-0 group-hover:opacity-100"
                 >
                   <Trash2 size={13} />
                 </button>
