@@ -7,9 +7,7 @@ import {
   ExternalLink,
   ShieldCheck,
   Globe,
-  MapPin,
   Bookmark,
-  CheckCircle2,
   HelpCircle,
   TrendingUp,
   Share2,
@@ -23,9 +21,10 @@ import CredibilityBadge from '../components/common/CredibilityBadge.jsx';
 import DirectionBadge from '../components/common/DirectionBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { translateNewsText, translateNewsArray } from '../i18n/newsContentTranslations.js';
+import { getNewsEditorialImage } from '../lib/newsImages.js';
 
-// ─── Event Details Page ───────────────────────────────────────────────────────
-// Standalone page for inspecting full intelligence dossier on a specific event.
+// ─── Standalone Event Article & Dossier Page ───────────────────────────────────
+// Full-width editorial article page matching modern newspaper standards.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventDetails() {
@@ -39,6 +38,8 @@ export default function EventDetails() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  const lang = i18n.language || 'en';
 
   useEffect(() => {
     let isMounted = true;
@@ -98,172 +99,147 @@ KEY ENTITIES: ${(eventData.entities || []).join(', ') || 'N/A'}
 
 --------------------------------------------------------------------------------
 CONFIRMED FACTS & CLAIMS:
-${(eventData.facts || []).map((f, i) => `[${i + 1}] ${f}`).join('\n')}
+${(eventData.facts || []).map((f) => `• ${f}`).join('\n') || 'None recorded'}
 
 REPORTED UNCERTAINTIES:
-${(eventData.uncertainties || []).map((u, i) => `[${i + 1}] ${u}`).join('\n') || 'None recorded'}
+${(eventData.uncertainties || []).map((u) => `? ${u}`).join('\n') || 'None recorded'}
 
 --------------------------------------------------------------------------------
-DOMAIN IMPACT EVALUATION:
+DOMAIN IMPACT EVALUATIONS:
 ${impacts
   .map(
-    (imp) =>
-      `• Domain: ${imp.domain} | Direction: ${imp.direction} | Severity: ${imp.severity} | Confidence: ${Math.round(imp.confidenceScore * 100)}%\n  Explanation: ${imp.ruleExplanation}`
+    (imp) => `
+[${imp.domain}] Direction: ${imp.direction} | Severity: ${imp.severity} | Confidence: ${Math.round(imp.confidenceScore * 100)}%
+Explanation: ${imp.explanation}
+`
   )
-  .join('\n\n')}
-
---------------------------------------------------------------------------------
-PRIMARY REPORT:
-Title: ${eventData.primaryArticleId?.title || 'N/A'}
-Source: ${eventData.primaryArticleId?.sourceId?.name || 'News Source'}
-URL: ${eventData.primaryArticleId?.url || 'N/A'}
+  .join('')}
 ================================================================================
-`.trim();
+`;
 
     const blob = new Blob([briefing], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `GeoMonitor-Dossier-${eventData._id}.txt`;
-    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
   if (isLoading) {
     return (
-      <div className="py-24 text-center text-slate-400">
-        <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-xs font-mono">{t('eventDetail.loading')}</p>
+      <div className="py-24 flex flex-col items-center justify-center text-slate-400 space-y-3">
+        <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs text-slate-500">{t('eventDetail.loading', { defaultValue: 'Loading article dossier...' })}</p>
       </div>
     );
   }
 
   if (error || !eventData) {
     return (
-      <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
-        <h2 className="text-lg font-bold text-rose-400">{t('eventDetail.dossierUnavailable')}</h2>
-        <p className="text-xs text-slate-400">{error || t('eventDetail.eventNotFound')}</p>
+      <div className="p-10 rounded-2xl border border-rose-200 bg-rose-50 text-center text-rose-700 space-y-4 max-w-xl mx-auto">
+        <p className="text-sm">{error || t('errors.notFoundDesc')}</p>
         <button
           onClick={() => navigate('/')}
-          className="px-4 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-semibold hover:bg-slate-800 transition cursor-pointer"
+          className="px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
         >
-          {t('eventDetail.backToFeed')}
+          {t('errors.returnHome', { defaultValue: 'Return to News Feed' })}
         </button>
       </div>
     );
   }
 
-  const bookmarked = isBookmarked(eventData._id);
+  const localizedSummary = translateNewsText(eventData.summary, lang);
   const primaryArticle = eventData.primaryArticleId;
-
-  const lang = i18n.language || 'en';
-  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
-  const formattedDate = eventData.createdAt
-    ? new Date(eventData.createdAt).toLocaleDateString(locale, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      })
-    : '';
+  const localizedArticleExcerpt = primaryArticle?.excerpt
+    ? translateNewsText(primaryArticle.excerpt, lang)
+    : null;
 
   const eventTypeLabel = eventData.eventType
     ? t(`eventTypes.${eventData.eventType}`, { defaultValue: eventData.eventType.replace(/_/g, ' ') })
-    : '';
+    : 'EVENT DOSSIER';
 
-  const localizedSummary = translateNewsText(eventData.summary, lang);
-  const localizedArticleExcerpt = primaryArticle?.excerpt
-    ? translateNewsText(primaryArticle.excerpt, lang)
-    : '';
-  const localizedArticleTitle = primaryArticle?.title
-    ? translateNewsText(primaryArticle.title, lang)
+  const bookmarked = isBookmarked ? isBookmarked(eventData._id) : false;
+  const imageUrl = getNewsEditorialImage(eventData);
+  const sourceName = primaryArticle?.sourceId?.name || 'World News Wire';
+
+  const formattedDate = eventData.createdAt
+    ? new Date(eventData.createdAt).toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      })
     : '';
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Navigation & Action Bar */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+    <article className="space-y-8 max-w-4xl mx-auto w-full">
+      {/* Top Breadcrumb & Action Toolbar */}
+      <div className="flex items-center justify-between gap-4 flex-wrap pb-4 border-b border-slate-200">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-950 transition cursor-pointer"
         >
-          <ArrowLeft size={14} />
-          <span>{t('eventDetail.back')}</span>
+          <ArrowLeft size={15} />
+          <span>{t('feed.allStories', { defaultValue: 'Back to Stories' })}</span>
         </button>
 
         <div className="flex items-center gap-2">
-          {/* Export Briefing */}
+          {/* Export text briefing */}
           <button
             onClick={handleExportBriefing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
-            title={t('eventDetail.exportBriefing')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer shadow-2xs"
           >
-            <Download size={13} />
-            <span>{t('eventDetail.exportBriefing')}</span>
+            <Download size={12} />
+            <span className="hidden sm:inline">Export Briefing</span>
           </button>
 
-          {/* Share / Copy */}
+          {/* Share */}
           <button
             onClick={handleCopyLink}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-semibold transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 hover:bg-slate-100 text-xs font-semibold transition cursor-pointer shadow-2xs"
           >
-            {copied ? (
-              <>
-                <Check size={13} className="text-emerald-400" />
-                <span className="text-emerald-400">{t('eventDetail.copied')}</span>
-              </>
-            ) : (
-              <>
-                <Share2 size={13} />
-                <span>{t('eventDetail.share')}</span>
-              </>
-            )}
+            {copied ? <Check size={13} className="text-emerald-600" /> : <Share2 size={12} />}
+            <span>{copied ? 'Copied' : 'Share'}</span>
           </button>
 
           {/* Bookmark */}
           {isAuthenticated && (
             <button
               onClick={() => toggleBookmark(eventData._id)}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-semibold transition cursor-pointer ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer shadow-2xs ${
                 bookmarked
-                  ? 'bg-amber-500/20 border-amber-500/40 text-amber-400'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white'
+                  ? 'bg-slate-900 text-white'
+                  : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
-              <Bookmark size={14} fill={bookmarked ? 'currentColor' : 'none'} />
-              <span>{bookmarked ? t('eventDetail.saved') : t('eventDetail.saveDossier')}</span>
+              <Bookmark size={12} fill={bookmarked ? 'currentColor' : 'none'} />
+              <span>{bookmarked ? 'Saved' : 'Save'}</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Main Event Header Card */}
-      <div
-        className="p-6 sm:p-8 rounded-3xl border space-y-5 shadow-2xl"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
+      {/* Main Headline & Metadata */}
+      <div className="space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <SeverityBadge severity={eventData.severity} />
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2.5 py-0.5 rounded">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-0.5 rounded-full">
             {eventTypeLabel}
           </span>
+          <SeverityBadge severity={eventData.severity} size="sm" />
           <CredibilityBadge
             label={eventData.credibilityLabel}
             score={eventData.credibilityScore}
           />
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+        <h1 className="text-2xl sm:text-4xl font-black text-slate-950 leading-[1.18] tracking-tight">
           {localizedSummary}
         </h1>
 
-        <div className="flex items-center gap-4 text-xs text-slate-400 font-mono border-t border-slate-800/80 pt-4 flex-wrap">
+        <div className="flex items-center gap-3 text-xs text-slate-500 font-mono pt-2 border-t border-slate-100 flex-wrap">
           <span className="flex items-center gap-1.5">
-            <Globe size={13} className="text-amber-400" />
-            <span>{t('eventDetail.source')}: {primaryArticle?.sourceId?.name || 'News Wire'}</span>
+            <Globe size={13} className="text-indigo-600" />
+            <span>Source: <strong className="text-slate-800">{sourceName}</strong></span>
           </span>
           <span>•</span>
           <span className="flex items-center gap-1.5">
@@ -273,25 +249,23 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         </div>
       </div>
 
-      {/* ARTICLE SUMMARY SECTION */}
-      <div
-        className="p-6 rounded-2xl border space-y-3"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
-        <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-800/80">
+      {/* Editorial Hero Photography Frame */}
+      <div className="relative h-72 sm:h-96 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-200 shadow-xs">
+        <img
+          src={imageUrl}
+          alt={eventData.summary}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Dedicated Article Summary Card */}
+      <div className="p-5 sm:p-6 rounded-2xl border border-indigo-100 bg-indigo-50/50 space-y-3">
+        <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-indigo-100">
           <div className="flex items-center gap-2">
-            <Newspaper size={16} className="text-amber-400" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-              {t('eventDetail.articleSummary')}
+            <Newspaper size={16} className="text-indigo-600" />
+            <h2 className="text-xs font-bold font-mono tracking-wide text-slate-900 uppercase">
+              {t('eventDetail.articleSummary', { defaultValue: 'Article Summary' })}
             </h2>
-            {primaryArticle?.sourceId?.name && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-700">
-                {primaryArticle.sourceId.name}
-              </span>
-            )}
           </div>
 
           {primaryArticle?.url && (
@@ -299,16 +273,16 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               href={primaryArticle.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-amber-400 hover:underline inline-flex items-center gap-1 font-medium transition-colors"
+              className="text-xs font-bold text-indigo-700 hover:text-indigo-900 hover:underline inline-flex items-center gap-1 transition-colors"
             >
-              <span>{t('eventDetail.readOriginal')}</span>
-              <ExternalLink size={13} />
+              <span>{t('eventDetail.readOriginal', { defaultValue: 'Read Original Wire Article' })}</span>
+              <ExternalLink size={12} />
             </a>
           )}
         </div>
 
         {localizedArticleExcerpt ? (
-          <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-700 leading-relaxed">
             {localizedArticleExcerpt}
           </p>
         ) : (
@@ -318,37 +292,73 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
                 href={primaryArticle.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-amber-400/90 hover:text-amber-300 hover:underline inline-flex items-center gap-1 font-medium not-italic"
+                className="text-indigo-700 hover:underline inline-flex items-center gap-1 font-medium not-italic"
               >
-                {t('eventDetail.summaryUnavailable')}
+                {t('eventDetail.summaryUnavailable', { defaultValue: 'Summary unavailable. Read original article →' })}
               </a>
             ) : (
-              <span>{t('eventDetail.summaryUnavailable')}</span>
+              <span>{t('eventDetail.summaryUnavailable', { defaultValue: 'Summary unavailable.' })}</span>
             )}
           </div>
         )}
       </div>
 
-      {/* Section 1: Who Is Involved */}
-      <div
-        className="p-6 rounded-2xl border space-y-3"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <MapPin size={16} className="text-amber-400" />
-          {t('eventDetail.keyEntitiesGeography')}
+      {/* Verified Claims vs Reported Uncertainties */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Verified Claims */}
+        <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-emerald-700">
+            <ShieldCheck size={16} className="text-emerald-600" />
+            <span>{t('eventDetail.verifiedFacts', { defaultValue: 'Verified Claims & Facts' })}</span>
+          </div>
+          {eventData.facts && eventData.facts.length > 0 ? (
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
+              {translateNewsArray(eventData.facts, lang).map((fact, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-emerald-600 font-bold mt-0.5">•</span>
+                  <span className="leading-relaxed">{fact}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-slate-400 italic">{t('eventDetail.noFacts', { defaultValue: 'No specific claims recorded.' })}</p>
+          )}
+        </div>
+
+        {/* Reported Uncertainties */}
+        <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white space-y-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase text-amber-700">
+            <HelpCircle size={16} className="text-amber-600" />
+            <span>{t('eventDetail.reportedUncertainties', { defaultValue: 'Reported Uncertainties' })}</span>
+          </div>
+          {eventData.uncertainties && eventData.uncertainties.length > 0 ? (
+            <ul className="space-y-2.5 text-xs sm:text-sm text-slate-700">
+              {translateNewsArray(eventData.uncertainties, lang).map((unc, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-amber-600 font-bold mt-0.5">•</span>
+                  <span className="leading-relaxed">{unc}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-slate-400 italic">{t('eventDetail.noUncertainties', { defaultValue: 'No uncertainties recorded.' })}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Entities & Geography */}
+      <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4">
+        <h2 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
+          KEY GEOGRAPHY & SECTORS
         </h2>
 
-        <div className="flex items-center gap-2 flex-wrap pt-1">
+        <div className="flex items-center gap-2 flex-wrap">
           {eventData.countries?.map((country) => (
             <span
               key={country}
-              className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-medium flex items-center gap-1.5"
+              className="px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-800 text-xs font-medium flex items-center gap-1.5"
             >
-              <Globe size={12} className="text-amber-500" />
+              <Globe size={12} className="text-indigo-600" />
               {country}
             </span>
           ))}
@@ -356,16 +366,16 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
           {eventData.sectors?.map((sector) => (
             <span
               key={sector}
-              className="px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs font-mono"
+              className="px-3 py-1 rounded-md bg-slate-100 border border-slate-200 text-slate-700 text-xs font-mono"
             >
-              {t('eventDetail.sectorLabel', { sector })}
+              #{sector}
             </span>
           ))}
 
           {eventData.entities?.map((ent) => (
             <span
               key={ent}
-              className="px-3 py-1 rounded-lg bg-slate-900/60 border border-slate-800/80 text-slate-400 text-xs"
+              className="px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-xs"
             >
               {ent}
             </span>
@@ -373,16 +383,16 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         </div>
       </div>
 
-      {/* Section 2: Potential Impact Assessment */}
+      {/* Domain Impact Evaluations */}
       <div className="space-y-4">
-        <h2 className="text-base font-bold text-white flex items-center gap-2">
-          <TrendingUp size={18} className="text-amber-400" />
-          <span>{t('eventDetail.domainImpactEvaluation', { count: impacts.length })}</span>
+        <h2 className="text-lg font-black text-slate-950 flex items-center gap-2">
+          <TrendingUp size={20} className="text-indigo-600" />
+          <span>{t('eventDetail.domainImpacts', { defaultValue: 'Domain Impact Assessments' })}</span>
         </h2>
 
         {impacts.length === 0 ? (
-          <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/20 text-center text-xs text-slate-400">
-            {t('eventDetail.noImpactRules')}
+          <div className="p-6 rounded-2xl border border-slate-200 bg-white text-center text-xs text-slate-400">
+            {t('eventDetail.noImpacts', { defaultValue: 'No domain impacts assessed for this event yet.' })}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -393,34 +403,30 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
               return (
                 <div
                   key={imp._id}
-                  className="p-5 rounded-2xl border space-y-3"
-                  style={{
-                    backgroundColor: 'var(--color-surface-1)',
-                    borderColor: 'var(--color-border)',
-                  }}
+                  className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-2xs"
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-0.5 rounded border border-amber-900/60">
+                  <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                    <span className="text-xs font-mono font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
                       {domainLabel}
                     </span>
                     <DirectionBadge direction={imp.direction} size="sm" />
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-                      <span>{t('eventDetail.severityImpact')}:</span>
-                      <span className="font-bold text-white">{t(`badges.severity.${imp.severity}`, { defaultValue: imp.severity })}</span>
+                  <div className="space-y-1 text-xs text-slate-500 font-mono">
+                    <div className="flex items-center justify-between">
+                      <span>Severity:</span>
+                      <span className="font-bold text-slate-900">{imp.severity}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
-                      <span>{t('eventDetail.confidenceScoreLabel')}:</span>
-                      <span className="font-bold text-amber-400">
-                        {Math.round(imp.confidenceScore * 100)}%
+                    <div className="flex items-center justify-between">
+                      <span>Confidence:</span>
+                      <span className="font-bold text-indigo-600">
+                        {Math.round((imp.confidenceScore || 0.88) * 100)}%
                       </span>
                     </div>
                   </div>
 
                   {localizedImpExplanation && (
-                    <p className="text-xs text-slate-300 leading-relaxed border-t border-slate-800/80 pt-2.5">
+                    <p className="text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 pt-2.5">
                       {localizedImpExplanation}
                     </p>
                   )}
@@ -431,87 +437,23 @@ URL: ${eventData.primaryArticleId?.url || 'N/A'}
         )}
       </div>
 
-      {/* Section 3: Verified Facts & Evidence */}
-      <div
-        className="p-6 rounded-2xl border space-y-4"
-        style={{
-          backgroundColor: 'var(--color-surface-1)',
-          borderColor: 'var(--color-border)',
-        }}
-      >
-        <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <ShieldCheck size={16} className="text-amber-400" />
-          {t('eventDetail.extractedFactualClaims')}
-        </h2>
-
-        {eventData.facts && eventData.facts.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
-              {t('eventDetail.confirmedFactualStatements')}
-            </h3>
-            <ul className="space-y-2">
-              {translateNewsArray(eventData.facts, lang).map((fact, idx) => (
-                <li
-                  key={idx}
-                  className="text-xs text-slate-200 bg-slate-900/60 p-3 rounded-xl border border-slate-800/80 flex items-start gap-2.5 leading-relaxed"
-                >
-                  <CheckCircle2 size={15} className="text-emerald-400 shrink-0 mt-0.5" />
-                  <span>{fact}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {eventData.uncertainties && eventData.uncertainties.length > 0 && (
-          <div className="space-y-2 pt-2">
-            <h3 className="text-xs font-bold text-slate-400 font-mono uppercase">
-              {t('eventDetail.keyUncertainties')}
-            </h3>
-            <ul className="space-y-2">
-              {translateNewsArray(eventData.uncertainties, lang).map((unc, idx) => (
-                <li
-                  key={idx}
-                  className="text-xs text-amber-300/90 bg-amber-950/20 p-3 rounded-xl border border-amber-900/40 flex items-start gap-2.5 leading-relaxed"
-                >
-                  <HelpCircle size={15} className="text-amber-400 shrink-0 mt-0.5" />
-                  <span>{unc}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-
-      {/* Section 4: Primary Article Reference */}
-      {primaryArticle && (
-        <div
-          className="p-6 rounded-2xl border flex items-center justify-between gap-4"
-          style={{
-            backgroundColor: 'var(--color-surface-1)',
-            borderColor: 'var(--color-border)',
-          }}
-        >
-          <div className="space-y-1">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">
-              {t('eventDetail.originalReport')}
-            </span>
-            <h3 className="text-sm font-bold text-white line-clamp-1">
-              {localizedArticleTitle || primaryArticle.title}
-            </h3>
-          </div>
-
+      {/* Wire Source Action */}
+      {primaryArticle?.url && (
+        <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between flex-wrap gap-4 text-xs">
+          <span className="text-slate-600 font-mono">
+            Original Source: <strong className="text-slate-900">{sourceName}</strong>
+          </span>
           <a
             href={primaryArticle.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer shrink-0"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition"
           >
-            <span>{t('eventDetail.readOriginal')}</span>
+            <span>{t('eventDetail.readOriginal', { defaultValue: 'Read Full Wire Article' })}</span>
             <ExternalLink size={13} />
           </a>
         </div>
       )}
-    </div>
+    </article>
   );
 }

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Layers } from 'lucide-react';
 
-// ─── Feed Filters ──────────────────────────────────────────────────────────────
-// Sticky, mobile-responsive topic and severity filter toolbar.
+// ─── Clean Editorial Feed Filters ─────────────────────────────────────────────
+// Sticky category and severity filter toolbar with light theme styling.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DOMAIN_KEYS = [
@@ -32,15 +32,14 @@ export default function FeedFilters({
   const { t } = useTranslation();
 
   return (
-    <div
-      className="p-3 sm:p-4 rounded-2xl border space-y-2.5 sticky top-14 sm:top-16 z-30 shadow-lg backdrop-blur-md"
-      style={{
-        backgroundColor: 'color-mix(in srgb, var(--color-surface-1) 95%, transparent)',
-        borderColor: 'var(--color-border)',
-      }}
-    >
-      {/* Top Bar: Topic Category Pills */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+    <section className="p-4 rounded-2xl border border-slate-200 bg-white shadow-xs space-y-3 sticky top-16 sm:top-20 z-30">
+      {/* Category Pills Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+        <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400 mr-1 hidden sm:flex items-center gap-1 shrink-0">
+          <Layers size={12} className="text-slate-500" />
+          <span>TOPICS:</span>
+        </span>
+
         {DOMAIN_KEYS.map((key) => {
           const isSelected = domain === key;
           const label = t(`domains.${key}`, { defaultValue: key });
@@ -48,10 +47,10 @@ export default function FeedFilters({
             <button
               key={key}
               onClick={() => onDomainChange(key)}
-              className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold whitespace-nowrap transition cursor-pointer shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer shrink-0 ${
                 isSelected
-                  ? 'bg-amber-400 text-slate-950 font-bold shadow-md'
-                  : 'bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800 hover:text-white'
+                  ? 'bg-slate-900 text-white font-bold shadow-xs scale-[1.02]'
+                  : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
               }`}
             >
               {label}
@@ -60,52 +59,52 @@ export default function FeedFilters({
         })}
       </div>
 
-      {/* Bottom Bar: Search + Severity Filter */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 pt-2 border-t border-slate-800/80">
+      {/* Sub-Bar: Search + Severity Filter */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <Search
             size={13}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
           />
           <input
             type="text"
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t('filters.searchPlaceholder')}
-            className="w-full pl-8 pr-7 py-1.5 text-xs rounded-xl border bg-slate-950 text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition"
-            style={{ borderColor: 'var(--color-border)' }}
+            placeholder={t('filters.searchPlaceholder', { defaultValue: 'Search events, countries, leaders...' })}
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-full border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition"
           />
           {search && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white cursor-pointer p-0.5"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-0.5"
             >
               <X size={12} />
             </button>
           )}
         </div>
 
-        {/* Severity Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
-          <span className="text-[10px] sm:text-[11px] font-semibold text-slate-400 mr-1 flex items-center gap-1 shrink-0">
-            <SlidersHorizontal size={10} />
-            <span className="hidden sm:inline">{t('filters.severityLabel')}</span>
+        {/* Severity Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <span className="text-[11px] font-medium text-slate-500 mr-1 flex items-center gap-1 shrink-0">
+            <SlidersHorizontal size={11} className="text-slate-400" />
+            <span className="hidden md:inline">{t('filters.severityLabel', { defaultValue: 'Severity:' })}</span>
           </span>
+
           {SEVERITIES.map((sev) => {
             const isSelected = severity === sev;
             const sevLabel = sev === 'ALL'
-              ? t('filters.all')
+              ? t('filters.all', { defaultValue: 'All' })
               : t(`badges.severity.${sev}`, { defaultValue: sev });
 
             return (
               <button
                 key={sev}
                 onClick={() => onSeverityChange(sev)}
-                className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg text-[10px] sm:text-[11px] font-medium transition cursor-pointer shrink-0 ${
+                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-amber-500 text-slate-950 font-bold'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    ? 'bg-slate-900 text-white font-bold'
+                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                 }`}
               >
                 {sevLabel}
@@ -116,14 +115,15 @@ export default function FeedFilters({
           {hasActiveFilters && (
             <button
               onClick={onReset}
-              className="px-1.5 py-0.5 text-[10px] sm:text-[11px] rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer flex items-center gap-0.5 ml-1 shrink-0"
+              className="px-2.5 py-1 text-xs rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer flex items-center gap-1 ml-1 shrink-0"
+              title="Reset all filters"
             >
-              <X size={10} />
-              {t('filters.reset')}
+              <X size={11} />
+              <span>{t('filters.reset', { defaultValue: 'Reset' })}</span>
             </button>
           )}
         </div>
       </div>
-    </div>
+    </section>
   );
 }

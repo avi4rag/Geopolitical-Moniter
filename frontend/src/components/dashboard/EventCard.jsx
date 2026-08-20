@@ -1,139 +1,87 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, ChevronRight, MapPin, Layers, Clock } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
-import { translateNewsText, translateNewsArray } from '../../i18n/newsContentTranslations.js';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
-// ─── Event Card ───────────────────────────────────────────────────────────────
-// Information-dense card representing an extracted geopolitical event.
+// ─── Editorial Event Card (Analytics View) ────────────────────────────────────
+// Compact analytical story card with severity badge, source attribution,
+// and smooth hover state.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function EventCard({ event, onSelect }) {
   const { t, i18n } = useTranslation();
 
   const lang = i18n.language || 'en';
-  const locale = lang.startsWith('hi') ? 'hi-IN' : 'en-US';
   const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString(locale, {
+    ? new Date(event.createdAt).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
       })
-    : '';
+    : 'Recent';
 
   const article = event.primaryArticleId;
-  const sourceName = article?.sourceId?.name || 'News Wire';
-
+  const sourceName = article?.sourceId?.name || 'World News Wire';
   const localizedSummary = translateNewsText(event.summary, lang);
-  const localizedFacts = translateNewsArray(event.facts || [], lang);
 
   const eventTypeLabel = event.eventType
     ? t(`eventTypes.${event.eventType}`, { defaultValue: event.eventType.replace(/_/g, ' ') })
-    : '';
+    : 'INTELLIGENCE';
 
   return (
     <div
       onClick={() => onSelect && onSelect(event)}
-      className="p-5 rounded-xl border transition-all duration-200 hover:border-slate-600 hover:shadow-lg hover:shadow-black/40 cursor-pointer group flex flex-col justify-between"
-      style={{
-        backgroundColor: 'var(--color-surface-1)',
-        borderColor: 'var(--color-border)',
-      }}
+      className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
     >
-      <div>
-        {/* Top Header: Event Type + Severity + Credibility + Date */}
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-mono font-semibold uppercase tracking-wider text-amber-400 bg-amber-950/40 border border-amber-800/60 px-2 py-0.5 rounded">
-              {eventTypeLabel}
-            </span>
+      <div className="space-y-3">
+        {/* Top Header: Event Type + Severity + Credibility */}
+        <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-slate-100">
+          <span className="text-[11px] font-mono font-bold uppercase text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
+            {eventTypeLabel}
+          </span>
+          <div className="flex items-center gap-1.5">
             <SeverityBadge severity={event.severity} size="sm" />
             <CredibilityBadge
               label={event.credibilityLabel}
               score={event.credibilityScore}
             />
           </div>
-
-          <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono">
-            <Clock size={11} />
-            <span>{formattedDate}</span>
-          </div>
         </div>
 
-        {/* Factual Summary */}
-        <h4 className="text-sm font-medium text-slate-100 leading-snug group-hover:text-amber-300 transition-colors">
+        {/* Headline */}
+        <h3 className="text-sm sm:text-base font-bold text-slate-950 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
           {localizedSummary}
-        </h4>
+        </h3>
 
-        {/* Key Extracted Facts Preview */}
-        {localizedFacts && localizedFacts.length > 0 && (
-          <ul className="mt-2.5 space-y-1 text-xs text-slate-300 border-l-2 border-slate-700/80 pl-2.5 py-0.5">
-            {localizedFacts.slice(0, 2).map((fact, idx) => (
-              <li key={idx} className="line-clamp-1">
-                • {fact}
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Tags: Countries & Sectors */}
-        <div className="mt-3.5 flex items-center gap-1.5 flex-wrap">
-          {event.countries && event.countries.length > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-slate-400 mr-2">
-              <MapPin size={11} className="text-slate-500" />
-              {event.countries.slice(0, 3).map((country) => (
-                <span
-                  key={country}
-                  className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px]"
-                >
-                  {country}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {event.sectors && event.sectors.length > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-slate-400">
-              <Layers size={11} className="text-slate-500" />
-              {event.sectors.slice(0, 2).map((sector) => (
-                <span
-                  key={sector}
-                  className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300 text-[10px]"
-                >
-                  {sector}
-                </span>
-              ))}
-            </div>
-          )}
+        {/* Sectors & Countries */}
+        <div className="flex items-center gap-1.5 flex-wrap pt-1 text-xs">
+          {event.countries?.slice(0, 2).map((c) => (
+            <span
+              key={c}
+              className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-medium"
+            >
+              {c}
+            </span>
+          ))}
+          {event.sectors?.slice(0, 2).map((s) => (
+            <span
+              key={s}
+              className="px-2 py-0.5 rounded-md bg-slate-50 text-slate-600 text-[11px] font-mono"
+            >
+              #{s}
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Footer: Source link + View Details CTA */}
-      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[11px] text-slate-500">{t('eventDetail.source')}</span>
-          {article?.url ? (
-            <a
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="text-[11px] text-slate-300 hover:text-amber-400 inline-flex items-center gap-1 transition"
-            >
-              {sourceName}
-              <ExternalLink size={10} />
-            </a>
-          ) : (
-            <span className="text-[11px] text-slate-400">{sourceName}</span>
-          )}
-        </div>
-
-        <button className="inline-flex items-center gap-1 text-amber-400 font-medium group-hover:translate-x-0.5 transition-transform text-xs cursor-pointer">
-          <span>{t('analytics.inspectImpacts')}</span>
-          <ChevronRight size={13} />
-        </button>
+      {/* Footer */}
+      <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+        <span className="font-mono text-slate-500 text-[11px]">{sourceName}</span>
+        <span className="text-indigo-700 font-semibold flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+          <span>Read</span>
+          <ArrowRight size={11} />
+        </span>
       </div>
     </div>
   );

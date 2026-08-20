@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw, AlertCircle, FileQuestion, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RefreshCw, AlertCircle, FileQuestion } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import StatCards from '../components/dashboard/StatCards.jsx';
 import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
@@ -9,24 +9,22 @@ import EventFilterBar from '../components/dashboard/EventFilterBar.jsx';
 import EventCard from '../components/dashboard/EventCard.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
-// ─── Dashboard Page ───────────────────────────────────────────────────────────
-// Main real-time intelligence hub.
+// ─── Full-Width Analytics & Risk Monitor Page ─────────────────────────────────
+// Real-time KPI distribution, domain radar, country risk matrix, and events.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  // Data state
   const [stats, setStats] = useState(null);
   const [domainStats, setDomainStats] = useState([]);
   const [events, setEvents] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
 
-  // Loading & error state
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
 
-  // Filter state
+  // Filters
   const [search, setSearch] = useState('');
   const [severity, setSeverity] = useState('ALL');
   const [eventType, setEventType] = useState('ALL');
@@ -34,10 +32,8 @@ export default function DashboardPage() {
   const [sortBy, setSortBy] = useState('createdAt');
   const [page, setPage] = useState(1);
 
-  // Selected event for modal
   const [selectedEventId, setSelectedEventId] = useState(null);
 
-  // Fetch stats & domain distribution
   const fetchStats = useCallback(async () => {
     try {
       const [statsRes, domainsRes] = await Promise.all([
@@ -51,7 +47,6 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Fetch events with current filters
   const fetchEvents = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -83,7 +78,6 @@ export default function DashboardPage() {
     }
   }, [page, search, severity, eventType, selectedDomain, sortBy, t]);
 
-  // Initial load
   useEffect(() => {
     fetchStats();
   }, [fetchStats]);
@@ -92,7 +86,6 @@ export default function DashboardPage() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Reset page when filters change
   const handleSearchChange = (val) => {
     setSearch(val);
     setPage(1);
@@ -130,19 +123,25 @@ export default function DashboardPage() {
     sortBy !== 'createdAt';
 
   return (
-    <div className="space-y-6">
-      {/* ── Page Header ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-8 w-full">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <span>{t('analytics.title')}</span>
+          <div className="flex items-center gap-2">
+            <div className="h-3 w-1 bg-indigo-600 rounded-full" />
+            <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-indigo-700">
+              MACROECONOMIC INTELLIGENCE MONITOR
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-4xl font-black text-slate-950 tracking-tight mt-1.5">
+            {t('analytics.title', { defaultValue: 'Global Event & Impact Analytics' })}
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            {t('analytics.subtitle')}
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-3xl">
+            {t('analytics.subtitle', { defaultValue: 'Automated intelligence extraction & deterministic cross-domain impact analysis.' })}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={() => {
               setIsRefreshing(true);
@@ -150,15 +149,15 @@ export default function DashboardPage() {
               fetchEvents();
             }}
             disabled={isRefreshing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 transition cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50 transition cursor-pointer disabled:opacity-50 shadow-2xs"
           >
-            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
-            <span>{t('analytics.refresh')}</span>
+            <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-indigo-600' : ''} />
+            <span>{t('analytics.refresh', { defaultValue: 'Refresh Feed' })}</span>
           </button>
         </div>
       </div>
 
-      {/* ── KPI Stat Cards ───────────────────────────────────────────────────── */}
+      {/* KPI Stat Cards */}
       <StatCards
         stats={stats}
         onRefresh={() => {
@@ -167,17 +166,17 @@ export default function DashboardPage() {
         }}
       />
 
-      {/* ── Domain Impact Radar ──────────────────────────────────────────────── */}
+      {/* Domain Impact Radar */}
       <DomainMatrix
         domainStats={domainStats}
         selectedDomain={selectedDomain}
         onSelectDomain={handleDomainSelect}
       />
 
-      {/* ── Country Risk Matrix ──────────────────────────────────────────────── */}
+      {/* Country Risk Matrix */}
       <CountryRiskMatrix />
 
-      {/* ── Filter Toolbar ───────────────────────────────────────────────────── */}
+      {/* Filter Toolbar */}
       <EventFilterBar
         search={search}
         onSearchChange={handleSearchChange}
@@ -191,22 +190,22 @@ export default function DashboardPage() {
         hasActiveFilters={hasActiveFilters}
       />
 
-      {/* ── Events Grid ──────────────────────────────────────────────────────── */}
+      {/* Events Grid */}
       {isLoading && events.length === 0 ? (
         <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-3">
-          <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs">{t('feed.loading')}</p>
+          <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-500">{t('feed.loading')}</p>
         </div>
       ) : error ? (
-        <div className="p-8 rounded-xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400 space-y-2">
-          <AlertCircle size={32} className="mx-auto text-rose-400" />
-          <h3 className="text-sm font-semibold">{t('feed.errorTitle')}</h3>
-          <p className="text-xs text-rose-300/80">{error}</p>
+        <div className="p-8 rounded-2xl border border-rose-200 bg-rose-50 text-center text-rose-700 space-y-2">
+          <AlertCircle size={32} className="mx-auto text-rose-600" />
+          <h3 className="text-sm font-bold">{t('feed.errorTitle')}</h3>
+          <p className="text-xs text-rose-600">{error}</p>
         </div>
       ) : events.length === 0 ? (
-        <div className="p-12 rounded-xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-3">
-          <FileQuestion size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-sm font-semibold text-slate-300">{t('analytics.noEventsTitle')}</h3>
+        <div className="p-14 rounded-2xl border border-slate-200 bg-white text-center text-slate-500 space-y-3">
+          <FileQuestion size={40} className="mx-auto text-slate-400" />
+          <h3 className="text-base font-bold text-slate-800">{t('analytics.noEventsTitle')}</h3>
           <p className="text-xs text-slate-500 max-w-md mx-auto">
             {hasActiveFilters
               ? t('analytics.noEventsDescFiltered')
@@ -215,7 +214,7 @@ export default function DashboardPage() {
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
-              className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold hover:bg-amber-400 transition cursor-pointer"
+              className="mt-2 text-xs px-4 py-2 rounded-full bg-slate-900 text-white font-bold hover:bg-slate-800 transition cursor-pointer"
             >
               {t('filters.clearFilters')}
             </button>
@@ -223,7 +222,7 @@ export default function DashboardPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+          <div className="flex items-center justify-between text-xs text-slate-500 font-mono pb-2 border-b border-slate-200">
             <span>
               {selectedDomain
                 ? t('analytics.showingOfFiltered', { count: events.length, total: pagination.total, domain: t(`domains.${selectedDomain}`, { defaultValue: selectedDomain }) })
@@ -234,7 +233,7 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {events.map((event) => (
               <EventCard
                 key={event._id}
@@ -244,64 +243,34 @@ export default function DashboardPage() {
             ))}
           </div>
 
-          {/* ── Pagination Controls ─────────────────────────────────────────── */}
+          {/* Pagination Controls */}
           {pagination.totalPages > 1 && (
-            <div className="pt-4 flex items-center justify-between border-t border-slate-800">
+            <div className="pt-6 flex items-center justify-between border-t border-slate-200">
               <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={!pagination.hasPrevPage}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+                className="px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
               >
-                <ChevronLeft size={13} />
-                <span>{t('analytics.previous')}</span>
+                {t('analytics.previous', { defaultValue: 'Previous' })}
               </button>
 
-              <div className="flex items-center gap-1">
-                {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                  .filter((p) => {
-                    return (
-                      p === 1 ||
-                      p === pagination.totalPages ||
-                      Math.abs(p - pagination.page) <= 1
-                    );
-                  })
-                  .map((p, idx, arr) => {
-                    const isCurrent = p === pagination.page;
-                    const prevP = arr[idx - 1];
-                    const showEllipsis = prevP && p - prevP > 1;
-
-                    return (
-                      <React.Fragment key={p}>
-                        {showEllipsis && <span className="text-slate-600 px-1">...</span>}
-                        <button
-                          onClick={() => setPage(p)}
-                          className={`w-7 h-7 rounded-lg text-xs font-mono font-medium transition cursor-pointer ${
-                            isCurrent
-                              ? 'bg-amber-500 text-slate-950 font-bold'
-                              : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      </React.Fragment>
-                    );
-                  })}
-              </div>
+              <span className="text-xs font-mono text-slate-500">
+                {page} / {pagination.totalPages}
+              </span>
 
               <button
-                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                disabled={!pagination.hasNextPage}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-900 text-slate-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition"
+                onClick={() => setPage((p) => Math.min(p + 1, pagination.totalPages))}
+                disabled={page === pagination.totalPages}
+                className="px-4 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 disabled:opacity-40 transition cursor-pointer"
               >
-                <span>{t('analytics.next')}</span>
-                <ChevronRight size={13} />
+                {t('analytics.next', { defaultValue: 'Next' })}
               </button>
             </div>
           )}
         </div>
       )}
 
-      {/* ── Event Detail Modal ──────────────────────────────────────────────── */}
+      {/* Modal */}
       {selectedEventId && (
         <EventDetailModal
           eventId={selectedEventId}

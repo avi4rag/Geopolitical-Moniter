@@ -20,7 +20,13 @@
     "title": "Global Event & Impact Feed",
     "updatedContinuously": "Updated continuously via multi-source ingestion",
     "topStory": "Top Story",
-    "inspectDossier": "Inspect Dossier",
+    "bestOfWeek": "LEAD INTELLIGENCE STORY",
+    "readArticle": "Read Article",
+    "inspectDossier": "Read Story",
+    "recommended": "Recommended",
+    "viewAll": "View all",
+    "allStories": "Latest Geopolitical Stories",
+    "stories": "stories",
     "loadMore": "Load More Geopolitical Stories",
     "loadingMore": "Loading More Stories...",
     "loading": "Loading real-time event feed...",
@@ -31,11 +37,14 @@
     "noStoriesDesc": "No events match your current filter settings. Try searching for broader terms or clearing your topic filters."
   },
   "filters": {
-    "searchPlaceholder": "Search events, countries, leaders...",
+    "searchPlaceholder": "Search events, countries, leaders, sectors...",
     "severityLabel": "Severity:",
     "all": "All",
     "reset": "Reset",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "allEventTypes": "All Event Classifications",
+    "allSectors": "All Sectors",
+    "allSeverities": "All Severities"
   },
   "badges": {
     "severity": {
@@ -52,14 +61,14 @@
       "confidence": "confidence"
     },
     "direction": {
-      "NEGATIVE": "Negative Impact",
+      "NEGATIVE": "Downside Shock",
       "NEGATIVE_SHORT": "Negative",
       "RISK_INCREASE": "Risk Increase",
       "RISK_INCREASE_SHORT": "Risk Increase",
-      "POSITIVE": "Positive Impact",
+      "POSITIVE": "Positive Opportunity",
       "POSITIVE_SHORT": "Positive",
-      "RISK_DECREASE": "Risk Decrease",
-      "RISK_DECREASE_SHORT": "Risk Decrease",
+      "RISK_DECREASE": "De-escalation & Relief",
+      "RISK_DECREASE_SHORT": "Relief",
       "NEUTRAL": "Neutral",
       "NEUTRAL_SHORT": "Neutral"
     }
@@ -71,7 +80,7 @@
     "TRADE": "Trade & Tariffs",
     "TECHNOLOGY": "Tech & Chips",
     "SEMICONDUCTORS": "Semiconductors",
-    "DEFENSE": "Defense",
+    "DEFENSE": "Defense & Security",
     "FOOD_AGRICULTURE": "Food & Ag",
     "DIPLOMACY": "Diplomacy",
     "FINANCIAL_MARKETS": "Markets & FX",
@@ -107,11 +116,11 @@
     "CIVIL_UNREST": "Civil Unrest"
   },
   "eventDetail": {
-    "headerBadge": "EVENT DETAILS",
+    "headerBadge": "EVENT DOSSIER",
     "source": "Source:",
     "originalArticle": "Original Article",
     "articleSummary": "Article Summary",
-    "articleSummarySubtitle": "Concise summary from original wire report",
+    "articleSummarySubtitle": "Concise wire summary from original report",
     "summaryUnavailable": "Summary unavailable. Read the original article →",
     "readOriginal": "Read Original Article",
     "countriesRegions": "Countries & Regions",
@@ -133,7 +142,7 @@
     "bookmark": "Bookmark dossier",
     "removeBookmark": "Remove bookmark",
     "openStandalone": "Open standalone dossier page",
-    "close": "Close modal",
+    "close": "Close",
     "loading": "Loading intelligence dossier..."
   },
   "intel": {
@@ -179,7 +188,7 @@
   },
   "auth": {
     "welcomeBack": "Welcome back to GeoMonitor",
-    "loginSubtitle": "Sign in to access your bookmarked intelligence dossier & preferences",
+    "loginSubtitle": "Sign in to access your bookmarked intelligence dossiers & preferences",
     "createAccount": "Create your GeoMonitor account",
     "signupSubtitle": "Join the real-time global intelligence network",
     "fullName": "Full Name",
@@ -208,31 +217,46 @@
     "remove": "Remove"
   },
   "search": {
-    "title": "Intelligence Search Engine",
+    "tagline": "GEOPOLITICAL INTELLIGENCE ARCHIVE",
+    "title": "Intelligence Search & Exploration",
     "subtitle": "Multi-facet search across global events, countries, and domains",
-    "searchPlaceholder": "Search events, countries, entities, summaries...",
-    "popularCountries": "Popular Countries:",
-    "allSectors": "All Sectors",
-    "resultsFound": "{{count}} intelligence dossiers found",
-    "noResults": "No events match your search query"
+    "searchPlaceholder": "Search events, countries, treaties, sectors...",
+    "eventType": "Event Classification",
+    "affectedSector": "Affected Sector",
+    "severityLevel": "Severity Threshold",
+    "country": "Country / Region",
+    "popular": "Key Nations",
+    "foundReports": "{{count}} intelligence dossiers found",
+    "searching": "Searching archive...",
+    "noMatchesTitle": "No Matching Dossiers",
+    "noMatchesDesc": "Try adjusting your search terms or clearing specific facet filters."
   },
   "sources": {
     "title": "Monitored Wire Sources",
     "subtitle": "Multi-source news harvesters and reliability ratings",
-    "reliability": "Reliability Score",
-    "domain": "Domain",
-    "status": "Status",
-    "active": "Active",
-    "articlesIngested": "Articles Ingested"
+    "reliabilityScore": "Reliability Score",
+    "sourceType": "Source Type",
+    "activeFeed": "Active Feed",
+    "apiIntegration": "Ingestion Pipeline",
+    "visitWebsite": "Visit Wire Website",
+    "loading": "Loading monitored sources...",
+    "errorLoading": "Failed to load sources directory"
   },
   "impacts": {
+    "engineTagline": "CAUSAL TRANSMISSION ENGINE",
     "title": "Cross-Domain Impact Explorer",
-    "subtitle": "Qualitative causal ripple effects across 13 strategic economic sectors",
+    "subtitle": "Qualitative causal ripple effects across 13 strategic macroeconomic sectors",
     "allDirections": "All Directions",
-    "positive": "Positive & Opportunities",
-    "riskDecrease": "De-escalation & Relief",
-    "riskIncrease": "Risk Increases",
-    "negative": "Downside Shocks",
+    "positiveOpportunities": "Positive Opportunities",
+    "deescalationRelief": "De-escalation & Relief",
+    "riskIncreases": "Risk Increases",
+    "downsideShocks": "Downside Shocks",
+    "filterDomain": "Filter by Domain",
+    "errorLoading": "Failed to load impact assessments",
+    "confidence": "Confidence",
+    "relatedStory": "Read Story",
+    "noImpactsTitle": "No Impact Assessments Found",
+    "noImpactsDesc": "No qualitative evaluations match your selected sector or direction filter.",
     "showingImpacts": "Showing {{count}} of {{total}} impact assessments"
   },
   "errors": {
