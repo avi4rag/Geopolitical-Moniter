@@ -2,44 +2,44 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle, Minus } from 'lucide-react';
 
-// ─── Direction Badge ──────────────────────────────────────────────────────────
-// Shows whether an impact direction is negative, positive, or risk increase.
+// ─── Editorial Direction Badge ────────────────────────────────────────────────
+// Clean visual pill for positive, negative, and risk transmission directions.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const DIRECTION_CONFIG = {
   NEGATIVE: {
     key: 'NEGATIVE',
-    color: '#f87171',
+    color: '#fca5a5',
     bg: 'rgba(239, 68, 68, 0.12)',
-    border: 'rgba(239, 68, 68, 0.3)',
+    border: 'rgba(239, 68, 68, 0.35)',
     Icon: TrendingDown,
   },
   RISK_INCREASE: {
     key: 'RISK_INCREASE',
-    color: '#fb923c',
+    color: '#fdba74',
     bg: 'rgba(249, 115, 22, 0.12)',
-    border: 'rgba(249, 115, 22, 0.3)',
+    border: 'rgba(249, 115, 22, 0.35)',
     Icon: AlertTriangle,
   },
   POSITIVE: {
     key: 'POSITIVE',
-    color: '#4ade80',
-    bg: 'rgba(34, 197, 94, 0.12)',
-    border: 'rgba(34, 197, 94, 0.3)',
+    color: '#6ee7b7',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    border: 'rgba(16, 185, 129, 0.35)',
     Icon: TrendingUp,
   },
   RISK_DECREASE: {
     key: 'RISK_DECREASE',
-    color: '#4ade80',
-    bg: 'rgba(34, 197, 94, 0.12)',
-    border: 'rgba(34, 197, 94, 0.3)',
+    color: '#6ee7b7',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    border: 'rgba(16, 185, 129, 0.35)',
     Icon: CheckCircle,
   },
   NEUTRAL: {
     key: 'NEUTRAL',
-    color: '#94a3b8',
+    color: '#cbd5e1',
     bg: 'rgba(148, 163, 184, 0.12)',
-    border: 'rgba(148, 163, 184, 0.3)',
+    border: 'rgba(148, 163, 184, 0.35)',
     Icon: Minus,
   },
 };
@@ -58,7 +58,7 @@ export default function DirectionBadge({ direction, short = false }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-md shrink-0"
+      className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-0.5 rounded-full shrink-0 shadow-sm"
       style={{
         backgroundColor: cfg.bg,
         border: `1px solid ${cfg.border}`,

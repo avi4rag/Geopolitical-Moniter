@@ -1,274 +1,214 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe, Bookmark, User, LogIn, UserPlus, LogOut, Search, Sparkles, Menu, X } from 'lucide-react';
+import {
+  Globe,
+  Search,
+  Sparkles,
+  Menu,
+  X,
+  ChevronDown,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
 import EventDetailModal from '../events/EventDetailModal.jsx';
-import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
-// ─── Navbar ───────────────────────────────────────────────────────────────────
-// Fully responsive news masthead with desktop navigation, mobile drawer menu,
-// Ask AI Intel assistant trigger, language switcher, bookmarks, and user auth.
+// ─── Reference Design Navigation Masthead ─────────────────────────────────────
+// Features rounded pill category tags with '+' suffix, brand pill button,
+// clean language toggle, and dedicated rounded search input.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
-  const { user, isAuthenticated, logout, bookmarks } = useAuth();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const [isAskOpen, setIsAskOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const currentLang = i18n.language || 'en';
 
-  const navLinks = [
-    { href: '/', label: t('nav.newsFeed') },
-    { href: '/search', label: t('nav.search') },
-    { href: '/impacts', label: t('nav.domainImpacts') },
-    { href: '/sources', label: t('nav.sources') },
-    { href: '/stats', label: t('nav.analytics') },
+  const navPills = [
+    { href: '/', label: 'All', activeKey: '/' },
+    { href: '/', label: 'News', activeKey: '/news' },
+    { href: '/impacts', label: 'Impacts', activeKey: '/impacts' },
+    { href: '/sources', label: 'Sources', activeKey: '/sources' },
+    { href: '/stats', label: 'Analytics', activeKey: '/stats' },
   ];
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const handleLanguageChange = (lang) => {
+    i18n.changeLanguage(lang);
+    setIsLangDropdownOpen(false);
+  };
 
   return (
     <>
-      <header
-        className="sticky top-0 z-40 border-b shadow-md"
-        style={{
-          background: 'color-mix(in srgb, var(--color-surface-1) 95%, transparent)',
-          borderColor: 'var(--color-border)',
-          backdropFilter: 'blur(12px)',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            {/* Brand */}
-            <Link
-              to="/"
-              onClick={closeMobileMenu}
-              className="flex items-center gap-2 group shrink-0"
-              aria-label="Geopolitical Monitor Home"
-            >
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm"
-                style={{ background: 'var(--color-accent)' }}
-              >
-                <Globe size={14} color="#000" strokeWidth={2.5} />
-              </div>
-              <span className="text-base font-extrabold tracking-tight text-white">
-                {t('nav.brand')}
-              </span>
-              <span
-                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
-                style={{
-                  background: 'var(--color-surface-3)',
-                  color: 'var(--color-accent)',
-                  border: '1px solid var(--color-border)',
-                }}
-              >
-                {t('nav.newsBadge')}
-              </span>
-            </Link>
-
-            {/* Desktop Navigation (Hidden on Mobile) */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-2" role="navigation" aria-label="Main navigation">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    className="px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-150"
-                    style={{
-                      color: isActive ? '#fff' : 'var(--color-text-secondary)',
-                      background: isActive ? 'var(--color-surface-3)' : 'transparent',
-                      border: isActive ? '1px solid var(--color-border)' : '1px solid transparent',
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Right Tools: Language Switcher + Ask AI Intel + Auth Menu + Mobile Hamburger */}
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              {/* Language Switcher (Desktop) */}
-              <div className="hidden sm:block">
-                <LanguageSwitcher variant="dropdown" />
-              </div>
-
-              {/* Ask AI Intel trigger button */}
-              <button
-                onClick={() => {
-                  closeMobileMenu();
-                  setIsAskOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 text-xs font-bold transition cursor-pointer shadow-sm"
-                title={t('intel.title')}
-              >
-                <Sparkles size={13} />
-                <span className="hidden sm:inline font-mono">{t('nav.askAiIntel')}</span>
-              </button>
-
-              {/* Desktop Auth Controls */}
-              {isAuthenticated ? (
-                <div className="hidden sm:flex items-center gap-2">
-                  <Link
-                    to="/profile"
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-200 text-xs font-semibold hover:border-amber-500/50 hover:text-white transition"
-                    title={t('profile.accountProfile')}
-                  >
-                    <Bookmark size={13} className="text-amber-400" />
-                    <span className="font-mono">
-                      ({bookmarks?.length || 0})
-                    </span>
-                  </Link>
-
-                  <Link
-                    to="/profile"
-                    className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-mono font-bold text-xs hover:bg-amber-500/30 transition"
-                    title={user?.name}
-                  >
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                  </Link>
-                </div>
-              ) : (
-                <div className="hidden sm:flex items-center gap-2">
-                  <Link
-                    to="/login"
-                    className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition"
-                  >
-                    {t('nav.signIn')}
-                  </Link>
-
-                  <Link
-                    to="/signup"
-                    className="px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm"
-                    style={{
-                      backgroundColor: 'var(--color-accent)',
-                      color: '#000',
-                    }}
-                  >
-                    {t('nav.createAccount')}
-                  </Link>
-                </div>
-              )}
-
-              {/* Mobile Hamburger Toggle Button */}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-1.5 rounded-lg border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/80 transition cursor-pointer"
-                aria-label="Toggle mobile menu"
-              >
-                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-              </button>
+      <header className="w-full px-4 sm:px-6 lg:px-8 py-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Left Section: Brand Pill + Category Pills */}
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+          {/* Brand Pill */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-900 font-bold text-xs sm:text-sm transition-all shrink-0"
+          >
+            <div className="w-4 h-4 rounded-full bg-slate-900 flex items-center justify-center text-white">
+              <Globe size={11} />
             </div>
-          </div>
+            <span>{t('nav.brand', { defaultValue: 'GeoMonitor' })}</span>
+          </Link>
+
+          {/* Navigation Category Pills with '+' */}
+          <nav className="hidden sm:flex items-center gap-1.5 flex-wrap" role="navigation">
+            {navPills.map((pill) => {
+              const isActive = location.pathname === pill.activeKey || (pill.activeKey === '/' && location.pathname === '/');
+              return (
+                <Link
+                  key={pill.label}
+                  to={pill.href}
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all flex items-center gap-1 ${
+                    isActive
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100/90 text-slate-700 hover:bg-slate-200/80 hover:text-slate-900 border border-transparent'
+                  }`}
+                >
+                  <span>{pill.label}</span>
+                  <span className="text-[11px] opacity-60 font-mono">+</span>
+                </Link>
+              );
+            })}
+
+            {/* Ask AI Intel Pill Button */}
+            <button
+              onClick={() => setIsAskOpen(true)}
+              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/60 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <Sparkles size={12} className="text-indigo-600" />
+              <span>{t('nav.askAiIntel', { defaultValue: 'Ask Intel' })}</span>
+              <span className="text-[11px] opacity-60 font-mono">+</span>
+            </button>
+          </nav>
         </div>
 
-        {/* Mobile Slide-Down Menu Drawer */}
-        {isMobileMenuOpen && (
-          <div
-            className="md:hidden border-t border-slate-800 px-4 py-4 space-y-3 animate-in slide-in-from-top duration-200"
-            style={{
-              backgroundColor: 'var(--color-surface-1)',
-            }}
-          >
-            {/* Mobile Language Switcher */}
-            <div className="pb-1">
-              <LanguageSwitcher variant="segmented" />
-            </div>
+        {/* Right Section: Language Toggle + Rounded Search Bar + Auth */}
+        <div className="flex items-center gap-3 justify-between sm:justify-end shrink-0">
+          {/* Language Toggle Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+            >
+              <span className="uppercase">{currentLang.substring(0, 2)}</span>
+              <ChevronDown size={12} className="text-slate-400" />
+            </button>
 
-            {/* Mobile Navigation Links */}
-            <div className="grid grid-cols-2 gap-1.5">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    to={link.href}
-                    onClick={closeMobileMenu}
-                    className="px-3 py-2 rounded-lg text-xs font-semibold transition"
-                    style={{
-                      color: isActive ? '#fff' : 'var(--color-text-secondary)',
-                      background: isActive ? 'var(--color-surface-3)' : 'var(--color-surface-2)',
-                      border: isActive ? '1px solid var(--color-border)' : '1px solid transparent',
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </div>
-
-            {/* Mobile Auth / Profile Section */}
-            <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/profile"
-                    onClick={closeMobileMenu}
-                    className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-white"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold font-mono">
-                        {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                      </div>
-                      <div>
-                        <div className="font-bold text-white">{user?.name || 'Reader'}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{user?.email}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 text-amber-400 font-mono text-xs">
-                      <Bookmark size={12} />
-                      <span>{bookmarks?.length || 0}</span>
-                    </div>
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      logout();
-                      closeMobileMenu();
-                    }}
-                    className="w-full py-2 px-3 rounded-lg border border-slate-800 text-xs font-semibold text-slate-400 hover:text-rose-400 hover:bg-slate-900 flex items-center justify-center gap-1.5 transition cursor-pointer"
-                  >
-                    <LogOut size={13} />
-                    <span>{t('nav.signOut')}</span>
-                  </button>
-                </>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    to="/login"
-                    onClick={closeMobileMenu}
-                    className="py-2.5 px-3 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-center text-slate-200 hover:text-white"
-                  >
-                    {t('nav.signIn')}
-                  </Link>
-                  <Link
-                    to="/signup"
-                    onClick={closeMobileMenu}
-                    className="py-2.5 px-3 rounded-xl text-xs font-bold text-center text-slate-950 shadow-sm"
-                    style={{ backgroundColor: 'var(--color-accent)' }}
-                  >
-                    {t('nav.createAccount')}
-                  </Link>
-                </div>
-              )}
-            </div>
+            {isLangDropdownOpen && (
+              <div className="absolute right-0 mt-1 w-28 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in duration-150">
+                <button
+                  onClick={() => handleLanguageChange('en')}
+                  className={`w-full px-3 py-1.5 text-xs text-left font-medium hover:bg-slate-50 flex items-center justify-between ${
+                    currentLang.startsWith('en') ? 'text-indigo-600 font-bold' : 'text-slate-700'
+                  }`}
+                >
+                  <span>English</span>
+                  {currentLang.startsWith('en') && <span>✓</span>}
+                </button>
+                <button
+                  onClick={() => handleLanguageChange('hi')}
+                  className={`w-full px-3 py-1.5 text-xs text-left font-medium hover:bg-slate-50 flex items-center justify-between ${
+                    currentLang.startsWith('hi') ? 'text-indigo-600 font-bold' : 'text-slate-700'
+                  }`}
+                >
+                  <span>हिंदी (Hindi)</span>
+                  {currentLang.startsWith('hi') && <span>✓</span>}
+                </button>
+              </div>
+            )}
           </div>
-        )}
+
+          {/* Sleek Rounded Search Bar (matches reference top-right input) */}
+          <form onSubmit={handleSearchSubmit} className="relative w-48 sm:w-64">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Article name, tag, category..."
+              className="w-full pl-4 pr-9 py-2 rounded-2xl bg-slate-100/90 border border-slate-200/80 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition shadow-inner"
+            />
+            <button
+              type="submit"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
+            >
+              <Search size={14} />
+            </button>
+          </form>
+
+          {/* User Auth controls */}
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/profile"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-bold transition"
+                title={user?.name}
+              >
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              className="hidden lg:inline-flex px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 transition"
+            >
+              {t('nav.signIn', { defaultValue: 'Sign In' })}
+            </Link>
+          )}
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="sm:hidden p-2 rounded-full bg-slate-100 text-slate-700"
+          >
+            {isMobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+          </button>
+        </div>
       </header>
 
-      {/* Ask AI Intel Modal */}
+      {/* Mobile Drawer */}
+      {isMobileMenuOpen && (
+        <div className="sm:hidden px-4 py-3 border-b border-slate-100 bg-slate-50 space-y-2">
+          <div className="grid grid-cols-2 gap-2">
+            {navPills.map((pill) => (
+              <Link
+                key={pill.label}
+                to={pill.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-800"
+              >
+                {pill.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Modals */}
       <AskIntelModal
         isOpen={isAskOpen}
         onClose={() => setIsAskOpen(false)}
-        onSelectEvent={(eventId) => setSelectedEventId(eventId)}
+        onSelectEvent={(id) => setSelectedEventId(id)}
       />
 
-      {/* Selected Event Detail Modal */}
       {selectedEventId && (
         <EventDetailModal
           eventId={selectedEventId}

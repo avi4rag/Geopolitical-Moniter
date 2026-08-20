@@ -1,37 +1,37 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { RefreshCw, AlertCircle, FileQuestion, ArrowDown } from 'lucide-react';
+import { RefreshCw, AlertCircle, ArrowDown } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import FeaturedStory from '../components/feed/FeaturedStory.jsx';
-import FeedFilters from '../components/feed/FeedFilters.jsx';
+import SubFeaturedRail from '../components/feed/SubFeaturedRail.jsx';
+import TrendingSidebar from '../components/feed/TrendingSidebar.jsx';
 import NewsCard from '../components/feed/NewsCard.jsx';
 import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
-// ─── Home / News Feed Page ───────────────────────────────────────────────────
-// Core consumer news feed.
+// ─── Reference Design Home Page ───────────────────────────────────────────────
+// Main editorial homepage layout replicating the reference design:
+// - Left: Featured Lead Hero + Ethereal Glowing Sphere + 3-Column Sub-Stories
+// - Right: Recommended Sidebar with Hero Card + Stack of Compact Thumbnail Stories
+// - Bottom / Expanded: Full Ingested News Grid & Load More
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
   const { t } = useTranslation();
   const [events, setEvents] = useState([]);
   const [featuredEvent, setFeaturedEvent] = useState(null);
+  const [subFeaturedEvents, setSubFeaturedEvents] = useState([]);
+  const [recommendedEvents, setRecommendedEvents] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 1 });
 
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState(null);
-
-  // Filters
-  const [search, setSearch] = useState('');
-  const [domain, setDomain] = useState('ALL');
-  const [severity, setSeverity] = useState('ALL');
   const [page, setPage] = useState(1);
-
-  // Modal inspection
   const [selectedEventId, setSelectedEventId] = useState(null);
 
-  // Fetch initial feed data
+  const newsFeedRef = useRef(null);
+
   const fetchFeed = useCallback(async (targetPage = 1, append = false) => {
     try {
       if (append) {
@@ -48,10 +48,6 @@ export default function Home() {
         sortOrder: 'desc',
       };
 
-      if (search.trim()) params.search = search.trim();
-      if (severity !== 'ALL') params.severity = severity;
-      if (domain !== 'ALL') params.sector = domain;
-
       const res = await apiClient.get('/events', { params });
       const fetchedEvents = res.data || [];
 
@@ -59,9 +55,17 @@ export default function Home() {
         setEvents((prev) => [...prev, ...fetchedEvents]);
       } else {
         setEvents(fetchedEvents);
-        // Find top high/critical event for featured story
-        const topHero = fetchedEvents.find((e) => e.severity === 'CRITICAL' || e.severity === 'HIGH');
-        setFeaturedEvent(topHero || fetchedEvents[0] || null);
+
+        // 1. Pick Top Hero
+        const hero = fetchedEvents.find((e) => e.severity === 'CRITICAL' || e.severity === 'HIGH') || fetchedEvents[0] || null;
+        setFeaturedEvent(hero);
+
+        // 2. Pick next 3 stories for sub-features row
+        const others = fetchedEvents.filter((e) => hero && e._id !== hero._id);
+        setSubFeaturedEvents(others.slice(0, 3));
+
+        // 3. Pick recommended stories for right column
+        setRecommendedEvents(others.slice(3, 8).length > 0 ? others.slice(3, 8) : fetchedEvents.slice(0, 5));
       }
 
       if (res.pagination) {
@@ -73,10 +77,9 @@ export default function Home() {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [search, domain, severity, t]);
+  }, [t]);
 
   useEffect(() => {
-    setPage(1);
     fetchFeed(1, false);
   }, [fetchFeed]);
 
@@ -88,117 +91,106 @@ export default function Home() {
     }
   };
 
-  const handleResetFilters = () => {
-    setSearch('');
-    setDomain('ALL');
-    setSeverity('ALL');
+  const handleScrollToFeed = () => {
+    if (newsFeedRef.current) {
+      newsFeedRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
-  const hasActiveFilters = search !== '' || domain !== 'ALL' || severity !== 'ALL';
-
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Masthead Headline */}
-      <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div>
-          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-amber-400">
-            {t('feed.tagline')}
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
-            {t('feed.title')}
-          </h1>
-        </div>
-        <div className="text-xs text-slate-400 font-mono">
-          {t('feed.updatedContinuously')}
-        </div>
-      </div>
-
-      {/* Featured Hero Story (only when on page 1 without heavy filters) */}
-      {!hasActiveFilters && page === 1 && featuredEvent && !isLoading && (
-        <FeaturedStory
-          event={featuredEvent}
-          onSelect={(e) => setSelectedEventId(e._id)}
-        />
-      )}
-
-      {/* Sticky Filter Toolbar */}
-      <FeedFilters
-        search={search}
-        onSearchChange={setSearch}
-        domain={domain}
-        onDomainChange={setDomain}
-        severity={severity}
-        onSeverityChange={setSeverity}
-        onReset={handleResetFilters}
-        hasActiveFilters={hasActiveFilters}
-      />
-
-      {/* News Feed Stream */}
+    <div className="space-y-12">
       {isLoading ? (
         <FeedSkeleton count={6} />
       ) : error ? (
-        <div className="p-10 rounded-2xl border border-rose-900/60 bg-rose-950/20 text-center text-rose-400 space-y-3">
-          <AlertCircle size={36} className="mx-auto text-rose-400" />
-          <h3 className="text-sm font-semibold">{t('feed.errorTitle')}</h3>
-          <p className="text-xs text-rose-300/80">{error}</p>
+        <div className="p-10 rounded-2xl border border-rose-200 bg-rose-50 text-center text-rose-700 space-y-3">
+          <AlertCircle size={36} className="mx-auto text-rose-600" />
+          <h3 className="text-base font-bold">{t('feed.errorTitle')}</h3>
+          <p className="text-xs text-rose-600">{error}</p>
           <button
             onClick={() => fetchFeed(1, false)}
-            className="px-4 py-2 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer"
+            className="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition cursor-pointer"
           >
             {t('feed.tryAgain')}
           </button>
         </div>
-      ) : events.length === 0 ? (
-        <div className="p-12 rounded-2xl border border-slate-800 bg-slate-900/20 text-center text-slate-400 space-y-3">
-          <FileQuestion size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-sm font-semibold text-slate-300">{t('feed.noStoriesTitle')}</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
-            {t('feed.noStoriesDesc')}
-          </p>
-          {hasActiveFilters && (
-            <button
-              onClick={handleResetFilters}
-              className="px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs hover:bg-amber-400 transition cursor-pointer"
-            >
-              {t('feed.resetAllFilters')}
-            </button>
-          )}
-        </div>
       ) : (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {events.map((event) => (
-              <NewsCard
-                key={event._id}
-                event={event}
-                onSelect={(e) => setSelectedEventId(e._id)}
+        <>
+          {/* Main Top Two-Column Grid (Direct Reference Replica) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+            {/* Left Main Editorial Column (~68% on Desktop) */}
+            <div className="lg:col-span-8 space-y-8">
+              {/* Featured Lead Hero with Holographic Sphere */}
+              {featuredEvent && (
+                <FeaturedStory
+                  event={featuredEvent}
+                  onSelect={(e) => setSelectedEventId(e._id)}
+                />
+              )}
+
+              {/* 3-Column Sub-Stories Row Directly Beneath Hero */}
+              {subFeaturedEvents.length > 0 && (
+                <SubFeaturedRail
+                  events={subFeaturedEvents}
+                  onSelect={(e) => setSelectedEventId(e._id)}
+                />
+              )}
+            </div>
+
+            {/* Right Recommended Sidebar (~32% on Desktop) */}
+            <div className="lg:col-span-4 border-t lg:border-t-0 lg:border-l border-slate-100 lg:pl-8 pt-8 lg:pt-0">
+              <TrendingSidebar
+                trendingEvents={recommendedEvents}
+                onSelectEvent={(e) => setSelectedEventId(e._id)}
+                onViewAll={handleScrollToFeed}
               />
-            ))}
+            </div>
           </div>
 
-          {/* Infinite Scroll / Load More Button */}
-          {page < pagination.totalPages && (
-            <div className="pt-6 text-center">
-              <button
-                onClick={handleLoadMore}
-                disabled={isLoadingMore}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-slate-700 bg-slate-900 text-slate-200 hover:text-white hover:bg-slate-800 text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-lg"
-              >
-                {isLoadingMore ? (
-                  <>
-                    <RefreshCw size={14} className="animate-spin text-amber-400" />
-                    <span>{t('feed.loadingMore')}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t('feed.loadMore')}</span>
-                    <ArrowDown size={14} />
-                  </>
-                )}
-              </button>
+          {/* Full Ingested News Grid Section */}
+          <div ref={newsFeedRef} className="pt-8 border-t border-slate-100 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-slate-950 tracking-tight">
+                {t('feed.allStories', { defaultValue: 'All Ingested Geopolitical Stories' })}
+              </h2>
+              <span className="text-xs font-mono text-slate-400">
+                {events.length} {t('feed.stories', { defaultValue: 'stories' })}
+              </span>
             </div>
-          )}
-        </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {events.map((event) => (
+                <NewsCard
+                  key={event._id}
+                  event={event}
+                  onSelect={(e) => setSelectedEventId(e._id)}
+                />
+              ))}
+            </div>
+
+            {/* Load More Button */}
+            {page < pagination.totalPages && (
+              <div className="pt-4 text-center">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all cursor-pointer shadow-md hover:scale-105"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin text-indigo-400" />
+                      <span>{t('feed.loadingMore')}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{t('feed.loadMore')}</span>
+                      <ArrowDown size={14} />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       {/* Event Detail Inspection Modal */}

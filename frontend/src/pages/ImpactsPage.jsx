@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ShieldCheck,
-  Filter,
   ChevronLeft,
   ChevronRight,
   AlertCircle,

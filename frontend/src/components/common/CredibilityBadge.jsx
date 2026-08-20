@@ -2,30 +2,30 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 
-// ─── Credibility Badge ────────────────────────────────────────────────────────
+// ─── Editorial Credibility Badge ──────────────────────────────────────────────
 // Displays application-calculated credibility ratings for an event.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CREDIBILITY_CONFIG = {
   CONFIRMED: {
     key: 'CONFIRMED',
-    color: '#4ade80',
-    bg: 'rgba(34, 197, 94, 0.12)',
-    border: 'rgba(34, 197, 94, 0.3)',
+    color: '#6ee7b7',
+    bg: 'rgba(16, 185, 129, 0.12)',
+    border: 'rgba(16, 185, 129, 0.35)',
     Icon: ShieldCheck,
   },
   LIKELY: {
     key: 'LIKELY',
-    color: '#fbbf24',
+    color: '#fde047',
     bg: 'rgba(245, 158, 11, 0.12)',
-    border: 'rgba(245, 158, 11, 0.3)',
+    border: 'rgba(245, 158, 11, 0.35)',
     Icon: ShieldAlert,
   },
   UNVERIFIED: {
     key: 'UNVERIFIED',
-    color: '#94a3b8',
+    color: '#cbd5e1',
     bg: 'rgba(148, 163, 184, 0.12)',
-    border: 'rgba(148, 163, 184, 0.3)',
+    border: 'rgba(148, 163, 184, 0.35)',
     Icon: Shield,
   },
 };
@@ -45,7 +45,7 @@ export default function CredibilityBadge({ label, score }) {
 
   return (
     <span
-      className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-medium px-2 py-0.5 rounded-md shrink-0"
+      className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-0.5 rounded-full shrink-0 shadow-sm"
       style={{
         backgroundColor: cfg.bg,
         border: `1px solid ${cfg.border}`,
@@ -56,7 +56,7 @@ export default function CredibilityBadge({ label, score }) {
       <Icon size={12} className="shrink-0" />
       <span>{translatedLabel}</span>
       {percentage && (
-        <span className="opacity-75 text-[10px] font-mono ml-0.5">({percentage})</span>
+        <span className="opacity-80 font-mono text-[10px] ml-0.5">({percentage})</span>
       )}
     </span>
   );

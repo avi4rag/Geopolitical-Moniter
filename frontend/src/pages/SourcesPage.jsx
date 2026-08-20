@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Newspaper, ShieldCheck, CheckCircle2, AlertCircle, ExternalLink, Globe } from 'lucide-react';
+import { Newspaper, CheckCircle2, AlertCircle, ExternalLink, Globe } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 
 // ─── Sources Page ─────────────────────────────────────────────────────────────
