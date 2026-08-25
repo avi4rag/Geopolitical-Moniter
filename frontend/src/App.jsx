@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext.jsx';
 import Layout from './components/layout/Layout.jsx';
 import Home from './pages/Home.jsx';
 import SearchPage from './pages/SearchPage.jsx';
-import EventDetails from './pages/EventDetails.jsx';
+import EventDetailPage from './pages/EventDetailPage.jsx';
 import ImpactsPage from './pages/ImpactsPage.jsx';
 import SourcesPage from './pages/SourcesPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
@@ -16,6 +16,7 @@ import NotFoundPage from './pages/NotFoundPage.jsx';
 
 // ─── App Router ───────────────────────────────────────────────────────────────
 // Main news platform routes wrapped in AuthProvider and shared Layout.
+// Event detail: /event/:id and /events/:id both render the full-screen dossier.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -25,8 +26,8 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchPage />} />
-          <Route path="/event/:id" element={<EventDetails />} />
-          <Route path="/events/:id" element={<EventDetails />} />
+          <Route path="/event/:id" element={<EventDetailPage />} />
+          <Route path="/events/:id" element={<EventDetailPage />} />
           <Route path="/impacts" element={<ImpactsPage />} />
           <Route path="/sources" element={<SourcesPage />} />
           <Route path="/stats" element={<DashboardPage />} />

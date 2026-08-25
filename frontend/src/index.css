@@ -1,99 +1,180 @@
 @import "tailwindcss";
 
-/* ─── Premium Editorial Design System Tokens ──────────────────────────────── */
-@theme {
-  /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: 'Georgia', 'Cambria', 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;
+/* ─── Situation Room Dark Design System ─────────────────────────────────────── */
+/* GeoMonitor Intelligence Platform — Dark Theme Token System                    */
+/* Inspired by the AI Studio "Situation Room" reference aesthetic.               */
+/* ─────────────────────────────────────────────────────────────────────────────*/
 
-  /* Global Color Tokens */
-  --color-canvas: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-soft: #f1f5f9;
-  --color-surface-hover: #e2e8f0;
+@layer base {
+  :root {
+    /* ── Surface palette ──────────────────────────────────────────────── */
+    --color-obsidian: #020617;        /* body background */
+    --color-bg: #0c1324;              /* page background */
+    --color-surface-1: #0c1324;       /* primary card surface */
+    --color-surface-2: #151b2d;       /* secondary / nested card */
+    --color-surface-3: #191f31;       /* sidebar / panel */
+    --color-surface-4: #23293c;       /* hover state / inner */
+    --color-surface-5: #2e3447;       /* highest container */
+    --color-border: #1e293b;          /* default border */
+    --color-border-subtle: rgba(255, 255, 255, 0.05);
+    --color-border-muted: rgba(255, 255, 255, 0.10);
 
-  --color-text-main: #0f172a;
-  --color-text-body: #334155;
-  --color-text-muted: #64748b;
-  --color-text-sub: #94a3b8;
+    /* ── Text palette ─────────────────────────────────────────────────── */
+    --color-text-primary: #dce1fb;    /* high-emphasis text */
+    --color-text-secondary: #bec6e0;  /* medium-emphasis text */
+    --color-text-muted: #c6c6cd;      /* low-emphasis / body copy */
+    --color-text-dim: #909097;        /* very low emphasis */
 
-  --color-accent-amber: #f59e0b;
-  --color-accent-amber-dark: #d97706;
-  --color-accent-indigo: #4f46e5;
-  --color-accent-indigo-dark: #4338ca;
+    /* ── Accent / interactive ─────────────────────────────────────────── */
+    --color-accent: #c3c0ff;          /* periwinkle — links, active states */
+    --color-accent-bg: rgba(195, 192, 255, 0.10);
+    --color-accent-border: rgba(195, 192, 255, 0.20);
+    --color-accent-hover: rgba(195, 192, 255, 0.25);
 
-  --color-border-main: #e2e8f0;
-  --color-border-subtle: #f1f5f9;
-  --color-border-strong: #cbd5e1;
+    /* ── Semantic status colors ───────────────────────────────────────── */
+    --color-critical: #e11d48;        /* CRITICAL severity */
+    --color-critical-bg: rgba(225, 29, 72, 0.15);
+    --color-critical-border: rgba(225, 29, 72, 0.30);
+    --color-warning: #f59e0b;         /* HIGH severity */
+    --color-warning-bg: rgba(245, 158, 11, 0.15);
+    --color-stable: #10b981;          /* STABLE / LIVE / positive */
+    --color-stable-bg: rgba(16, 185, 129, 0.10);
+    --color-info: #38bdf8;            /* informational */
+  }
 
-  --color-positive: #10b981;
-  --color-negative: #ef4444;
-  --color-warning: #f59e0b;
+  body {
+    background-color: var(--color-obsidian);
+    color: var(--color-text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-obsidian);
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  /* Accessible focus ring — periwinkle on dark */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Text selection */
+  ::selection {
+    background-color: rgba(195, 192, 255, 0.20);
+    color: var(--color-text-primary);
+  }
 }
 
-/* ─── Global Full-Width Base Styles ───────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/* ─── Typography Utility Classes ─────────────────────────────────────────── */
+.font-headline {
+  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f8fafc;
-  color: #0f172a;
+.font-mono-code {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+}
+
+.font-body {
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* ─── HUD & Scanner FX ───────────────────────────────────────────────────── */
+
+/* Thin-border "intelligence console" framing */
+.scanner-border {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Standard dark data card */
+.data-card {
+  border: 1px solid #1e293b;
+}
+
+/* Slow inner glow shimmer on cards */
+@keyframes slow-shimmer {
+  0%   { box-shadow: inset 0 0 0 rgba(255, 255, 255, 0); }
+  50%  { box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.03); }
+  100% { box-shadow: inset 0 0 0 rgba(255, 255, 255, 0); }
+}
+.card-shimmer {
+  animation: slow-shimmer 8s infinite alternate ease-in-out;
+}
+
+/* Header text pulse — subtle scan effect */
+@keyframes scan-pulse {
+  0%   { opacity: 1;    text-shadow: 0 0 2px rgba(190, 198, 224, 0.10); }
+  50%  { opacity: 0.85; text-shadow: 0 0 10px rgba(190, 198, 224, 0.40); }
+  100% { opacity: 1;    text-shadow: 0 0 2px rgba(190, 198, 224, 0.10); }
+}
+.header-pulse {
+  animation: scan-pulse 4s ease-in-out infinite;
+}
+
+/* Horizontal scan line overlay (use inside a relative container) */
+@keyframes scan {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(100%); }
+}
+.scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  min-height: 100vh;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(190, 198, 224, 0.6), transparent);
+  animation: scan 4s linear infinite;
+  opacity: 0.25;
+  pointer-events: none;
 }
 
-body {
-  background-color: #f8fafc;
-  color: #0f172a;
-  font-family: var(--font-sans);
-  width: 100%;
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-}
-
-/* ─── Editorial Utilities ─────────────────────────────────────────────────── */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Custom Scrollbars */
+/* ─── Scrollbar ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #070d1f;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #1e293b;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #2e3447;
 }
 
-/* Accessible focus ring */
-:focus-visible {
-  outline: 2px solid #4f46e5;
-  outline-offset: 2px;
-  border-radius: 4px;
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar,
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Selection */
-::selection {
-  background-color: rgba(79, 70, 229, 0.15);
-  color: #0f172a;
+/* ─── Safe area ──────────────────────────────────────────────────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ─── Fade-in animation ──────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease-out forwards;
 }

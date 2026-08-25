@@ -4,51 +4,77 @@ import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
 import Navbar from './Navbar.jsx';
 
-// ─── Full-Width Editorial Layout ──────────────────────────────────────────────
-// Replaces the boxed floating container with a true edge-to-edge layout:
-// - 100% viewport width
-// - Sticky full-width editorial navigation header
-// - Generous, balanced content canvas
-// - Clean editorial footer
+// ─── Situation Room Layout ─────────────────────────────────────────────────────
+// Full-viewport dark layout:
+//  - Sticky dark top nav
+//  - Edge-to-edge obsidian canvas
+//  - Dark editorial footer with live status indicator
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Layout() {
   const { t } = useTranslation();
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 text-slate-900 flex flex-col justify-between">
-      {/* Full-Width Fixed/Sticky Header */}
+    <div className="min-h-screen w-full flex flex-col" style={{ backgroundColor: 'var(--color-obsidian)', color: 'var(--color-text-primary)' }}>
+      {/* Sticky dark navigation header */}
       <Navbar />
 
-      {/* Main Full-Width Editorial Canvas */}
-      <main className="flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Main content canvas */}
+      <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <Outlet />
       </main>
 
-      {/* Full-Width Professional Editorial Footer */}
-      <footer className="w-full border-t border-slate-200 bg-white py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-[1360px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      {/* Dark editorial footer */}
+      <footer
+        className="w-full border-t py-8 px-4 sm:px-6 lg:px-8 mt-auto"
+        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
+      >
+        <div
+          className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4"
+          style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}
+        >
+          {/* Brand */}
           <div className="flex items-center gap-3">
-            <div className="w-6 h-6 rounded-md bg-slate-900 flex items-center justify-center text-white font-bold text-xs">
-              <Globe size={13} />
+            <div
+              className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'var(--color-surface-4)' }}
+            >
+              <Globe size={13} style={{ color: 'var(--color-accent)' }} />
             </div>
             <div>
-              <span className="font-bold text-slate-900 tracking-tight">GeoMonitor</span>
-              <span className="ml-2 text-slate-400">© {new Date().getFullYear()} Real-Time Geopolitical Intelligence & Macroeconomic Analysis</span>
+              <span className="font-bold font-mono-code tracking-tight" style={{ color: 'var(--color-text-secondary)' }}>
+                GeoMonitor
+              </span>
+              <span className="ml-2" style={{ color: 'var(--color-text-dim)' }}>
+                © {new Date().getFullYear()} Real-Time Geopolitical Intelligence
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-600 font-medium flex-wrap justify-center">
-            <span className="inline-flex items-center gap-1.5 text-emerald-600 font-semibold font-mono text-[11px]">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>LIVE INGESTION ACTIVE</span>
+          {/* Status + Nav links */}
+          <div className="flex items-center gap-4 flex-wrap justify-center font-mono-code">
+            <span
+              className="inline-flex items-center gap-1.5 font-bold tracking-wider uppercase"
+              style={{ color: 'var(--color-stable)', fontSize: '0.65rem' }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full animate-pulse"
+                style={{ backgroundColor: 'var(--color-stable)' }}
+              />
+              LIVE INGESTION ACTIVE
             </span>
-            <span className="text-slate-300">•</span>
-            <Link to="/impacts" className="hover:text-indigo-600 transition-colors">{t('nav.domainImpacts')}</Link>
-            <span className="text-slate-300">•</span>
-            <Link to="/sources" className="hover:text-indigo-600 transition-colors">{t('nav.sources')}</Link>
-            <span className="text-slate-300">•</span>
-            <Link to="/stats" className="hover:text-indigo-600 transition-colors">{t('nav.analytics')}</Link>
+            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
+            <Link to="/impacts" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
+              {t('nav.domainImpacts')}
+            </Link>
+            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
+            <Link to="/sources" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
+              {t('nav.sources')}
+            </Link>
+            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
+            <Link to="/stats" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
+              {t('nav.analytics')}
+            </Link>
           </div>
         </div>
       </footer>

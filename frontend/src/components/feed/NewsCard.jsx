@@ -1,119 +1,94 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Bookmark, ArrowRight } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext.jsx';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
-import { getNewsEditorialImage } from '../../lib/newsImages.js';
 
-// ─── Editorial News Card ──────────────────────────────────────────────────────
-// Clean, bright editorial story card with subtle border, high-contrast
-// headline typography, factual summary, source attribution, and bookmarking.
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'T-MINUS <1M';
+  if (m < 60) return `${m} MIN AGO`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `T-MINUS ${h}H`;
+  return `${Math.floor(h / 24)}D AGO`;
+}
+
+const SEV_DOT = {
+  CRITICAL: '#e11d48',
+  HIGH: '#f59e0b',
+  MEDIUM: '#38bdf8',
+  LOW: '#10b981',
+};
+
+// ─── News Card — Dark Situation Room ─────────────────────────────────────────
+// Compact intelligence card for the 3-col feed grid.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function NewsCard({ event, onSelect }) {
-  const { t, i18n } = useTranslation();
-  const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
-  const [bookmarking, setBookmarking] = useState(false);
-
+  const { i18n } = useTranslation();
   if (!event) return null;
 
   const lang = i18n.language || 'en';
-  const localizedHeadline = translateNewsText(event.summary, lang);
-  const localizedFact = event.facts && event.facts.length > 0
-    ? translateNewsText(event.facts[0], lang)
-    : null;
-
-  const bookmarked = isBookmarked ? isBookmarked(event._id) : false;
-  const imageUrl = getNewsEditorialImage(event);
-  const sourceName = event.primaryArticleId?.sourceId?.name || 'World News Wire';
-
-  const categoryName = event.sectors && event.sectors.length > 0
-    ? event.sectors[0]
-    : 'World News';
-
-  const formattedDate = event.createdAt
-    ? new Date(event.createdAt).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-      })
-    : 'Recent';
-
-  const handleBookmarkClick = async (e) => {
-    e.stopPropagation();
-    if (!isAuthenticated) return;
-    try {
-      setBookmarking(true);
-      await toggleBookmark(event._id);
-    } catch {
-      // Handled silently
-    } finally {
-      setBookmarking(false);
-    }
-  };
+  const tMinus = timeAgo(event.createdAt);
+  const dotColor = SEV_DOT[event.severity] || '#c3c0ff';
+  const category = event.eventType?.replace(/_/g, ' ') || 'EVENT';
+  const summary = translateNewsText(event.summary, lang);
 
   return (
-    <article
-      onClick={() => onSelect && onSelect(event)}
-      className="group cursor-pointer bg-white rounded-2xl border border-slate-200 p-4 hover:border-slate-300 hover:shadow-lg transition-all duration-200 flex flex-col justify-between"
+    <div
+      className="data-card card-shimmer rounded-lg p-5 flex flex-col justify-between gap-4 cursor-pointer group transition-colors"
+      style={{
+        backgroundColor: 'var(--color-surface-2)',
+        border: '1px solid var(--color-border)',
+      }}
+      onClick={() => onSelect(event)}
+      onKeyDown={(e) => e.key === 'Enter' && onSelect(event)}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open briefing: ${event.summary}`}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
     >
-      <div className="space-y-3">
-        {/* Editorial Photo Frame */}
-        <div className="relative h-44 w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-100">
-          <img
-            src={imageUrl}
-            alt={event.summary}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+      {/* Top row: category + timestamp */}
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className="text-[10px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded"
+          style={{ backgroundColor: 'var(--color-surface-4)', color: 'var(--color-text-dim)' }}
+        >
+          {category}
+        </span>
+        <span
+          className="text-[10px] font-mono-code"
+          style={{ color: 'var(--color-text-dim)' }}
+        >
+          {tMinus}
+        </span>
+      </div>
+
+      {/* Headline */}
+      <h3
+        className="font-headline text-base font-semibold leading-snug line-clamp-2 transition-colors"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        {summary}
+      </h3>
+
+      {/* Bottom row: severity dot + CTA */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
+        <span className="flex items-center gap-1.5 text-[10px] font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
+          <span
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: dotColor }}
           />
-
-          {/* Bookmark Button */}
-          {isAuthenticated && (
-            <button
-              onClick={handleBookmarkClick}
-              disabled={bookmarking}
-              className={`absolute top-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer shadow-xs ${
-                bookmarked
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white/80 text-slate-700 hover:bg-white hover:text-slate-950'
-              }`}
-              title={bookmarked ? 'Remove Bookmark' : 'Save Story'}
-            >
-              <Bookmark size={12} fill={bookmarked ? 'currentColor' : 'none'} />
-            </button>
-          )}
-        </div>
-
-        {/* Category & Timestamp */}
-        <div className="text-xs font-semibold text-indigo-700 flex items-center gap-1.5 pt-0.5">
-          <span>{categoryName}</span>
-          <span className="text-slate-300">•</span>
-          <span className="text-slate-400 font-normal">{formattedDate}</span>
-        </div>
-
-        {/* Headline */}
-        <h3 className="text-base font-bold text-slate-950 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">
-          {localizedHeadline}
-        </h3>
-
-        {/* Short Summary / Fact */}
-        {localizedFact && (
-          <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-            {localizedFact}
-          </p>
-        )}
-      </div>
-
-      {/* Footer Bar */}
-      <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-        <span className="text-[11px] font-medium text-slate-500">
-          {sourceName}
+          {event.severity || 'UNKNOWN'}
         </span>
-
-        <span className="text-indigo-700 font-semibold text-xs flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
-          <span>{t('feed.readArticle', { defaultValue: 'Read Article' })}</span>
-          <ArrowRight size={12} />
+        <span
+          className="text-[10px] font-mono-code font-bold flex items-center gap-1 transition-colors"
+          style={{ color: 'var(--color-accent)' }}
+        >
+          Open Briefing →
         </span>
       </div>
-    </article>
+    </div>
   );
 }

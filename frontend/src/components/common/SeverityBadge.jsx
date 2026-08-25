@@ -1,54 +1,52 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 
-// ─── Editorial Severity Badge ─────────────────────────────────────────────────
-// Visual pill indicator for event & impact severity levels.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const SEVERITY_CONFIG = {
+// Severity colors (dark-surface optimized)
+const CONFIG = {
   CRITICAL: {
-    key: 'CRITICAL',
-    className: 'bg-rose-50 border-rose-200 text-rose-700',
-    dot: 'bg-rose-600',
+    bg: 'rgba(225,29,72,0.15)',
+    border: 'rgba(225,29,72,0.30)',
+    color: '#e11d48',
+    label: 'CRITICAL',
   },
   HIGH: {
-    key: 'HIGH',
-    className: 'bg-orange-50 border-orange-200 text-orange-800',
-    dot: 'bg-orange-600',
+    bg: 'rgba(245,158,11,0.15)',
+    border: 'rgba(245,158,11,0.30)',
+    color: '#f59e0b',
+    label: 'HIGH',
   },
   MEDIUM: {
-    key: 'MEDIUM',
-    className: 'bg-amber-50 border-amber-200 text-amber-800',
-    dot: 'bg-amber-600',
+    bg: 'rgba(56,189,248,0.15)',
+    border: 'rgba(56,189,248,0.30)',
+    color: '#38bdf8',
+    label: 'MEDIUM',
   },
   LOW: {
-    key: 'LOW',
-    className: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-    dot: 'bg-emerald-600',
-  },
-  MINIMAL: {
-    key: 'MINIMAL',
-    className: 'bg-slate-100 border-slate-200 text-slate-700',
-    dot: 'bg-slate-500',
+    bg: 'rgba(16,185,129,0.10)',
+    border: 'rgba(16,185,129,0.25)',
+    color: '#10b981',
+    label: 'LOW',
   },
 };
 
-export default function SeverityBadge({ severity, size = 'md' }) {
-  const { t } = useTranslation();
-  const level = severity ? severity.toUpperCase() : 'MEDIUM';
-  const cfg = SEVERITY_CONFIG[level] || SEVERITY_CONFIG.MEDIUM;
+const SIZE = {
+  sm: 'text-[10px] px-2 py-0.5',
+  md: 'text-xs px-2.5 py-1',
+};
 
-  const isSmall = size === 'sm';
-  const label = t(`badges.severity.${cfg.key}`, { defaultValue: cfg.key });
+export default function SeverityBadge({ severity, size = 'sm' }) {
+  const c = CONFIG[severity] || {
+    bg: 'var(--color-surface-4)',
+    border: 'var(--color-border)',
+    color: 'var(--color-text-muted)',
+    label: severity || 'UNKNOWN',
+  };
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 font-bold font-mono uppercase tracking-wider rounded-full border ${
-        isSmall ? 'text-[10px] px-2 py-0.5' : 'text-[11px] px-2.5 py-0.5'
-      } ${cfg.className}`}
+      className={`${SIZE[size] || SIZE.sm} rounded font-mono-code font-bold uppercase tracking-wider inline-block`}
+      style={{ backgroundColor: c.bg, border: `1px solid ${c.border}`, color: c.color }}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-      <span>{label}</span>
+      {c.label}
     </span>
   );
 }
