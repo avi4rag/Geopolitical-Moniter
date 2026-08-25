@@ -96,6 +96,7 @@ export class GuardianProvider extends BaseProvider {
       excerpt: this._buildExcerpt(content),
       author: fields.byline?.trim() || null,
       publishedAt: new Date(raw.webPublicationDate),
+      imageUrl: fields.thumbnail?.trim() || null,
     };
   }
 

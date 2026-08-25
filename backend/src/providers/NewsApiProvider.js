@@ -92,6 +92,7 @@ export class NewsApiProvider extends BaseProvider {
       excerpt: excerpt.slice(0, 2000),
       author: raw.author?.trim() || null,
       publishedAt: raw.publishedAt ? new Date(raw.publishedAt) : new Date(),
+      imageUrl: raw.urlToImage?.trim() || null,
     };
   }
 

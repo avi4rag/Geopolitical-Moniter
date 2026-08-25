@@ -1,39 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Bookmark, LogOut, Shield, Mail, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import apiClient from '../lib/apiClient.js';
 import NewsCard from '../components/feed/NewsCard.jsx';
-import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
-// ─── Editorial Profile & Bookmarks Page ───────────────────────────────────────
-// User account profile and saved bookmarks management.
+// ─── Situation Room Profile & Bookmarks Page ───────────────────────────────────
+// User account info + bookmarked dossiers. Uses navigate() instead of modal.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user, logout, toggleBookmark } = useAuth();
   const [bookmarkedEvents, setBookmarkedEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedEventId, setSelectedEventId] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
-    apiClient
-      .get('/users/bookmarks')
-      .then((res) => {
-        if (isMounted) setBookmarkedEvents(res.data || []);
-      })
-      .catch((err) => {
-        console.error('Failed to load user bookmarks:', err);
-      })
-      .finally(() => {
-        if (isMounted) setIsLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
+    apiClient.get('/users/bookmarks')
+      .then((res) => { if (isMounted) setBookmarkedEvents(res.data || []); })
+      .catch((err) => console.error('Failed to load user bookmarks:', err))
+      .finally(() => { if (isMounted) setIsLoading(false); });
+    return () => { isMounted = false; };
   }, []);
 
   const handleRemoveBookmark = async (eventId, e) => {
@@ -46,26 +36,31 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto w-full">
-      {/* Account Info Header */}
-      <div className="p-6 rounded-3xl border border-slate-200 bg-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      {/* Account header */}
+      <div
+        className="p-6 rounded-lg border flex flex-col sm:flex-row sm:items-center justify-between gap-6"
+        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
+      >
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700 text-xl font-bold font-mono shrink-0">
+          <div
+            className="w-14 h-14 rounded flex items-center justify-center text-xl font-bold font-mono-code shrink-0"
+            style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
+          >
             {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
           </div>
-
           <div className="space-y-1">
-            <h1 className="text-xl font-black text-slate-950">
+            <h1 className="text-xl font-bold font-headline" style={{ color: 'var(--color-text-primary)' }}>
               {user.name}
             </h1>
-            <div className="flex items-center gap-3 text-xs text-slate-500 font-mono flex-wrap">
-              <span className="flex items-center gap-1">
-                <Mail size={12} className="text-slate-400" />
-                <span>{user.email}</span>
+            <div className="flex items-center gap-3 text-xs font-mono-code flex-wrap">
+              <span className="flex items-center gap-1" style={{ color: 'var(--color-text-muted)' }}>
+                <Mail size={11} style={{ color: 'var(--color-text-dim)' }} />
+                {user.email}
               </span>
-              <span>•</span>
-              <span className="flex items-center gap-1 text-indigo-700 font-bold">
-                <Shield size={12} />
-                <span>{user.role ? user.role.toUpperCase() : 'ANALYST'}</span>
+              <span style={{ color: 'var(--color-border)' }}>•</span>
+              <span className="flex items-center gap-1 font-bold" style={{ color: 'var(--color-accent)' }}>
+                <Shield size={11} />
+                {user.role ? user.role.toUpperCase() : 'ANALYST'}
               </span>
             </div>
           </div>
@@ -73,64 +68,66 @@ export default function ProfilePage() {
 
         <button
           onClick={logout}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-full border border-slate-200 bg-slate-50 text-slate-700 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 text-xs font-bold transition cursor-pointer self-start sm:self-center"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded text-xs font-mono-code font-bold cursor-pointer transition-colors self-start sm:self-center"
+          style={{
+            color: '#e11d48',
+            border: '1px solid rgba(225,29,72,0.30)',
+            backgroundColor: 'rgba(225,29,72,0.10)',
+          }}
         >
           <LogOut size={13} />
-          <span>{t('nav.signOut', { defaultValue: 'Sign Out' })}</span>
+          {t('nav.signOut', { defaultValue: 'Sign Out' })}
         </button>
       </div>
 
-      {/* Bookmarked Dossiers Section */}
+      {/* Bookmarked dossiers */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-          <h2 className="text-lg font-black text-slate-950 flex items-center gap-2">
-            <Bookmark size={18} className="text-indigo-600" />
-            <span>{t('profile.savedDossiers', { count: bookmarkedEvents.length, defaultValue: `Saved Dossiers (${bookmarkedEvents.length})` })}</span>
+        <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: 'var(--color-border)' }}>
+          <h2 className="font-headline text-lg font-bold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+            <Bookmark size={18} style={{ color: 'var(--color-accent)' }} />
+            {t('profile.savedDossiers', { count: bookmarkedEvents.length, defaultValue: `Saved Dossiers (${bookmarkedEvents.length})` })}
           </h2>
         </div>
 
         {isLoading ? (
-          <div className="py-16 text-center text-slate-400 text-xs">
+          <div className="py-16 text-center text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
             {t('profile.loadingBookmarks', { defaultValue: 'Loading saved bookmarks...' })}
           </div>
         ) : bookmarkedEvents.length === 0 ? (
-          <div className="p-12 rounded-2xl border border-slate-200 bg-white text-center text-slate-500 space-y-2">
-            <Bookmark size={36} className="mx-auto text-slate-300" />
-            <h3 className="text-sm font-bold text-slate-800">
+          <div className="p-12 rounded-lg border text-center space-y-2" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
+            <Bookmark size={32} className="mx-auto" style={{ color: 'var(--color-text-dim)' }} />
+            <h3 className="text-sm font-bold font-headline" style={{ color: 'var(--color-text-primary)' }}>
               {t('profile.noBookmarks', { defaultValue: 'No saved dossiers yet' })}
             </h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            <p className="text-xs font-mono-code max-w-sm mx-auto" style={{ color: 'var(--color-text-muted)' }}>
               {t('profile.noBookmarksDesc', { defaultValue: 'Bookmark geopolitical events from the news feed to review and track them here.' })}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {bookmarkedEvents.map((event) => (
               <div key={event._id} className="relative group">
                 <NewsCard
                   event={event}
-                  onSelect={(e) => setSelectedEventId(e._id)}
+                  onSelect={(e) => navigate(`/event/${e._id}`)}
                 />
                 <button
                   onClick={(e) => handleRemoveBookmark(event._id, e)}
                   title={t('profile.remove', { defaultValue: 'Remove' })}
-                  className="absolute top-6 right-6 p-1.5 rounded-lg bg-white/90 border border-slate-200 text-slate-500 hover:text-rose-600 transition shadow-xs cursor-pointer z-10 opacity-0 group-hover:opacity-100"
+                  className="absolute top-4 right-4 p-1.5 rounded border cursor-pointer z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    backgroundColor: 'rgba(225,29,72,0.10)',
+                    borderColor: 'rgba(225,29,72,0.30)',
+                    color: '#e11d48',
+                  }}
                 >
-                  <Trash2 size={13} />
+                  <Trash2 size={12} />
                 </button>
               </div>
             ))}
           </div>
         )}
       </div>
-
-      {/* Event Detail Modal */}
-      {selectedEventId && (
-        <EventDetailModal
-          eventId={selectedEventId}
-          onClose={() => setSelectedEventId(null)}
-        />
-      )}
     </div>
   );
 }

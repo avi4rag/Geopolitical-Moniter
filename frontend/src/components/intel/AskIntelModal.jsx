@@ -5,8 +5,8 @@ import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
-// ─── Editorial Ask Intel Modal ────────────────────────────────────────────────
-// AI-powered executive synthesis tool grounded in live geopolitical events.
+// ─── Ask Intel Modal — Situation Room Dark Theme ──────────────────────────────
+// AI synthesis tool. All logic preserved; only visual classes replaced.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
@@ -17,7 +17,6 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
   const [error, setError] = useState(null);
 
   if (!isOpen) return null;
-
   const lang = i18n.language || 'en';
 
   const suggestions = [
@@ -30,11 +29,7 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (!query.trim() || isLoading) return;
-
-    setIsLoading(true);
-    setError(null);
-    setResponse(null);
-
+    setIsLoading(true); setError(null); setResponse(null);
     try {
       const res = await apiClient.post('/events/ask', { query: query.trim() });
       setResponse(res.data);
@@ -46,13 +41,8 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
   };
 
   const handleSuggestionClick = (sug) => {
-    setQuery(sug);
-    setIsLoading(true);
-    setError(null);
-    setResponse(null);
-
-    apiClient
-      .post('/events/ask', { query: sug })
+    setQuery(sug); setIsLoading(true); setError(null); setResponse(null);
+    apiClient.post('/events/ask', { query: sug })
       .then((res) => setResponse(res.data))
       .catch((err) => setError(err.message || t('intel.error', { defaultValue: 'Failed to synthesize intelligence inquiry' })))
       .finally(() => setIsLoading(false));
@@ -60,62 +50,79 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md"
+      style={{ backgroundColor: 'rgba(2,6,23,0.85)' }}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden"
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-lg overflow-hidden animate-fadeIn"
+        style={{ backgroundColor: 'var(--color-surface-1)', border: '1px solid var(--color-border)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
-        <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
+        {/* Header */}
+        <div className="px-5 py-4 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
-              <Sparkles size={16} />
+            <div
+              className="w-8 h-8 rounded flex items-center justify-center"
+              style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)' }}
+            >
+              <Sparkles size={15} style={{ color: 'var(--color-accent)' }} />
             </div>
             <div>
-              <h2 className="text-sm font-black text-slate-950 flex items-center gap-2">
-                <span>{t('intel.title', { defaultValue: 'Ask GeoMonitor Intelligence' })}</span>
-                <span className="text-[9px] font-mono uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold">
+              <h2 className="text-sm font-bold font-mono-code flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                {t('intel.title', { defaultValue: 'Ask GeoMonitor Intelligence' })}
+                <span
+                  className="text-[9px] font-mono-code uppercase px-2 py-0.5 rounded font-bold"
+                  style={{ backgroundColor: 'var(--color-accent-bg)', color: 'var(--color-accent)', border: '1px solid var(--color-accent-border)' }}
+                >
                   {t('intel.badge', { defaultValue: 'AI ASSISTANT' })}
                 </span>
               </h2>
             </div>
           </div>
-
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
-            aria-label={t('eventDetail.close', { defaultValue: 'Close' })}
+            className="p-1.5 rounded transition cursor-pointer"
+            style={{ color: 'var(--color-text-dim)' }}
+            aria-label="Close"
+            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-4)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Modal Body */}
+        {/* Body */}
         <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
-          {/* Query Form */}
+          {/* Query form */}
           <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('intel.placeholder', { defaultValue: 'Ask about geopolitical risks, commodities, trade pacts...' })}
-              className="w-full pl-4 pr-12 py-3 text-xs sm:text-sm rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition shadow-inner"
+              className="w-full pl-4 pr-12 py-3 text-xs sm:text-sm rounded font-mono-code"
+              style={{
+                backgroundColor: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+              autoFocus
             />
             <button
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-40 transition cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded disabled:opacity-40 transition cursor-pointer"
+              style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
             >
               {isLoading ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
             </button>
           </form>
 
-          {/* Quick Suggestions */}
+          {/* Suggestions */}
           {!response && !isLoading && (
             <div className="space-y-2">
-              <span className="text-[11px] font-mono font-bold text-slate-400 uppercase">
+              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-dim)' }}>
                 {t('intel.suggestedTitle', { defaultValue: 'Suggested Inquiries' })}:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -123,77 +130,79 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(sug)}
-                    className="p-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50/50 hover:border-indigo-200 text-left text-xs text-slate-700 hover:text-slate-950 transition cursor-pointer flex items-center justify-between group"
+                    className="p-3 rounded border text-left text-xs transition cursor-pointer flex items-center justify-between gap-2 group"
+                    style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.backgroundColor = 'var(--color-surface-2)'; }}
                   >
-                    <span className="line-clamp-2 leading-relaxed">{sug}</span>
-                    <ArrowRight size={12} className="text-slate-400 group-hover:text-indigo-600 shrink-0 ml-2" />
+                    <span className="line-clamp-2 leading-relaxed font-mono-code">{sug}</span>
+                    <ArrowRight size={12} className="shrink-0" style={{ color: 'var(--color-accent)' }} />
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Loading State */}
+          {/* Loading */}
           {isLoading && (
-            <div className="py-12 text-center text-slate-500 space-y-3">
-              <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-mono">{t('intel.synthesizing', { defaultValue: 'Synthesizing intelligence inquiry...' })}</p>
+            <div className="py-12 text-center space-y-3">
+              <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'var(--color-accent) transparent transparent transparent' }} />
+              <p className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
+                {t('intel.synthesizing', { defaultValue: 'Synthesizing intelligence inquiry...' })}
+              </p>
             </div>
           )}
 
-          {/* Error State */}
+          {/* Error */}
           {error && (
-            <div className="p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 text-xs">
+            <div className="p-4 rounded border text-xs font-mono-code" style={{ backgroundColor: 'rgba(225,29,72,0.10)', borderColor: 'rgba(225,29,72,0.30)', color: '#e11d48' }}>
               {error}
             </div>
           )}
 
-          {/* Synthesized Response */}
+          {/* Response */}
           {response && (
             <div className="space-y-5">
-              {/* Answer Card */}
-              <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-indigo-700">
-                  <Bot size={15} />
+              {/* Answer card */}
+              <div className="p-5 rounded border space-y-3" style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center gap-2 text-xs font-mono-code font-bold" style={{ color: 'var(--color-accent)' }}>
+                  <Bot size={14} />
                   <span>SYNTHESIZED INTELLIGENCE ASSESSMENT</span>
                 </div>
-                <div className="text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">
+                <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--color-text-muted)' }}>
                   {response.answer}
                 </div>
               </div>
 
-              {/* Grounded Event Sources */}
-              {response.referencedEvents && response.referencedEvents.length > 0 && (
+              {/* Referenced events */}
+              {response.referencedEvents?.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-slate-400 uppercase">
-                    <ShieldCheck size={14} className="text-emerald-600" />
-                    <span>{t('intel.referencedDossiers', { defaultValue: 'Referenced Intelligence Dossiers' })}</span>
+                  <div className="flex items-center gap-2 text-xs font-mono-code font-bold uppercase" style={{ color: 'var(--color-text-dim)' }}>
+                    <ShieldCheck size={13} style={{ color: 'var(--color-stable)' }} />
+                    {t('intel.referencedDossiers', { defaultValue: 'Referenced Intelligence Dossiers' })}
                   </div>
-
                   <div className="space-y-2">
                     {response.referencedEvents.map((ev) => (
                       <div
                         key={ev._id}
-                        className="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition flex items-center justify-between gap-3 text-xs"
+                        className="p-3.5 rounded border flex items-center justify-between gap-3 text-xs transition-colors"
+                        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
                       >
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <SeverityBadge severity={ev.severity} size="sm" />
-                            <span className="text-slate-400 font-mono text-[10px]">
+                            <span className="font-mono-code text-[10px]" style={{ color: 'var(--color-text-dim)' }}>
                               {ev.createdAt ? new Date(ev.createdAt).toLocaleDateString() : ''}
                             </span>
                           </div>
-                          <p className="font-semibold text-slate-900 truncate">
+                          <p className="font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
                             {translateNewsText(ev.summary, lang)}
                           </p>
                         </div>
-
                         <button
-                          onClick={() => {
-                            onClose();
-                            if (onSelectEvent) onSelectEvent(ev._id);
-                          }}
-                          className="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shrink-0 cursor-pointer transition"
+                          onClick={() => { onClose(); if (onSelectEvent) onSelectEvent(ev._id); }}
+                          className="px-3 py-1.5 rounded text-xs font-mono-code font-bold shrink-0 cursor-pointer transition-colors"
+                          style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
                         >
                           {t('intel.inspect', { defaultValue: 'Inspect' })}
                         </button>
@@ -206,8 +215,11 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
           )}
         </div>
 
-        {/* Modal Footer */}
-        <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+        {/* Footer */}
+        <div
+          className="px-5 py-3 border-t flex items-center justify-between text-[10px] font-mono-code"
+          style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)', color: 'var(--color-text-dim)' }}
+        >
           <span>{t('intel.groundedNotice', { defaultValue: 'Responses are synthesized from live, verified event dossiers.' })}</span>
           <span>GeoMonitor AI v2.4</span>
         </div>

@@ -47,7 +47,15 @@ const articleSchema = new mongoose.Schema(
     // Short description / lede paragraph
     excerpt: {
       type: String,
-      maxlength: [2000, 'Excerpt cannot exceed 2,000 characters'],
+      trim: true,
+      maxlength: [2000, 'Excerpt cannot exceed 2000 characters'],
+    },
+
+    imageUrl: {
+      type: String,
+      trim: true,
+      maxlength: [2048, 'Image URL cannot exceed 2048 characters'],
+      default: null,
     },
 
     author: {

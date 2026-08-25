@@ -1,51 +1,25 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
-import { ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 
-// ─── Editorial Credibility Badge ──────────────────────────────────────────────
-// Displays application-calculated credibility ratings for an event.
-// ─────────────────────────────────────────────────────────────────────────────
-
-const CREDIBILITY_CONFIG = {
-  CONFIRMED: {
-    key: 'CONFIRMED',
-    className: 'bg-emerald-50 border-emerald-200 text-emerald-800',
-    Icon: ShieldCheck,
-  },
-  LIKELY: {
-    key: 'LIKELY',
-    className: 'bg-amber-50 border-amber-200 text-amber-800',
-    Icon: ShieldAlert,
-  },
-  UNVERIFIED: {
-    key: 'UNVERIFIED',
-    className: 'bg-slate-100 border-slate-200 text-slate-700',
-    Icon: Shield,
-  },
+const CONFIG = {
+  CONFIRMED: { bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.25)', color: '#10b981' },
+  HIGH:      { bg: 'rgba(16,185,129,0.10)', border: 'rgba(16,185,129,0.25)', color: '#10b981' },
+  MEDIUM:    { bg: 'rgba(245,158,11,0.10)', border: 'rgba(245,158,11,0.25)', color: '#f59e0b' },
+  LOW:       { bg: 'rgba(225,29,72,0.10)',  border: 'rgba(225,29,72,0.25)',  color: '#e11d48' },
+  UNVERIFIED:{ bg: 'rgba(144,144,151,0.10)', border: 'rgba(144,144,151,0.20)', color: '#909097' },
 };
 
 export default function CredibilityBadge({ label, score }) {
-  const { t } = useTranslation();
-  const cred = label ? label.toUpperCase() : 'UNVERIFIED';
-  const cfg = CREDIBILITY_CONFIG[cred] || CREDIBILITY_CONFIG.UNVERIFIED;
-  const { Icon } = cfg;
-
-  const translatedLabel = t(`badges.credibility.${cfg.key}`, { defaultValue: cfg.key });
-
-  const percentage = typeof score === 'number' && score > 0
-    ? `${Math.round(score * 100)}%`
-    : null;
+  const key = label || 'UNVERIFIED';
+  const c = CONFIG[key] || CONFIG.UNVERIFIED;
 
   return (
     <span
-      className={`inline-flex items-center gap-1 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${cfg.className}`}
-      title={`${translatedLabel}${percentage ? ` (${percentage} ${t('badges.credibility.confidence', { defaultValue: 'confidence' })})` : ''}`}
+      className="text-[10px] px-2 py-0.5 rounded font-mono-code font-bold uppercase border inline-block"
+      style={{ backgroundColor: c.bg, border: `1px solid ${c.border}`, color: c.color }}
     >
-      <Icon size={12} className="shrink-0" />
-      <span>{translatedLabel}</span>
-      {percentage && (
-        <span className="opacity-80 font-mono text-[10px] ml-0.5">({percentage})</span>
-      )}
+      {key === 'UNVERIFIED'
+        ? 'UNVERIFIED'
+        : `${key}${typeof score === 'number' ? ` · ${Math.round(score * 100)}%` : ''}`}
     </span>
   );
 }

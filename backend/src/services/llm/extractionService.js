@@ -166,6 +166,7 @@ async function extractArticle(llmClient, article) {
       facts: extracted.facts,
       uncertainties: extracted.uncertainties,
       entities: extracted.entities,
+      imageUrl: article.imageUrl || null, // Propagate article thumbnail to the event
       extractionMetadata,
       processingStatus: 'ANALYZED',
       // credibilityLabel and credibilityScore are set by the impact engine (Phase 5)
