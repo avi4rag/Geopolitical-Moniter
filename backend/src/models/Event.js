@@ -101,6 +101,15 @@ const eventSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Hero image URL inherited from the primary article at extraction time.
+    // Null for events ingested before this field was added (frontend falls back to category image).
+    imageUrl: {
+      type: String,
+      trim: true,
+      maxlength: [2048, 'Image URL cannot exceed 2048 characters'],
+      default: null,
+    },
+
     // ── LLM Metadata ─────────────────────────────────────────────────────────
     extractionMetadata: {
       modelName: { type: String, trim: true },
