@@ -73,20 +73,19 @@ export default function ImpactsPage() {
 
   return (
     <div className="space-y-8 w-full">
-
       {/* ── Header ────────────────────────────────────────────────────────── */}
-      <div className="border-b pb-5" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center gap-2 mb-1">
-          <div className="h-3 w-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }} />
-          <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest" style={{ color: 'var(--color-accent)' }}>
+      <div className="border-b border-slate-800/80 pb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          <div className="h-3 w-1 rounded-full bg-cyan-400" />
+          <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyan-400">
             CAUSAL TRANSMISSION ENGINE
           </span>
         </div>
-        <h1 className="font-headline text-2xl sm:text-4xl font-bold flex items-center gap-3 mt-1" style={{ color: 'var(--color-text-primary)' }}>
-          <ShieldCheck size={28} style={{ color: 'var(--color-accent)', flexShrink: 0 }} />
+        <h1 className="font-headline text-2xl sm:text-4xl font-bold flex items-center gap-3 mt-1 text-slate-100">
+          <ShieldCheck size={30} className="text-cyan-400 shrink-0" />
           {t('impacts.title', { defaultValue: 'Systemic Impact Matrix' })}
         </h1>
-        <p className="text-xs sm:text-sm mt-1 max-w-3xl leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+        <p className="text-xs sm:text-sm mt-1 max-w-3xl leading-relaxed text-slate-400 font-sans">
           {t('impacts.subtitle', { defaultValue: 'Qualitative causal ripple effects across 13 strategic macroeconomic and geopolitical sectors.' })}
         </p>
       </div>
@@ -99,13 +98,13 @@ export default function ImpactsPage() {
             <button
               key={value}
               onClick={() => { setSelectedDirection(value); setPage(1); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded text-xs font-mono-code font-bold uppercase tracking-wide whitespace-nowrap cursor-pointer transition-colors flex-shrink-0"
-              style={isActive
-                ? { backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }
-                : { backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-dim)' }
-              }
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wide whitespace-nowrap cursor-pointer transition-all duration-150 shrink-0 ${
+                isActive
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
+                  : 'glass-control text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
             >
-              <Icon size={12} />
+              <Icon size={12} className={isActive ? 'text-cyan-400' : 'text-slate-500'} />
               {label}
             </button>
           );
@@ -121,11 +120,11 @@ export default function ImpactsPage() {
             <button
               key={d}
               onClick={() => { setSelectedDomain(d); setPage(1); }}
-              className="px-2.5 py-1 rounded text-[10px] font-mono-code font-bold uppercase tracking-wide cursor-pointer transition-colors"
-              style={isActive
-                ? { backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }
-                : { backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-dim)' }
-              }
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wide cursor-pointer transition-all duration-150 ${
+                isActive
+                  ? 'bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 shadow-[0_0_10px_rgba(6,182,212,0.25)]'
+                  : 'glass-control text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+              }`}
             >
               {label}
             </button>
@@ -139,31 +138,29 @@ export default function ImpactsPage() {
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
-              className="rounded-lg p-5 space-y-3 border animate-pulse"
-              style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+              className="glass-panel rounded-2xl p-5 space-y-3 animate-pulse"
             >
-              <div className="h-3 rounded w-1/3" style={{ backgroundColor: 'var(--color-surface-4)' }} />
-              <div className="h-4 rounded w-full" style={{ backgroundColor: 'var(--color-surface-4)' }} />
-              <div className="h-4 rounded w-3/4" style={{ backgroundColor: 'var(--color-surface-4)' }} />
+              <div className="h-3 rounded w-1/3 bg-slate-800/80" />
+              <div className="h-4 rounded w-full bg-slate-800/80" />
+              <div className="h-4 rounded w-3/4 bg-slate-800/80" />
             </div>
           ))}
         </div>
       ) : error ? (
-        <div className="p-10 rounded-lg border text-center space-y-3" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
-          <AlertCircle size={28} style={{ color: 'var(--color-critical)', margin: '0 auto' }} />
-          <p className="text-sm font-mono-code" style={{ color: 'var(--color-text-muted)' }}>{error}</p>
+        <div className="glass-panel p-10 rounded-2xl text-center space-y-3">
+          <AlertCircle size={32} className="mx-auto text-rose-400" />
+          <p className="text-sm font-mono text-slate-300">{error}</p>
           <button
             onClick={fetchImpacts}
-            className="px-4 py-2 rounded text-xs font-mono-code font-bold cursor-pointer"
-            style={{ backgroundColor: 'var(--color-surface-4)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}
+            className="px-4 py-2 rounded-xl text-xs font-mono font-bold cursor-pointer glass-control text-slate-200 hover:text-white transition"
           >
             Retry
           </button>
         </div>
       ) : impacts.length === 0 ? (
-        <div className="p-14 rounded-lg border text-center space-y-2" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
-          <Layers size={28} style={{ color: 'var(--color-text-dim)', margin: '0 auto' }} />
-          <p className="text-sm font-mono-code" style={{ color: 'var(--color-text-muted)' }}>
+        <div className="glass-panel p-14 rounded-2xl text-center space-y-2">
+          <Layers size={32} className="mx-auto text-slate-500" />
+          <p className="text-sm font-mono text-slate-400">
             {t('impacts.noImpactsFound', { defaultValue: 'No impacts found for the selected filters.' })}
           </p>
         </div>
@@ -176,54 +173,51 @@ export default function ImpactsPage() {
             return (
               <div
                 key={impact._id}
-                className="rounded-lg border p-5 space-y-3 transition-colors"
-                style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+                className="glass-card rounded-2xl p-5 space-y-3 transition-all duration-200 hover:border-cyan-500/40 hover:shadow-[0_4px_24px_rgba(6,182,212,0.12)] flex flex-col justify-between"
               >
-                {/* Card header */}
-                <div className="flex items-center justify-between gap-2 pb-2 border-b" style={{ borderColor: 'var(--color-border-subtle)' }}>
-                  <span
-                    className="text-[10px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-                    style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
-                  >
-                    {domainLabel}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <DirectionBadge direction={impact.direction} />
-                    <SeverityBadge severity={impact.severity} />
+                <div className="space-y-3">
+                  {/* Card header */}
+                  <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/60">
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30 text-cyan-300">
+                      {domainLabel}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <DirectionBadge direction={impact.direction} />
+                      <SeverityBadge severity={impact.severity} />
+                    </div>
                   </div>
+
+                  {/* Explanation */}
+                  <p className="text-sm leading-relaxed text-slate-200 font-sans">
+                    {explanation}
+                  </p>
                 </div>
 
-                {/* Explanation */}
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
-                  {explanation}
-                </p>
+                <div className="space-y-3 pt-2">
+                  {/* Confidence bar */}
+                  <div>
+                    <div className="flex justify-between text-[10px] font-mono mb-1 text-slate-400">
+                      <span>VERIFICATION CONFIDENCE</span>
+                      <span className="text-cyan-300 font-bold">{confidencePct}%</span>
+                    </div>
+                    <div className="w-full h-1.5 rounded-full overflow-hidden bg-slate-800/80">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400"
+                        style={{ width: `${confidencePct}%` }}
+                      />
+                    </div>
+                  </div>
 
-                {/* Confidence bar */}
-                <div>
-                  <div className="flex justify-between text-[9px] font-mono-code mb-1" style={{ color: 'var(--color-text-dim)' }}>
-                    <span>CONFIDENCE</span>
-                    <span>{confidencePct}%</span>
-                  </div>
-                  <div className="w-full h-1 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--color-surface-4)' }}>
-                    <div
-                      className="h-full rounded-full"
-                      style={{ width: `${confidencePct}%`, backgroundColor: 'var(--color-accent)' }}
-                    />
-                  </div>
+                  {/* Event link */}
+                  {impact.eventId?._id && (
+                    <button
+                      onClick={() => navigate(`/event/${impact.eventId._id}`)}
+                      className="text-[11px] font-mono font-bold cursor-pointer text-cyan-400 hover:text-cyan-200 transition-colors flex items-center gap-1 pt-1"
+                    >
+                      <span>→ View Corroborated Source Event</span>
+                    </button>
+                  )}
                 </div>
-
-                {/* Event link */}
-                {impact.eventId?._id && (
-                  <button
-                    onClick={() => navigate(`/event/${impact.eventId._id}`)}
-                    className="text-[10px] font-mono-code font-bold cursor-pointer transition-colors"
-                    style={{ color: 'var(--color-accent)' }}
-                  >
-                    → View Source Event
-                  </button>
-                )}
               </div>
             );
           })}
@@ -236,20 +230,18 @@ export default function ImpactsPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="flex items-center gap-1.5 px-4 py-2 rounded text-xs font-mono-code font-bold cursor-pointer disabled:opacity-40 transition-colors"
-            style={{ backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold cursor-pointer disabled:opacity-40 transition-colors glass-control text-slate-300 hover:text-white"
           >
             <ChevronLeft size={14} />
             Previous
           </button>
-          <span className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
+          <span className="text-xs font-mono text-slate-400">
             {page} / {pagination.totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
             disabled={page === pagination.totalPages}
-            className="flex items-center gap-1.5 px-4 py-2 rounded text-xs font-mono-code font-bold cursor-pointer disabled:opacity-40 transition-colors"
-            style={{ backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-mono font-bold cursor-pointer disabled:opacity-40 transition-colors glass-control text-slate-300 hover:text-white"
           >
             Next
             <ChevronRight size={14} />
