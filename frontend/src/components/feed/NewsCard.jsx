@@ -87,26 +87,41 @@ export default function NewsCard({ event, onSelect }) {
 
       {/* Headline */}
       <h3
-        className="font-headline text-base font-semibold leading-snug line-clamp-2 transition-colors"
+        className="font-headline text-base font-semibold leading-snug line-clamp-2 transition-colors group-hover:text-white"
         style={{ color: 'var(--color-text-primary)' }}
       >
         {summary}
       </h3>
 
+      {/* Wire Source and Country Tag */}
+      <div className="flex items-center gap-2 text-[11px] font-mono-code flex-wrap">
+        <span className="font-semibold" style={{ color: 'var(--color-accent)' }}>
+          {event.primaryArticleId?.sourceId?.name || 'Wire Dispatch'}
+        </span>
+        {event.countries?.[0] && (
+          <>
+            <span style={{ color: 'var(--color-text-dim)' }}>•</span>
+            <span style={{ color: 'var(--color-text-muted)' }}>
+              {translateNewsText(event.countries[0], lang)}
+            </span>
+          </>
+        )}
+      </div>
+
       {/* Bottom row: severity dot + CTA */}
-      <div className="flex items-center justify-between gap-2 pt-1 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
+      <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
         <span className="flex items-center gap-1.5 text-[10px] font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
           <span
-            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+            className="w-2 h-2 rounded-full flex-shrink-0"
             style={{ backgroundColor: dotColor }}
           />
-          {event.severity || 'UNKNOWN'}
+          <span className="font-bold tracking-wider">{event.severity || 'UNKNOWN'}</span>
         </span>
         <span
-          className="text-[10px] font-mono-code font-bold flex items-center gap-1 transition-colors"
+          className="text-xs font-mono-code font-bold flex items-center gap-1 transition-colors group-hover:translate-x-0.5 duration-150"
           style={{ color: 'var(--color-accent)' }}
         >
-          Open Briefing →
+          Read Dossier →
         </span>
       </div>
     </div>
