@@ -231,24 +231,35 @@ export default function Home() {
           {/* ── LIVE INTELLIGENCE FEED ─────────────────────────────────────────── */}
           <div
             ref={newsFeedRef}
-            className="pt-6 border-t space-y-6"
-            style={{ borderColor: 'var(--color-border-subtle)' }}
+            className="pt-8 border-t space-y-6"
+            style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}
           >
-            {/* Feed header */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            {/* Multi-Theater Ingestion header */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-2">
               <div>
-                <h2 className="font-headline text-2xl sm:text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold tracking-widest uppercase border border-sky-500/30 bg-sky-500/10 text-sky-400">
+                    MULTI-THEATER INGESTION
+                  </span>
+                  <span className="text-[10px] font-mono-code text-[var(--color-text-dim)] uppercase tracking-wider hidden sm:inline">
+                    FILTER: {domain === 'ALL' ? 'ALL THEATERS' : domain} • SORT: CHRONOLOGICAL • STREAM ACTIVE
+                  </span>
+                </div>
+                <h2 className="font-headline text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: 'var(--color-text-primary)' }}>
                   {hasActiveFilters
                     ? t('search.resultsFound', { count: events.length, defaultValue: `Filtered Results (${events.length})` })
-                    : t('feed.allStories', { defaultValue: 'Live Intelligence Feed' })}
+                    : t('feed.allStories', { defaultValue: 'Live Intelligence Signals' })}
                 </h2>
-                <p className="text-xs font-mono-code mt-1" style={{ color: 'var(--color-text-dim)' }}>
-                  {t('feed.updatedContinuously', { defaultValue: 'Updated continuously via multi-source ingestion' })}
+                <p className="text-xs font-mono-code mt-1 text-[var(--color-text-dim)]">
+                  {t('feed.updatedContinuously', { defaultValue: 'Deterministic multi-source ingestion & causal analysis pipeline' })}
                 </p>
               </div>
-              <span className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
-                {events.length} {t('feed.stories', { defaultValue: 'SIGNALS' })}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-mono-code font-bold px-2.5 py-1 rounded border border-white/10 bg-slate-900/60 text-[var(--color-cyan)]">
+                  {events.length} {t('feed.stories', { defaultValue: 'SIGNALS LOADED' })}
+                </span>
+              </div>
             </div>
 
             {/* Sector Impact Radar */}

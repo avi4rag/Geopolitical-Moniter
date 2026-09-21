@@ -52,22 +52,28 @@ export default function NewsCard({ event, onSelect }) {
 
   const lang = i18n.language || 'en';
   const tMinus = timeAgo(event.createdAt);
-  const dotColor = SEV_DOT[event.severity] || '#c3c0ff';
+  const dotColor = SEV_DOT[event.severity] || '#38bdf8';
   const category = event.eventType?.replace(/_/g, ' ') || 'EVENT';
   const summary = translateNewsText(event.summary, lang);
   const imageUrl = getNewsEditorialImage(event);
   const sector = getSectorAccent(event);
 
+  // Derive confidence if present
+  const confidence = typeof event.confidenceScore === 'number'
+    ? `${Math.round(event.confidenceScore > 1 ? event.confidenceScore : event.confidenceScore * 100)}%`
+    : null;
+
   return (
     <article
-      className="glass-card rounded-xl p-4 flex flex-col justify-between gap-3 cursor-pointer group relative overflow-hidden focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
+      className="glass-card hover-lift rounded-xl p-4 flex flex-col justify-between gap-3.5 cursor-pointer group relative overflow-hidden border transition-all duration-200"
       onClick={() => onSelect(event)}
       onKeyDown={(e) => e.key === 'Enter' && onSelect(event)}
       role="button"
       tabIndex={0}
       aria-label={`Open briefing: ${event.summary}`}
       style={{
-        '--sector-color': sector.color,
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        backgroundColor: 'rgba(11, 16, 32, 0.70)',
       }}
     >
       {/* Subtle top sector glow line */}
@@ -79,26 +85,26 @@ export default function NewsCard({ event, onSelect }) {
       {/* Article Picture Thumbnail */}
       <div
         className="relative w-full h-44 rounded-lg overflow-hidden border"
-        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border-subtle)' }}
+        style={{ backgroundColor: '#070a12', borderColor: 'rgba(255,255,255,0.06)' }}
       >
         <img
           src={imageUrl}
           alt={summary}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           loading="lazy"
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/80 via-transparent to-[#020617]/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070a12] via-[#070a12]/30 to-transparent pointer-events-none" />
 
         {/* Sector / Category badge */}
         <div className="absolute top-2.5 left-2.5">
           <span
             className="text-[10px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded backdrop-blur-md shadow-sm border"
             style={{
-              backgroundColor: 'rgba(2,6,23,0.85)',
+              backgroundColor: 'rgba(7,10,18,0.85)',
               color: sector.color,
               borderColor: sector.border,
             }}
@@ -112,7 +118,7 @@ export default function NewsCard({ event, onSelect }) {
           <span
             className="text-[10px] font-mono-code px-2 py-0.5 rounded backdrop-blur-md shadow-sm border"
             style={{
-              backgroundColor: 'rgba(2,6,23,0.85)',
+              backgroundColor: 'rgba(7,10,18,0.85)',
               color: 'var(--color-text-secondary)',
               borderColor: 'rgba(255,255,255,0.08)',
             }}
@@ -120,6 +126,22 @@ export default function NewsCard({ event, onSelect }) {
             {tMinus}
           </span>
         </div>
+
+        {/* Confidence chip if genuine data exists */}
+        {confidence && (
+          <div className="absolute bottom-2 right-2">
+            <span
+              className="text-[9px] font-mono-code font-bold px-1.5 py-0.5 rounded backdrop-blur-md border"
+              style={{
+                backgroundColor: 'rgba(7,10,18,0.85)',
+                color: 'var(--color-cyan)',
+                borderColor: 'rgba(56,189,248,0.3)',
+              }}
+            >
+              CONF: {confidence}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Headline */}
@@ -132,7 +154,7 @@ export default function NewsCard({ event, onSelect }) {
 
       {/* Wire Source and Country Tag */}
       <div className="flex items-center gap-2 text-[11px] font-mono-code flex-wrap">
-        <span className="font-semibold tracking-tight" style={{ color: 'var(--color-accent)' }}>
+        <span className="font-semibold tracking-tight" style={{ color: 'var(--color-cyan)' }}>
           {event.primaryArticleId?.sourceId?.name || 'Wire Dispatch'}
         </span>
         {event.countries?.[0] && (
@@ -140,7 +162,7 @@ export default function NewsCard({ event, onSelect }) {
             <span style={{ color: 'var(--color-text-dim)' }}>•</span>
             <span
               className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold"
-              style={{ backgroundColor: 'var(--color-surface-4)', color: 'var(--color-text-secondary)' }}
+              style={{ backgroundColor: 'rgba(255,255,255,0.06)', color: 'var(--color-text-secondary)' }}
             >
               {translateNewsText(event.countries[0], lang)}
             </span>
@@ -151,7 +173,7 @@ export default function NewsCard({ event, onSelect }) {
       {/* Bottom row: severity dot + CTA */}
       <div
         className="flex items-center justify-between gap-2 pt-2.5 border-t"
-        style={{ borderColor: 'var(--color-border-subtle)' }}
+        style={{ borderColor: 'rgba(255,255,255,0.07)' }}
       >
         <span className="flex items-center gap-1.5 text-[10px] font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
           <span
@@ -164,10 +186,10 @@ export default function NewsCard({ event, onSelect }) {
           <span className="font-bold tracking-wider">{event.severity || 'UNKNOWN'}</span>
         </span>
         <span
-          className="text-xs font-mono-code font-bold flex items-center gap-1 transition-all duration-200 group-hover:text-white"
-          style={{ color: 'var(--color-accent)' }}
+          className="text-xs font-mono-code font-bold flex items-center gap-1 transition-all duration-200 group-hover:translate-x-0.5"
+          style={{ color: 'var(--color-coral)' }}
         >
-          <span>Read Dossier</span>
+          <span>READ DOSSIER</span>
           <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
         </span>
       </div>
