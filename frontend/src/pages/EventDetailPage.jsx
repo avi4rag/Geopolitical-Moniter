@@ -23,7 +23,7 @@ import DirectionBadge from '../components/common/DirectionBadge.jsx';
 import CredibilityBadge from '../components/common/CredibilityBadge.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { translateNewsText, translateNewsArray } from '../i18n/newsContentTranslations.js';
-import { getNewsEditorialImage } from '../lib/newsImages.js';
+import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../lib/newsImages.js';
 
 // ─── Event Intelligence Dossier — Full Viewport ────────────────────────────────
 // The main event detail view. Replaces the old centered overlay modal.
@@ -285,16 +285,20 @@ export default function EventDetailPage() {
               <img
                 src={imageUrl}
                 alt={eventData.summary}
-                className="w-full h-full object-cover opacity-80"
+                className="w-full h-full object-cover opacity-90"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
+                }}
               />
             </div>
             <figcaption
               className="text-[11px] font-mono-code px-3 pb-2"
               style={{ color: 'var(--color-text-dim)' }}
             >
-              {eventData.imageUrl
+              {eventData.imageUrl || eventData.primaryArticleId?.imageUrl
                 ? `SOURCE IMAGE — ${sourceName}`
-                : 'ILLUSTRATIVE IMAGE — No direct image available for this event'}
+                : 'ILLUSTRATIVE IMAGE — Category fallback photography'}
             </figcaption>
           </figure>
 

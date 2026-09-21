@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
+import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -21,7 +22,7 @@ const SEV_DOT = {
 };
 
 // ─── News Card — Dark Situation Room ─────────────────────────────────────────
-// Compact intelligence card for the 3-col feed grid.
+// Compact intelligence card for the 3-col feed grid with article photography.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function NewsCard({ event, onSelect }) {
@@ -33,10 +34,11 @@ export default function NewsCard({ event, onSelect }) {
   const dotColor = SEV_DOT[event.severity] || '#c3c0ff';
   const category = event.eventType?.replace(/_/g, ' ') || 'EVENT';
   const summary = translateNewsText(event.summary, lang);
+  const imageUrl = getNewsEditorialImage(event);
 
   return (
     <div
-      className="data-card card-shimmer rounded-lg p-5 flex flex-col justify-between gap-4 cursor-pointer group transition-colors"
+      className="data-card card-shimmer rounded-lg p-4 flex flex-col justify-between gap-3 cursor-pointer group transition-colors"
       style={{
         backgroundColor: 'var(--color-surface-2)',
         border: '1px solid var(--color-border)',
@@ -49,20 +51,38 @@ export default function NewsCard({ event, onSelect }) {
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
     >
-      {/* Top row: category + timestamp */}
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className="text-[10px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded"
-          style={{ backgroundColor: 'var(--color-surface-4)', color: 'var(--color-text-dim)' }}
-        >
-          {category}
-        </span>
-        <span
-          className="text-[10px] font-mono-code"
-          style={{ color: 'var(--color-text-dim)' }}
-        >
-          {tMinus}
-        </span>
+      {/* Article Picture Thumbnail */}
+      <div
+        className="relative w-full h-44 rounded-md overflow-hidden border"
+        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border-subtle)' }}
+      >
+        <img
+          src={imageUrl}
+          alt={summary}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/25 pointer-events-none" />
+        <div className="absolute top-2.5 left-2.5">
+          <span
+            className="text-[10px] font-mono-code font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm"
+            style={{ backgroundColor: 'rgba(2,6,23,0.85)', color: 'var(--color-text-dim)', border: '1px solid var(--color-border)' }}
+          >
+            {category}
+          </span>
+        </div>
+        <div className="absolute top-2.5 right-2.5">
+          <span
+            className="text-[10px] font-mono-code px-1.5 py-0.5 rounded shadow-sm"
+            style={{ backgroundColor: 'rgba(2,6,23,0.85)', color: 'var(--color-text-dim)' }}
+          >
+            {tMinus}
+          </span>
+        </div>
       </div>
 
       {/* Headline */}

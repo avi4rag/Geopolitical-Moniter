@@ -81,7 +81,7 @@ export async function listEvents(req, res, next) {
         .limit(limit)
         .populate({
           path: 'primaryArticleId',
-          select: 'title url excerpt publishedAt relevanceScore sourceId',
+          select: 'title url excerpt imageUrl publishedAt relevanceScore sourceId',
           populate: { path: 'sourceId', select: 'name domain reliabilityScore type' },
         })
         .lean(),
@@ -128,7 +128,7 @@ export async function getEvent(req, res, next) {
     const event = await Event.findById(id)
       .populate({
         path: 'primaryArticleId',
-        select: 'title url excerpt publishedAt sourceId',
+        select: 'title url excerpt imageUrl publishedAt sourceId',
         populate: { path: 'sourceId', select: 'name domain reliabilityScore type' },
       })
       .populate('articleIds', 'title url publishedAt sourceId')

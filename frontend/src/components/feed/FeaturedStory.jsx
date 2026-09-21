@@ -1,7 +1,7 @@
 import React from 'react';
 import { Clock, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getNewsEditorialImage } from '../../lib/newsImages.js';
+import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -33,7 +33,7 @@ export default function FeaturedStory({ event, onSelect }) {
   const imageUrl = getNewsEditorialImage(event);
   const sevColor = SEV_COLOR[event.severity] || '#c3c0ff';
   const ago = timeAgo(event.createdAt);
-  const isReal = !!(event.imageUrl);
+  const isReal = !!(event.imageUrl || event.primaryArticleId?.imageUrl);
 
   return (
     <div
@@ -51,7 +51,11 @@ export default function FeaturedStory({ event, onSelect }) {
           src={imageUrl}
           alt=""
           className="w-full h-full object-cover"
-          style={{ opacity: isReal ? 0.55 : 0.35, mixBlendMode: 'luminosity' }}
+          style={{ opacity: isReal ? 0.70 : 0.45 }}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
+          }}
         />
       </div>
 
