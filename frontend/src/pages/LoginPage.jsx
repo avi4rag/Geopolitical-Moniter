@@ -31,13 +31,17 @@ export default function LoginPage() {
     const params = new URLSearchParams(location.search);
     const errParam = params.get('error');
     if (errParam === 'GOOGLE_OAUTH_NOT_CONFIGURED') {
-      setOauthNotice('Google OAuth requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET configured in backend/.env. Please use email/password sign-in.');
+      setOauthNotice(
+        'Google OAuth requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET configured in the environment. Please use email/password sign-in or provide credentials.'
+      );
     } else if (errParam === 'OAUTH_CANCELLED') {
       setError('Google sign-in was cancelled.');
     } else if (errParam === 'INVALID_OAUTH_STATE') {
-      setError('Invalid OAuth state. Please try again.');
+      setError('OAuth security state verification failed or timed out. Please try again.');
+    } else if (errParam === 'TOKEN_EXCHANGE_FAILED' || errParam === 'OAUTH_PROCESSING_FAILED') {
+      setError('Could not complete Google authentication. Please try again or sign in with email/password.');
     } else if (errParam) {
-      setError(`Authentication error: ${errParam.replace(/_/g, ' ')}`);
+      setError(`Authentication notice: ${errParam.replace(/_/g, ' ')}`);
     }
   }, [location.search]);
 
@@ -56,8 +60,8 @@ export default function LoginPage() {
   };
 
   const handleGoogleOAuthRedirect = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || '/api/v1';
-    window.location.href = `${apiUrl}/auth/google`;
+    const base = (import.meta.env.VITE_API_URL || '/api/v1').replace(/\/+$/, '');
+    window.location.href = `${base}/auth/google`;
   };
 
   return (

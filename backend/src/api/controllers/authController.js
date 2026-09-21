@@ -76,6 +76,7 @@ export async function register(req, res, next) {
       success: true,
       data: {
         user: user.toJSON(),
+        token,
       },
       error: null,
     });
@@ -140,6 +141,7 @@ export async function login(req, res, next) {
       success: true,
       data: {
         user: user.toJSON(),
+        token,
       },
       error: null,
     });
@@ -199,14 +201,18 @@ export async function initiateGoogleAuth(req, res) {
       );
     }
 
-    // 1. Generate cryptographically random state parameter for CSRF protection
-    const state = crypto.randomBytes(32).toString('hex');
+    // 1. Generate cryptographically signed state parameter for CSRF protection
+    const nonce = crypto.randomBytes(16).toString('hex');
+    const timestamp = Date.now().toString();
+    const hmac = crypto.createHmac('sha256', env.jwtSecret).update(`${timestamp}.${nonce}`).digest('hex');
+    const state = `${timestamp}.${nonce}.${hmac}`;
 
     // 2. Store state parameter in a short-lived HTTP-only cookie (10 min expiry)
     res.cookie('oauth_state', state, {
       httpOnly: true,
       secure: env.isProduction,
       sameSite: env.isProduction ? 'none' : 'lax',
+      path: '/',
       maxAge: 10 * 60 * 1000,
     });
 
@@ -241,6 +247,7 @@ export async function handleGoogleCallback(req, res, next) {
       httpOnly: true,
       secure: env.isProduction,
       sameSite: env.isProduction ? 'none' : 'lax',
+      path: '/',
     });
 
     // Handle user cancellation or Google error
@@ -249,8 +256,24 @@ export async function handleGoogleCallback(req, res, next) {
       return res.redirect(`${env.frontendUrl}/login?error=OAUTH_CANCELLED`);
     }
 
-    // Verify OAuth state matches stored transaction state (CSRF mitigation)
-    if (!state || !storedState || state !== storedState) {
+    // Verify OAuth state matches stored transaction state or cryptographic HMAC signature (CSRF mitigation)
+    let isStateValid = false;
+    if (state && typeof state === 'string') {
+      const parts = state.split('.');
+      if (parts.length === 3) {
+        const [timestampStr, nonce, sig] = parts;
+        const expectedSig = crypto.createHmac('sha256', env.jwtSecret).update(`${timestampStr}.${nonce}`).digest('hex');
+        const age = Date.now() - parseInt(timestampStr, 10);
+        if (sig === expectedSig && !isNaN(age) && age >= 0 && age <= 15 * 60 * 1000) {
+          isStateValid = true;
+        }
+      }
+      if (storedState) {
+        isStateValid = isStateValid && (storedState === state);
+      }
+    }
+
+    if (!isStateValid) {
       logger.warn('Google OAuth state mismatch detected');
       return res.redirect(`${env.frontendUrl}/login?error=INVALID_OAUTH_STATE`);
     }
@@ -314,8 +337,8 @@ export async function handleGoogleCallback(req, res, next) {
     const token = signToken(user._id);
     setAuthCookie(res, token);
 
-    // Redirect back to frontend
-    res.redirect(`${env.frontendUrl}/?auth=google_success`);
+    // Redirect back to frontend with session token for cross-origin client bootstrap
+    res.redirect(`${env.frontendUrl}/?token=${encodeURIComponent(token)}&auth=google_success`);
   } catch (err) {
     logger.error({ err }, 'Google OAuth callback processing failed');
     res.redirect(`${env.frontendUrl}/login?error=OAUTH_PROCESSING_FAILED`);
@@ -393,6 +416,7 @@ export async function googleAuth(req, res, next) {
       success: true,
       data: {
         user: user.toJSON(),
+        token,
       },
       error: null,
     });

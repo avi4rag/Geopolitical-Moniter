@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [bookmarks, setBookmarks] = useState([]);
 
-  // Check current user session from HTTP-only cookie on mount
+  // Check current user session from HTTP-only cookie or Bearer token on mount
   const checkAuth = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -23,10 +23,12 @@ export function AuthProvider({ children }) {
       } else {
         setUser(null);
         setBookmarks([]);
+        localStorage.removeItem('auth_token');
       }
     } catch (err) {
       setUser(null);
       setBookmarks([]);
+      localStorage.removeItem('auth_token');
     } finally {
       setIsLoading(false);
     }
@@ -34,6 +36,23 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let isMounted = true;
+
+    // Check if OAuth callback redirected with a session bootstrap token
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tokenParam = params.get('token');
+        if (tokenParam) {
+          localStorage.setItem('auth_token', tokenParam);
+          params.delete('token');
+          const cleanSearch = params.toString() ? `?${params.toString()}` : '';
+          window.history.replaceState({}, document.title, window.location.pathname + cleanSearch);
+        }
+      } catch {
+        // Ignore URL parsing errors
+      }
+    }
+
     apiClient
       .get('/auth/me')
       .then((res) => {
@@ -44,6 +63,7 @@ export function AuthProvider({ children }) {
           } else {
             setUser(null);
             setBookmarks([]);
+            localStorage.removeItem('auth_token');
           }
         }
       })
@@ -51,6 +71,7 @@ export function AuthProvider({ children }) {
         if (isMounted) {
           setUser(null);
           setBookmarks([]);
+          localStorage.removeItem('auth_token');
         }
       })
       .finally(() => {
@@ -65,6 +86,9 @@ export function AuthProvider({ children }) {
   // Login handler
   const login = async (email, password) => {
     const res = await apiClient.post('/auth/login', { email, password });
+    if (res.data?.token) {
+      localStorage.setItem('auth_token', res.data.token);
+    }
     if (res.data?.user) {
       setUser(res.data.user);
       setBookmarks(res.data.user.bookmarks || []);
@@ -80,6 +104,9 @@ export function AuthProvider({ children }) {
       password,
       confirmPassword,
     });
+    if (res.data?.token) {
+      localStorage.setItem('auth_token', res.data.token);
+    }
     if (res.data?.user) {
       setUser(res.data.user);
       setBookmarks(res.data.user.bookmarks || []);
@@ -90,6 +117,9 @@ export function AuthProvider({ children }) {
   // Google OAuth handler
   const googleAuth = async (googlePayload) => {
     const res = await apiClient.post('/auth/google', googlePayload);
+    if (res.data?.token) {
+      localStorage.setItem('auth_token', res.data.token);
+    }
     if (res.data?.user) {
       setUser(res.data.user);
       setBookmarks(res.data.user.bookmarks || []);
@@ -101,7 +131,10 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     try {
       await apiClient.post('/auth/logout');
+    } catch {
+      // Ignore logout request errors
     } finally {
+      localStorage.removeItem('auth_token');
       setUser(null);
       setBookmarks([]);
     }

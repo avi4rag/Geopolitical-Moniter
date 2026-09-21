@@ -15,6 +15,23 @@ const apiClient = axios.create({
   },
 });
 
+// ─── Request Interceptor ─────────────────────────────────────────────────────
+// Automatically attaches Bearer token from localStorage for cross-origin setups
+apiClient.interceptors.request.use(
+  (config) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // Storage access blocked or unavailable
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // ─── Response Interceptor ────────────────────────────────────────────────────
 // Unwraps the standard { success, data, error } envelope.
 // Throws a normalized error if success is false.
