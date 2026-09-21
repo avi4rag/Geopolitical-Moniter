@@ -31,6 +31,7 @@ export default function FeaturedStory({ event, onSelect }) {
   const { i18n } = useTranslation();
   if (!event) return null;
 
+  const lang = i18n.language || 'en';
   const imageUrl = getNewsEditorialImage(event);
   const sevColor = SEV_COLOR[event.severity] || '#c3c0ff';
   const ago = timeAgo(event.createdAt);
