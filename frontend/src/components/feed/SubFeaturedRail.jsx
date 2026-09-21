@@ -1,5 +1,7 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -14,7 +16,10 @@ function timeAgo(dateStr) {
 // ─── Sub-Featured Rail — 3 mini cards below the hero ──────────────────────────
 
 export default function SubFeaturedRail({ events, onSelect }) {
+  const { i18n } = useTranslation();
   if (!events || events.length === 0) return null;
+
+  const lang = i18n.language || 'en';
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -67,7 +72,7 @@ export default function SubFeaturedRail({ events, onSelect }) {
               className="font-headline text-sm font-semibold leading-snug line-clamp-3 flex-1 group-hover:text-white transition-colors"
               style={{ color: 'var(--color-text-primary)' }}
             >
-              {event.summary}
+              {translateNewsText(event.summary, lang)}
             </h3>
 
             {/* Footer */}
@@ -81,7 +86,7 @@ export default function SubFeaturedRail({ events, onSelect }) {
                     color: 'var(--color-text-dim)',
                   }}
                 >
-                  {c}
+                  {translateNewsText(c, lang)}
                 </span>
               ))}
               <span className="text-[9px] font-mono-code ml-auto" style={{ color: 'var(--color-text-dim)' }}>
