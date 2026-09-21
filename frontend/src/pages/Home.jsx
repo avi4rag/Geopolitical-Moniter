@@ -10,15 +10,16 @@ import FeedFilters from '../components/feed/FeedFilters.jsx';
 import NewsCard from '../components/feed/NewsCard.jsx';
 import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
 import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
+import ActiveEventsTicker from '../components/feed/ActiveEventsTicker.jsx';
+import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
 // ─── Situation Room Intelligence Feed — Home Page ─────────────────────────────
 // Dark feed layout:
 // 1. Hero featured event + 3-column sub-rail (8-col on desktop)
 // 2. Trending signals sidebar (4-col on desktop)
-// 3. Live intelligence feed with filters + 3-col card grid + load-more
-//
-// NAVIGATION: clicking any event card navigates to /event/:id (full dossier)
-// — no modal overlay. EventDetailModal is removed from this page.
+// 3. Real-time active events ticker
+// 4. Live intelligence feed with filters + 3-col card grid + load-more
+// 5. In-place glass dossier modal overlay on card click with route pushState
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Home() {
@@ -42,12 +43,34 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [domainStats, setDomainStats] = useState([]);
 
+  // Dossier modal state
+  const [selectedEventId, setSelectedEventId] = useState(null);
+
   const newsFeedRef = useRef(null);
 
-  // Navigate to the full-screen event dossier on any card click
+  // Open in-place glass dossier modal on card click with URL synchronization
   const handleEventSelect = useCallback((event) => {
-    navigate(`/event/${event._id}`);
-  }, [navigate]);
+    const id = event?._id || event;
+    if (id) {
+      setSelectedEventId(id);
+      window.history.pushState({ modalOpen: true, eventId: id }, '', `/event/${id}`);
+    }
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setSelectedEventId(null);
+    window.history.pushState(null, '', '/');
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = (e) => {
+      if (selectedEventId) {
+        setSelectedEventId(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedEventId]);
 
   const fetchFeed = useCallback(async (targetPage = 1, append = false) => {
     try {
@@ -196,10 +219,18 @@ export default function Home() {
             </div>
           )}
 
+          {/* ── REAL-TIME ACTIVE EVENTS TICKER ──────────────────────────────────── */}
+          {events.length > 0 && (
+            <ActiveEventsTicker
+              events={events}
+              onSelectEvent={handleEventSelect}
+            />
+          )}
+
           {/* ── LIVE INTELLIGENCE FEED ─────────────────────────────────────────── */}
           <div
             ref={newsFeedRef}
-            className="pt-8 border-t space-y-6"
+            className="pt-6 border-t space-y-6"
             style={{ borderColor: 'var(--color-border-subtle)' }}
           >
             {/* Feed header */}
@@ -305,6 +336,14 @@ export default function Home() {
             )}
           </div>
         </>
+      )}
+
+      {/* ── IN-PLACE INTELLIGENCE DOSSIER MODAL ─────────────────────────────── */}
+      {selectedEventId && (
+        <EventDetailModal
+          eventId={selectedEventId}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );
