@@ -2,6 +2,7 @@ import React from 'react';
 import { Clock, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -105,7 +106,7 @@ export default function FeaturedStory({ event, onSelect }) {
           className="font-headline text-2xl sm:text-3xl md:text-4xl font-bold leading-tight mb-4 max-w-3xl group-hover:text-white transition-colors"
           style={{ color: 'var(--color-text-primary)' }}
         >
-          {event.summary}
+          {translateNewsText(event.summary, lang)}
         </h2>
 
         {/* Footer row */}
@@ -121,7 +122,7 @@ export default function FeaturedStory({ event, onSelect }) {
                   border: '1px solid rgba(255,255,255,0.10)',
                 }}
               >
-                {c}
+                {translateNewsText(c, lang)}
               </span>
             ))}
             <span
