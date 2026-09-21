@@ -61,10 +61,10 @@ export default function SearchPage() {
   const Pill = ({ value, active, onClick }) => (
     <button
       onClick={onClick}
-      className="px-2.5 py-1 rounded text-[10px] font-mono-code font-bold uppercase whitespace-nowrap cursor-pointer transition-colors"
+      className="px-2.5 py-1 rounded-md text-[10px] font-mono-code font-bold uppercase whitespace-nowrap cursor-pointer transition-all duration-150"
       style={active
-        ? { backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }
-        : { backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-dim)' }
+        ? { backgroundColor: 'rgba(195, 192, 255, 0.15)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', boxShadow: '0 0 10px rgba(195,192,255,0.25)' }
+        : { backgroundColor: 'rgba(21, 27, 45, 0.60)', border: '1px solid rgba(255, 255, 255, 0.08)', color: 'var(--color-text-dim)' }
       }
     >
       {value}
@@ -72,43 +72,45 @@ export default function SearchPage() {
   );
 
   return (
-    <div className="space-y-8 w-full">
+    <div className="space-y-8 w-full animate-fadeIn pb-16">
       {/* Header */}
       <div className="border-b pb-5" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1.5">
           <div className="h-3 w-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }} />
           <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest" style={{ color: 'var(--color-accent)' }}>
-            {t('search.tagline', { defaultValue: 'INTELLIGENCE ARCHIVE' })}
+            {t('search.tagline', { defaultValue: 'GLOBAL ARCHIVE QUERY' })}
           </span>
         </div>
         <h1 className="font-headline text-2xl sm:text-4xl font-bold mt-1" style={{ color: 'var(--color-text-primary)' }}>
           {t('search.title', { defaultValue: 'Intelligence Search' })}
         </h1>
-        <p className="text-xs sm:text-sm mt-1 max-w-3xl" style={{ color: 'var(--color-text-muted)' }}>
-          {t('search.subtitle', { defaultValue: 'Search across events, countries, and domains.' })}
+        <p className="text-xs sm:text-sm mt-1.5 max-w-3xl" style={{ color: 'var(--color-text-muted)' }}>
+          {t('search.subtitle', { defaultValue: 'Real-time multi-vector search across corroborated events, countries, and systemic impact domains.' })}
         </p>
       </div>
 
       {/* Search controls */}
-      <div className="p-5 rounded-lg border space-y-5" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
+      <div className="glass-panel p-5 sm:p-6 rounded-xl border space-y-5 shadow-lg" style={{ borderColor: 'var(--color-border)' }}>
         {/* Main search input */}
         <div className="relative">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-accent)' }} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('search.placeholder', { defaultValue: 'Search events, countries, entities...' })}
-            className="w-full pl-11 pr-10 py-3 rounded font-headline text-base"
+            placeholder={t('search.placeholder', { defaultValue: 'Search by keyword, country, entity, treaty, conflict...' })}
+            className="w-full pl-12 pr-10 py-3 rounded-lg font-headline text-base glass-control focus:outline-none transition-all"
             style={{
-              backgroundColor: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border)',
               color: 'var(--color-text-primary)',
             }}
             autoFocus
           />
           {query && (
-            <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer" style={{ color: 'var(--color-text-dim)' }}>
+            <button
+              onClick={() => setQuery('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--color-text-dim)] hover:text-white cursor-pointer p-1"
+              aria-label="Clear query"
+            >
               <X size={16} />
             </button>
           )}
@@ -116,16 +118,18 @@ export default function SearchPage() {
 
         {/* Country chips */}
         <div>
-          <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-dim)' }}>Quick Country Filter</div>
+          <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2.5 text-[var(--color-text-dim)]">
+            Active Geopolitical Entities
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {POPULAR_COUNTRIES.map((c) => (
               <button
                 key={c}
                 onClick={() => setCountry(country === c ? '' : c)}
-                className="px-2.5 py-1 rounded text-[10px] font-mono-code cursor-pointer transition-colors"
+                className="px-2.5 py-1 rounded-md text-[10px] font-mono-code font-bold cursor-pointer transition-all duration-150"
                 style={country === c
-                  ? { backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }
-                  : { backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-dim)' }
+                  ? { backgroundColor: 'rgba(195, 192, 255, 0.20)', border: '1px solid var(--color-accent)', color: 'var(--color-accent)', boxShadow: '0 0 10px rgba(195,192,255,0.25)' }
+                  : { backgroundColor: 'rgba(21, 27, 45, 0.50)', border: '1px solid rgba(255, 255, 255, 0.08)', color: 'var(--color-text-secondary)' }
                 }
               >
                 {c}
@@ -135,9 +139,9 @@ export default function SearchPage() {
         </div>
 
         {/* Facet pills row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
           <div>
-            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-dim)' }}>Event Type</div>
+            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2 text-[var(--color-text-dim)]">Event Type</div>
             <div className="flex flex-wrap gap-1.5">
               {EVENT_TYPES.slice(0, 6).map((et) => (
                 <Pill key={et} value={et.replace(/_/g, ' ')} active={eventType === et} onClick={() => setEventType(et)} />
@@ -145,7 +149,7 @@ export default function SearchPage() {
             </div>
           </div>
           <div>
-            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-dim)' }}>Sector</div>
+            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2 text-[var(--color-text-dim)]">Sector</div>
             <div className="flex flex-wrap gap-1.5">
               {SECTORS.map((s) => (
                 <Pill key={s} value={s} active={sector === s} onClick={() => setSector(s)} />
@@ -153,7 +157,7 @@ export default function SearchPage() {
             </div>
           </div>
           <div>
-            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-dim)' }}>Severity</div>
+            <div className="text-[9px] font-mono-code font-bold uppercase tracking-widest mb-2 text-[var(--color-text-dim)]">Severity</div>
             <div className="flex flex-wrap gap-1.5">
               {SEVERITIES.map((sv) => (
                 <Pill key={sv} value={sv} active={severity === sv} onClick={() => setSeverity(sv)} />
@@ -163,38 +167,54 @@ export default function SearchPage() {
         </div>
 
         {hasActive && (
-          <button onClick={handleReset} className="text-xs font-mono-code font-bold cursor-pointer flex items-center gap-1" style={{ color: '#e11d48' }}>
-            <X size={12} /> Reset All Filters
-          </button>
+          <div className="pt-2 border-t flex justify-end" style={{ borderColor: 'var(--color-border-subtle)' }}>
+            <button
+              onClick={handleReset}
+              className="text-xs font-mono-code font-bold cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all"
+              style={{
+                color: '#f43f5e',
+                border: '1px solid rgba(244,63,94,0.30)',
+                backgroundColor: 'rgba(244,63,94,0.10)',
+              }}
+            >
+              <X size={13} /> Reset All Filters
+            </button>
+          </div>
         )}
       </div>
 
       {/* Results */}
       <div className="space-y-4">
         {!isLoading && results.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Globe size={14} style={{ color: 'var(--color-accent)' }} />
-            <span className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
-              {totalCount} {t('search.resultsFound', { defaultValue: 'events found' })}
-            </span>
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <Globe size={14} style={{ color: 'var(--color-accent)' }} />
+              <span className="text-xs font-mono-code tracking-wide" style={{ color: 'var(--color-text-secondary)' }}>
+                <strong className="text-white">{totalCount}</strong> {t('search.resultsFound', { defaultValue: 'intelligence dispatches matched' })}
+              </span>
+            </div>
           </div>
         )}
 
         {isLoading ? (
           <FeedSkeleton count={6} />
         ) : error ? (
-          <div className="p-10 rounded-lg border text-center space-y-3" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
+          <div className="glass-panel p-10 rounded-xl border text-center space-y-3" style={{ borderColor: 'var(--color-border)' }}>
             <AlertCircle size={28} style={{ color: 'var(--color-critical)', margin: '0 auto' }} />
             <p className="text-sm font-mono-code" style={{ color: 'var(--color-text-muted)' }}>{error}</p>
-            <button onClick={performSearch} className="inline-flex items-center gap-2 px-4 py-2 rounded text-xs font-mono-code font-bold cursor-pointer" style={{ backgroundColor: 'var(--color-surface-4)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>
-              <RefreshCw size={12} /> Retry
+            <button
+              onClick={performSearch}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors"
+              style={{ backgroundColor: 'var(--color-surface-4)', border: '1px solid var(--color-border)', color: 'var(--color-text-primary)' }}
+            >
+              <RefreshCw size={12} /> Retry Search
             </button>
           </div>
         ) : results.length === 0 ? (
-          <div className="p-14 rounded-lg border text-center space-y-2" style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}>
+          <div className="glass-panel p-14 rounded-xl border text-center space-y-2" style={{ borderColor: 'var(--color-border)' }}>
             <Search size={28} style={{ color: 'var(--color-text-dim)', margin: '0 auto' }} />
             <p className="text-sm font-mono-code" style={{ color: 'var(--color-text-muted)' }}>
-              {hasActive ? t('search.noResults', { defaultValue: 'No events match your search' }) : t('search.startSearch', { defaultValue: 'Type a query to search intelligence events' })}
+              {hasActive ? t('search.noResults', { defaultValue: 'No intelligence events match the specified criteria' }) : t('search.startSearch', { defaultValue: 'Type a query above to search intelligence events' })}
             </p>
           </div>
         ) : (

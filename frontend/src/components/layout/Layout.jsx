@@ -24,57 +24,83 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* Dark editorial footer */}
-      <footer
-        className="w-full border-t py-8 px-4 sm:px-6 lg:px-8 mt-auto"
-        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
-      >
-        <div
-          className="max-w-[1400px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}
-        >
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <div
-              className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: 'var(--color-surface-4)' }}
-            >
-              <Globe size={13} style={{ color: 'var(--color-accent)' }} />
+      {/* Dark editorial footer with calm atmospheric gradient */}
+      <footer className="atmosphere-footer border-t border-slate-800/80 py-12 px-4 sm:px-6 lg:px-8 mt-auto">
+        <div className="max-w-[1400px] mx-auto space-y-8">
+          {/* Top row: Brand + Mission + Status Telemetry */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pb-8 border-b border-slate-800/60">
+            {/* Brand & Mission Statement (6 cols) */}
+            <div className="md:col-span-6 space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                  <Globe size={15} />
+                </div>
+                <span className="font-mono font-bold text-sm text-slate-100 tracking-wider uppercase">
+                  GeoMonitor <span className="text-cyan-400">Intel</span>
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+                Automated, multi-source geopolitical signal aggregation, structured impact analysis, and systemic ripple intelligence for researchers, analysts, and decision-makers.
+              </p>
             </div>
-            <div>
-              <span className="font-bold font-mono-code tracking-tight" style={{ color: 'var(--color-text-secondary)' }}>
-                GeoMonitor
-              </span>
-              <span className="ml-2" style={{ color: 'var(--color-text-dim)' }}>
-                © {new Date().getFullYear()} Real-Time Geopolitical Intelligence
-              </span>
+
+            {/* Quick Links (3 cols) */}
+            <div className="md:col-span-3 space-y-2">
+              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-300">
+                Intelligence Consoles
+              </div>
+              <ul className="space-y-1.5 text-xs font-mono text-slate-400">
+                <li>
+                  <Link to="/" className="hover:text-cyan-300 transition-colors">
+                    Live Situation Feed
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/impacts" className="hover:text-cyan-300 transition-colors">
+                    {t('nav.domainImpacts', { defaultValue: 'Domain Impacts' })}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/sources" className="hover:text-cyan-300 transition-colors">
+                    {t('nav.sources', { defaultValue: 'Wirefeed Sources' })}
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/stats" className="hover:text-cyan-300 transition-colors">
+                    {t('nav.analytics', { defaultValue: 'Risk Analytics' })}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Telemetry Status (3 cols) */}
+            <div className="md:col-span-3 space-y-3">
+              <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-300">
+                Network Status
+              </div>
+              <div className="p-3 rounded-xl glass-panel space-y-2">
+                <div className="flex items-center gap-2 text-[11px] font-mono text-emerald-400">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>ALL SYSTEMS OPERATIONAL</span>
+                </div>
+                <div className="text-[10px] font-mono text-slate-400 space-y-0.5">
+                  <div>140+ accredited sources</div>
+                  <div>Deterministic scoring active</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Status + Nav links */}
-          <div className="flex items-center gap-4 flex-wrap justify-center font-mono-code">
-            <span
-              className="inline-flex items-center gap-1.5 font-bold tracking-wider uppercase"
-              style={{ color: 'var(--color-stable)', fontSize: '0.65rem' }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ backgroundColor: 'var(--color-stable)' }}
-              />
-              LIVE INGESTION ACTIVE
-            </span>
-            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
-            <Link to="/impacts" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
-              {t('nav.domainImpacts')}
-            </Link>
-            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
-            <Link to="/sources" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
-              {t('nav.sources')}
-            </Link>
-            <span style={{ color: 'var(--color-border-muted)' }}>•</span>
-            <Link to="/stats" className="transition-colors hover:text-white" style={{ color: 'var(--color-text-muted)' }}>
-              {t('nav.analytics')}
-            </Link>
+          {/* Bottom row: Legal & copyright */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-slate-500">
+            <div>
+              © {new Date().getFullYear()} GeoMonitor Platform. Unbiased, Automated Intelligence.
+            </div>
+            <div className="flex items-center gap-3">
+              <span>LATENCY: &lt; 450MS</span>
+              <span>•</span>
+              <span>VERIFICATION LEVEL: 3</span>
+            </div>
           </div>
         </div>
       </footer>

@@ -203,11 +203,146 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* ─── Fade-in animation ──────────────────────────────────────────────────── */
+/* ─── Fade-in & Dossier Entrance Animations ──────────────────────────────── */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fadeIn {
-  animation: fadeIn 0.25s ease-out forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes dossierOpen {
+  0% {
+    opacity: 0;
+    transform: scale(0.98) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-dossierOpen {
+  animation: dossierOpen 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ─── Radar & Signal Keyframes ───────────────────────────────────────────── */
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-radarSweep {
+  animation: radarSweep 10s linear infinite;
+}
+
+@keyframes radarPing {
+  0%   { transform: scale(0.85); opacity: 0.8; }
+  50%  { transform: scale(1.15); opacity: 0.2; }
+  100% { transform: scale(0.85); opacity: 0.8; }
+}
+.animate-radarPing {
+  animation: radarPing 3.5s ease-in-out infinite;
+}
+
+@keyframes signalPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.92); }
+}
+.animate-signalPulse {
+  animation: signalPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ─── Controlled Glass / Transparency System ─────────────────────────────── */
+
+/* Standard translucent dark panel */
+.glass-panel {
+  background: rgba(12, 19, 36, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.40);
+}
+
+/* Interactive floating controls & search */
+.glass-control {
+  background: rgba(21, 27, 45, 0.68);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-control:hover,
+.glass-control:focus-within {
+  background: rgba(30, 38, 62, 0.85);
+  border-color: rgba(195, 192, 255, 0.30);
+  box-shadow: 0 0 15px rgba(195, 192, 255, 0.08);
+}
+
+/* Deep dossier modal / detail panel */
+.glass-dossier {
+  background: rgba(7, 13, 31, 0.90);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 40px rgba(7, 13, 31, 0.5);
+}
+
+/* Ticker glass strip */
+.glass-ticker {
+  background: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Editorial intelligence card with subtle elevation */
+.glass-card {
+  background: rgba(15, 23, 42, 0.70);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  background: rgba(21, 31, 56, 0.82);
+  border-color: rgba(195, 192, 255, 0.28);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), 0 0 20px rgba(195, 192, 255, 0.06);
+}
+
+/* Atmospheric section backdrop energy fields */
+.atmosphere-hero {
+  background: radial-gradient(circle at 80% 20%, rgba(225, 29, 72, 0.08) 0%, transparent 60%),
+              radial-gradient(circle at 20% 80%, rgba(30, 58, 138, 0.12) 0%, transparent 70%);
+}
+
+.atmosphere-feed {
+  background: radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.04) 0%, transparent 50%),
+              radial-gradient(circle at 85% 60%, rgba(99, 102, 241, 0.05) 0%, transparent 60%);
+}
+
+.atmosphere-methodology {
+  background: radial-gradient(circle at 30% 50%, rgba(16, 185, 129, 0.07) 0%, transparent 60%),
+              radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 50%);
+}
+
+.atmosphere-footer {
+  background: radial-gradient(circle at 50% 100%, rgba(15, 118, 110, 0.08) 0%, transparent 70%);
+}
+
+/* ─── Accessibility: Reduced Motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

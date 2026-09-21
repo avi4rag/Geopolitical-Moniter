@@ -26,41 +26,35 @@ export default function SubFeaturedRail({ events, onSelect }) {
       {events.slice(0, 3).map((event) => {
         const imageUrl = getNewsEditorialImage(event);
         return (
-          <div
+          <article
             key={event._id}
-            className="rounded-lg p-3 cursor-pointer group transition-colors border flex flex-col gap-2.5"
-            style={{
-              backgroundColor: 'var(--color-surface-2)',
-              borderColor: 'var(--color-border)',
-            }}
+            className="glass-card rounded-xl p-3 cursor-pointer group flex flex-col gap-2.5 relative overflow-hidden"
             onClick={() => onSelect(event)}
             onKeyDown={(e) => e.key === 'Enter' && onSelect(event)}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
             role="button"
             tabIndex={0}
             aria-label={`Open: ${event.summary}`}
           >
             {/* Image Thumbnail */}
             <div
-              className="relative w-full h-28 rounded overflow-hidden border"
+              className="relative w-full h-28 rounded-lg overflow-hidden border"
               style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border-subtle)' }}
             >
               <img
                 src={imageUrl}
                 alt={event.summary}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                 loading="lazy"
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
                 }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/70 via-transparent to-transparent pointer-events-none" />
               <div className="absolute top-2 left-2">
                 <span
-                  className="text-[9px] font-mono-code font-bold uppercase tracking-widest px-1.5 py-0.5 rounded shadow-sm"
-                  style={{ backgroundColor: 'rgba(2,6,23,0.85)', color: 'var(--color-accent)', border: '1px solid var(--color-border)' }}
+                  className="text-[9px] font-mono-code font-bold uppercase tracking-widest px-1.5 py-0.5 rounded backdrop-blur-md shadow-sm border"
+                  style={{ backgroundColor: 'rgba(2,6,23,0.85)', color: 'var(--color-accent)', borderColor: 'rgba(195,192,255,0.20)' }}
                 >
                   {event.eventType?.replace(/_/g, ' ') || 'EVENT'}
                 </span>
@@ -69,18 +63,18 @@ export default function SubFeaturedRail({ events, onSelect }) {
 
             {/* Headline */}
             <h3
-              className="font-headline text-sm font-semibold leading-snug line-clamp-3 flex-1 group-hover:text-white transition-colors"
+              className="font-headline text-sm font-semibold leading-snug line-clamp-3 flex-1 group-hover:text-white transition-colors duration-200"
               style={{ color: 'var(--color-text-primary)' }}
             >
               {translateNewsText(event.summary, lang)}
             </h3>
 
             {/* Footer */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
+            <div className="flex flex-wrap items-center gap-2 pt-1.5 border-t" style={{ borderColor: 'var(--color-border-subtle)' }}>
               {(event.countries || []).slice(0, 1).map((c) => (
                 <span
                   key={c}
-                  className="text-[9px] font-mono-code px-1.5 py-0.5 rounded"
+                  className="text-[9px] font-mono-code font-bold uppercase px-1.5 py-0.5 rounded"
                   style={{
                     backgroundColor: 'var(--color-surface-4)',
                     color: 'var(--color-text-dim)',
@@ -93,7 +87,7 @@ export default function SubFeaturedRail({ events, onSelect }) {
                 {timeAgo(event.createdAt)}
               </span>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>
