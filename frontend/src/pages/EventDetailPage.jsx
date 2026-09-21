@@ -70,9 +70,19 @@ export default function EventDetailPage() {
     setIsLoading(true);
     setError(null);
 
-    apiClient
-      .get(`/events/${id}`)
-      .then((res) => { if (isMounted) setEventData(res.data); })
+    Promise.all([
+      apiClient.get(`/events/${id}`),
+      apiClient.get(`/events/${id}/impacts`).catch(() => ({ data: [] })),
+    ])
+      .then(([eventRes, impactsRes]) => {
+        if (isMounted) {
+          const event = eventRes.data || {};
+          const impacts = (event.impacts && event.impacts.length > 0)
+            ? event.impacts
+            : (impactsRes.data || []);
+          setEventData({ ...event, impacts });
+        }
+      })
       .catch((err) => { if (isMounted) setError(err.message || 'Failed to load event'); })
       .finally(() => { if (isMounted) setIsLoading(false); });
 
@@ -503,13 +513,18 @@ export default function EventDetailPage() {
       </div>
 
       {/* ── FULL-WIDTH SECTOR IMPACT ANALYSIS ────────────────────────────────── */}
-      {eventData.impacts && eventData.impacts.length > 0 && (
-        <div className="space-y-4 border-t pt-8" style={{ borderColor: 'var(--color-border-subtle)' }}>
+      <div className="space-y-4 border-t pt-8" style={{ borderColor: 'var(--color-border-subtle)' }}>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <h2 className="font-headline text-xl font-bold flex items-center gap-2" style={{ color: 'var(--color-text-secondary)' }}>
             <ShieldCheck size={18} style={{ color: 'var(--color-accent)' }} />
             {t('eventDetail.domainImpacts', { defaultValue: 'Sector Impact Analysis' })}
           </h2>
+          <span className="text-[11px] font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
+            {(eventData.impacts?.length || 0)} EVALUATED SECTORS
+          </span>
+        </div>
 
+        {eventData.impacts && eventData.impacts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {eventData.impacts.map((impact) => {
               const domainLabel = t(`domains.${impact.domain}`, { defaultValue: impact.domain });
@@ -557,8 +572,21 @@ export default function EventDetailPage() {
               );
             })}
           </div>
-        </div>
-      )}
+        ) : (
+          <div
+            className="p-6 rounded-lg border text-center space-y-2"
+            style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}
+          >
+            <ShieldCheck size={28} className="mx-auto" style={{ color: 'var(--color-text-dim)' }} />
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+              {t('eventDetail.noImpacts', { defaultValue: 'No domain impacts assessed for this event yet.' })}
+            </p>
+            <p className="text-xs font-mono-code max-w-md mx-auto" style={{ color: 'var(--color-text-dim)' }}>
+              Causal transmission engine evaluates impact rules across Energy, Trade, Tech, and Macroeconomic sectors as new reports arrive.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

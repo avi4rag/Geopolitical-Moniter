@@ -9,6 +9,7 @@ import TrendingSidebar from '../components/feed/TrendingSidebar.jsx';
 import FeedFilters from '../components/feed/FeedFilters.jsx';
 import NewsCard from '../components/feed/NewsCard.jsx';
 import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
+import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
 
 // ─── Situation Room Intelligence Feed — Home Page ─────────────────────────────
 // Dark feed layout:
@@ -39,6 +40,7 @@ export default function Home() {
   const [domain, setDomain] = useState('ALL');
   const [severity, setSeverity] = useState('ALL');
   const [page, setPage] = useState(1);
+  const [domainStats, setDomainStats] = useState([]);
 
   const newsFeedRef = useRef(null);
 
@@ -102,6 +104,14 @@ export default function Home() {
     setPage(1);
     fetchFeed(1, false);
   }, [fetchFeed]);
+
+  useEffect(() => {
+    apiClient.get('/stats/domains')
+      .then((res) => {
+        if (res.data) setDomainStats(res.data);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLoadMore = () => {
     if (page < pagination.totalPages && !isLoadingMore) {
@@ -208,6 +218,13 @@ export default function Home() {
                 {events.length} {t('feed.stories', { defaultValue: 'SIGNALS' })}
               </span>
             </div>
+
+            {/* Sector Impact Radar */}
+            <DomainMatrix
+              domainStats={domainStats}
+              selectedDomain={domain === 'ALL' ? null : domain}
+              onSelectDomain={(d) => setDomain(d || 'ALL')}
+            />
 
             {/* Filters toolbar */}
             <FeedFilters
