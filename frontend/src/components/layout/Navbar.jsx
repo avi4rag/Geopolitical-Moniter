@@ -70,6 +70,33 @@ export default function Navbar() {
           borderBottom: '1px solid var(--color-border)',
         }}
       >
+        {/* Top Editorial Status Strip */}
+        <div
+          className="hidden sm:flex items-center justify-between text-[10px] font-mono-code px-4 sm:px-6 lg:px-8 py-1 border-b"
+          style={{
+            backgroundColor: 'rgba(2, 6, 23, 0.85)',
+            borderColor: 'var(--color-border-subtle)',
+            color: 'var(--color-text-dim)',
+          }}
+        >
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 font-bold" style={{ color: 'var(--color-stable)' }}>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--color-stable)' }} />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: 'var(--color-stable)' }} />
+              </span>
+              LIVE WIRE
+            </span>
+            <span>•</span>
+            <span className="uppercase tracking-wider">Automated Geopolitical Ingestion & Impact Matrix</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="uppercase tracking-widest">{new Date().toUTCString().slice(0, 16)} UTC</span>
+            <span>•</span>
+            <span className="font-semibold tracking-wider" style={{ color: 'var(--color-accent)' }}>GLOBAL INTEL</span>
+          </div>
+        </div>
+
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 gap-4">
 
@@ -88,7 +115,7 @@ export default function Navbar() {
               <div className="flex flex-col">
                 <span
                   className="text-sm font-bold font-mono-code tracking-tight leading-none transition-colors group-hover:text-white"
-                  style={{ color: 'var(--color-text-secondary)' }}
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   GeoMonitor
                 </span>
@@ -96,7 +123,7 @@ export default function Navbar() {
                   className="hidden sm:inline text-[9px] font-mono-code font-medium tracking-widest uppercase mt-0.5"
                   style={{ color: 'var(--color-text-dim)' }}
                 >
-                  INTEL PLATFORM
+                  INTELLIGENCE WIRE
                 </span>
               </div>
             </Link>
