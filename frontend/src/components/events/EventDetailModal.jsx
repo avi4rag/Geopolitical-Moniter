@@ -14,6 +14,8 @@ import {
   Share2,
   Check,
   Newspaper,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import apiClient from '../../lib/apiClient.js';
 import SeverityBadge from '../common/SeverityBadge.jsx';
@@ -33,6 +35,7 @@ export default function EventDetailModal({ eventId, onClose }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const lang = i18n.language || 'en';
   const { isAuthenticated, isBookmarked, toggleBookmark } = useAuth();
@@ -102,11 +105,17 @@ export default function EventDetailModal({ eventId, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150"
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-200 ${
+        isExpanded ? 'p-1 sm:p-2' : 'p-3 sm:p-6'
+      } bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-150`}
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden"
+        className={`relative w-full flex flex-col bg-white border border-slate-200 shadow-2xl overflow-hidden transition-all duration-200 ${
+          isExpanded
+            ? 'max-w-[98vw] w-[98vw] h-[98vh] max-h-[98vh] rounded-2xl'
+            : 'max-w-4xl max-h-[92vh] rounded-3xl'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Sticky Bar */}
@@ -150,6 +159,18 @@ export default function EventDetailModal({ eventId, onClose }) {
                 <Bookmark size={16} fill={bookmarked ? 'currentColor' : 'none'} />
               </button>
             )}
+
+            {/* Zoom / Expand Toggle */}
+            <button
+              onClick={() => setIsExpanded((prev) => !prev)}
+              className="p-2 rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition cursor-pointer"
+              title={isExpanded
+                ? t('eventDetail.restoreSize', { defaultValue: 'Exit full screen' })
+                : t('eventDetail.expandSize', { defaultValue: 'Expand view' })}
+              aria-label={isExpanded ? 'Exit full screen view' : 'Expand full screen view'}
+            >
+              {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
 
             {/* Close modal */}
             <button

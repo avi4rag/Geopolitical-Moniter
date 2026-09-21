@@ -142,6 +142,8 @@
     "bookmark": "Bookmark dossier",
     "removeBookmark": "Remove bookmark",
     "openStandalone": "Open standalone dossier page",
+    "expandSize": "Expand view",
+    "restoreSize": "Exit full screen",
     "close": "Close",
     "loading": "Loading intelligence dossier..."
   },
