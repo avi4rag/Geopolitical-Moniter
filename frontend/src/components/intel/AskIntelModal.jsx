@@ -50,50 +50,42 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md"
-      style={{ backgroundColor: 'rgba(2,6,23,0.85)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 backdrop-blur-xl bg-slate-950/80 animate-fadeIn"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-lg overflow-hidden animate-fadeIn"
-        style={{ backgroundColor: 'var(--color-surface-1)', border: '1px solid var(--color-border)' }}
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden glass-panel border border-slate-700/60 shadow-2xl shadow-cyan-950/20"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 border-b flex items-center justify-between shrink-0" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)' }}>
-          <div className="flex items-center gap-2.5">
-            <div
-              className="w-8 h-8 rounded flex items-center justify-center"
-              style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)' }}
-            >
-              <Sparkles size={15} style={{ color: 'var(--color-accent)' }} />
+        <div className="px-6 py-4 border-b border-slate-700/60 flex items-center justify-between shrink-0 bg-slate-900/60">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-sm shadow-cyan-500/20">
+              <Sparkles size={16} />
             </div>
             <div>
-              <h2 className="text-sm font-bold font-mono-code flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <h2 className="text-sm font-bold font-mono-code flex items-center gap-2.5 text-slate-100 tracking-wide">
                 {t('intel.title', { defaultValue: 'Ask GeoMonitor Intelligence' })}
-                <span
-                  className="text-[9px] font-mono-code uppercase px-2 py-0.5 rounded font-bold"
-                  style={{ backgroundColor: 'var(--color-accent-bg)', color: 'var(--color-accent)', border: '1px solid var(--color-accent-border)' }}
-                >
+                <span className="text-[9px] font-mono-code uppercase px-2 py-0.5 rounded-full font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 tracking-widest">
                   {t('intel.badge', { defaultValue: 'AI ASSISTANT' })}
                 </span>
               </h2>
+              <p className="text-[10px] font-mono-code text-slate-400 mt-0.5">
+                Neural Geopolitical Synthesis Engine • Real-Time Grounded
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded transition cursor-pointer"
-            style={{ color: 'var(--color-text-dim)' }}
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-100 hover:bg-slate-800/60 transition cursor-pointer"
             aria-label="Close"
-            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-4)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
           >
-            <X size={16} />
+            <X size={17} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+        <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
           {/* Query form */}
           <form onSubmit={handleSubmit} className="relative">
             <input
@@ -101,42 +93,34 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('intel.placeholder', { defaultValue: 'Ask about geopolitical risks, commodities, trade pacts...' })}
-              className="w-full pl-4 pr-12 py-3 text-xs sm:text-sm rounded font-mono-code"
-              style={{
-                backgroundColor: 'var(--color-surface-2)',
-                border: '1px solid var(--color-border)',
-                color: 'var(--color-text-primary)',
-              }}
+              className="w-full pl-4 pr-12 py-3.5 text-xs sm:text-sm rounded-xl font-mono-code glass-control text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 focus:ring-2 focus:ring-cyan-500/20 transition-all shadow-inner"
               autoFocus
             />
             <button
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded disabled:opacity-40 transition cursor-pointer"
-              style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg disabled:opacity-40 transition cursor-pointer bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 shadow-sm"
             >
-              {isLoading ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+              {isLoading ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
             </button>
           </form>
 
           {/* Suggestions */}
           {!response && !isLoading && (
-            <div className="space-y-2">
-              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-dim)' }}>
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-mono-code font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
                 {t('intel.suggestedTitle', { defaultValue: 'Suggested Inquiries' })}:
               </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {suggestions.map((sug, i) => (
                   <button
                     key={i}
                     onClick={() => handleSuggestionClick(sug)}
-                    className="p-3 rounded border text-left text-xs transition cursor-pointer flex items-center justify-between gap-2 group"
-                    style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
-                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-border)'; e.currentTarget.style.backgroundColor = 'var(--color-accent-bg)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.backgroundColor = 'var(--color-surface-2)'; }}
+                    className="p-3.5 rounded-xl border border-slate-700/60 bg-slate-900/40 hover:bg-cyan-950/20 hover:border-cyan-500/40 text-left text-xs transition-all cursor-pointer flex items-center justify-between gap-2.5 group shadow-sm"
                   >
-                    <span className="line-clamp-2 leading-relaxed font-mono-code">{sug}</span>
-                    <ArrowRight size={12} className="shrink-0" style={{ color: 'var(--color-accent)' }} />
+                    <span className="line-clamp-2 leading-relaxed font-mono-code text-slate-300 group-hover:text-cyan-200 transition-colors">{sug}</span>
+                    <ArrowRight size={13} className="shrink-0 text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" />
                   </button>
                 ))}
               </div>
@@ -145,9 +129,9 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
           {/* Loading */}
           {isLoading && (
-            <div className="py-12 text-center space-y-3">
-              <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'var(--color-accent) transparent transparent transparent' }} />
-              <p className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
+            <div className="py-14 text-center space-y-3.5">
+              <div className="w-9 h-9 border-2 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin mx-auto shadow-sm shadow-cyan-500/20" />
+              <p className="text-xs font-mono-code text-cyan-300 tracking-wider">
                 {t('intel.synthesizing', { defaultValue: 'Synthesizing intelligence inquiry...' })}
               </p>
             </div>
@@ -155,21 +139,21 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
           {/* Error */}
           {error && (
-            <div className="p-4 rounded border text-xs font-mono-code" style={{ backgroundColor: 'rgba(225,29,72,0.10)', borderColor: 'rgba(225,29,72,0.30)', color: '#e11d48' }}>
+            <div className="p-4 rounded-xl border text-xs font-mono-code bg-rose-950/30 border-rose-500/40 text-rose-300">
               {error}
             </div>
           )}
 
           {/* Response */}
           {response && (
-            <div className="space-y-5">
+            <div className="space-y-5 animate-fadeIn">
               {/* Answer card */}
-              <div className="p-5 rounded border space-y-3" style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border)' }}>
-                <div className="flex items-center gap-2 text-xs font-mono-code font-bold" style={{ color: 'var(--color-accent)' }}>
-                  <Bot size={14} />
+              <div className="p-5 rounded-xl border border-slate-700/70 bg-slate-900/60 space-y-3 shadow-lg shadow-black/30">
+                <div className="flex items-center gap-2 text-xs font-mono-code font-bold text-cyan-400 tracking-wider">
+                  <Bot size={15} />
                   <span>SYNTHESIZED INTELLIGENCE ASSESSMENT</span>
                 </div>
-                <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--color-text-muted)' }}>
+                <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-200 font-sans">
                   {response.answer}
                 </div>
               </div>
@@ -177,32 +161,30 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
               {/* Referenced events */}
               {response.referencedEvents?.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-mono-code font-bold uppercase" style={{ color: 'var(--color-text-dim)' }}>
-                    <ShieldCheck size={13} style={{ color: 'var(--color-stable)' }} />
+                  <div className="flex items-center gap-2 text-xs font-mono-code font-bold uppercase text-slate-400">
+                    <ShieldCheck size={14} className="text-emerald-400" />
                     {t('intel.referencedDossiers', { defaultValue: 'Referenced Intelligence Dossiers' })}
                   </div>
                   <div className="space-y-2">
                     {response.referencedEvents.map((ev) => (
                       <div
                         key={ev._id}
-                        className="p-3.5 rounded border flex items-center justify-between gap-3 text-xs transition-colors"
-                        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
+                        className="p-4 rounded-xl border border-slate-700/60 bg-slate-900/40 hover:border-slate-600 flex items-center justify-between gap-3 text-xs transition-all shadow-sm"
                       >
-                        <div className="space-y-1 flex-1 min-w-0">
+                        <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <SeverityBadge severity={ev.severity} size="sm" />
-                            <span className="font-mono-code text-[10px]" style={{ color: 'var(--color-text-dim)' }}>
+                            <span className="font-mono-code text-[10px] text-slate-400">
                               {ev.createdAt ? new Date(ev.createdAt).toLocaleDateString() : ''}
                             </span>
                           </div>
-                          <p className="font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                          <p className="font-semibold truncate text-slate-200">
                             {translateNewsText(ev.summary, lang)}
                           </p>
                         </div>
                         <button
                           onClick={() => { onClose(); if (onSelectEvent) onSelectEvent(ev._id); }}
-                          className="px-3 py-1.5 rounded text-xs font-mono-code font-bold shrink-0 cursor-pointer transition-colors"
-                          style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
+                          className="px-3.5 py-1.5 rounded-lg text-xs font-mono-code font-bold shrink-0 cursor-pointer transition-all bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300"
                         >
                           {t('intel.inspect', { defaultValue: 'Inspect' })}
                         </button>
@@ -217,11 +199,10 @@ export default function AskIntelModal({ isOpen, onClose, onSelectEvent }) {
 
         {/* Footer */}
         <div
-          className="px-5 py-3 border-t flex items-center justify-between text-[10px] font-mono-code"
-          style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface-2)', color: 'var(--color-text-dim)' }}
+          className="px-6 py-3.5 border-t border-slate-800 flex items-center justify-between text-[10px] font-mono-code bg-slate-950/70 text-slate-400"
         >
           <span>{t('intel.groundedNotice', { defaultValue: 'Responses are synthesized from live, verified event dossiers.' })}</span>
-          <span>GeoMonitor AI v2.4</span>
+          <span className="text-cyan-400/80 font-semibold">GeoMonitor AI v2.4</span>
         </div>
       </div>
     </div>
