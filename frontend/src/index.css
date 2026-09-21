@@ -79,17 +79,50 @@
 /* ─── Typography Utility Classes ─────────────────────────────────────────── */
 .font-headline {
   font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'clig' 1;
+  font-optical-sizing: auto;
 }
 
 .font-mono-code {
   font-family: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+  font-feature-settings: 'zero' 1;
 }
 
 .font-body {
   font-family: 'Inter', -apple-system, sans-serif;
 }
 
-/* ─── HUD & Scanner FX ───────────────────────────────────────────────────── */
+/* Editorial paragraph styling for maximum readability */
+.editorial-body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--color-text-secondary);
+  letter-spacing: -0.01em;
+}
+
+.editorial-lead {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+/* ─── Card Elevations & Interactions ──────────────────────────────────────── */
+
+/* Standard editorial news card */
+.editorial-card {
+  background-color: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.editorial-card:hover {
+  border-color: rgba(195, 192, 255, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(195, 192, 255, 0.05);
+}
 
 /* Thin-border "intelligence console" framing */
 .scanner-border {
