@@ -63,9 +63,16 @@ export default function NewsCard({ event, onSelect }) {
     ? `${Math.round(event.confidenceScore > 1 ? event.confidenceScore : event.confidenceScore * 100)}%`
     : null;
 
+  // Extract factual summary or article excerpt preview
+  const previewText = event.facts?.[0]
+    ? translateNewsText(event.facts[0], lang)
+    : event.primaryArticleId?.excerpt
+    ? translateNewsText(event.primaryArticleId.excerpt, lang)
+    : null;
+
   return (
     <article
-      className="glass-card hover-lift rounded-xl p-4 flex flex-col justify-between gap-3.5 cursor-pointer group relative overflow-hidden border transition-all duration-200"
+      className="glass-card hover-lift rounded-xl p-4 flex flex-col justify-between gap-3 cursor-pointer group relative overflow-hidden border transition-all duration-200"
       onClick={() => onSelect(event)}
       onKeyDown={(e) => e.key === 'Enter' && onSelect(event)}
       role="button"
@@ -144,13 +151,23 @@ export default function NewsCard({ event, onSelect }) {
         )}
       </div>
 
-      {/* Headline */}
-      <h3
-        className="font-headline text-base font-semibold leading-snug line-clamp-2 transition-colors duration-200 group-hover:text-white"
-        style={{ color: 'var(--color-text-primary)' }}
-      >
-        {summary}
-      </h3>
+      {/* Main text block */}
+      <div className="space-y-2">
+        {/* Headline */}
+        <h3
+          className="font-headline text-base font-semibold leading-snug line-clamp-2 transition-colors duration-200 group-hover:text-white"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          {summary}
+        </h3>
+
+        {/* Factual Summary / Excerpt Preview */}
+        {previewText && (
+          <p className="text-xs font-sans leading-relaxed line-clamp-2 text-slate-300/80">
+            {previewText}
+          </p>
+        )}
+      </div>
 
       {/* Wire Source and Country Tag */}
       <div className="flex items-center gap-2 text-[11px] font-mono-code flex-wrap">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { RefreshCw, AlertCircle, FileQuestion } from 'lucide-react';
 import apiClient from '../lib/apiClient.js';
 import StatCards from '../components/dashboard/StatCards.jsx';
@@ -7,7 +8,6 @@ import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
 import CountryRiskMatrix from '../components/dashboard/CountryRiskMatrix.jsx';
 import EventFilterBar from '../components/dashboard/EventFilterBar.jsx';
 import EventCard from '../components/dashboard/EventCard.jsx';
-import EventDetailModal from '../components/events/EventDetailModal.jsx';
 
 // ─── Full-Width Analytics & Risk Monitor Page ─────────────────────────────────
 // Real-time KPI distribution, domain radar, country risk matrix, and events.
@@ -238,7 +238,7 @@ export default function DashboardPage() {
               <EventCard
                 key={event._id}
                 event={event}
-                onSelect={(e) => setSelectedEventId(e._id)}
+                onSelect={(e) => navigate(`/event/${e._id}`)}
               />
             ))}
           </div>
@@ -268,14 +268,6 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      )}
-
-      {/* Modal */}
-      {selectedEventId && (
-        <EventDetailModal
-          eventId={selectedEventId}
-          onClose={() => setSelectedEventId(null)}
-        />
       )}
     </div>
   );

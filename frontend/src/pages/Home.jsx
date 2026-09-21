@@ -11,7 +11,6 @@ import NewsCard from '../components/feed/NewsCard.jsx';
 import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
 import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
 import ActiveEventsTicker from '../components/feed/ActiveEventsTicker.jsx';
-import EventDetailModal from '../components/events/EventDetailModal.jsx';
 import MethodologySection from '../components/home/MethodologySection.jsx';
 
 // ─── Situation Room Intelligence Feed — Home Page ─────────────────────────────
@@ -44,34 +43,15 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [domainStats, setDomainStats] = useState([]);
 
-  // Dossier modal state
-  const [selectedEventId, setSelectedEventId] = useState(null);
-
   const newsFeedRef = useRef(null);
 
-  // Open in-place glass dossier modal on card click with URL synchronization
+  // Navigate to the full-screen event dossier on any card click
   const handleEventSelect = useCallback((event) => {
     const id = event?._id || event;
     if (id) {
-      setSelectedEventId(id);
-      window.history.pushState({ modalOpen: true, eventId: id }, '', `/event/${id}`);
+      navigate(`/event/${id}`);
     }
-  }, []);
-
-  const handleCloseModal = useCallback(() => {
-    setSelectedEventId(null);
-    window.history.pushState(null, '', '/');
-  }, []);
-
-  useEffect(() => {
-    const handlePopState = (e) => {
-      if (selectedEventId) {
-        setSelectedEventId(null);
-      }
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, [selectedEventId]);
+  }, [navigate]);
 
   const fetchFeed = useCallback(async (targetPage = 1, append = false) => {
     try {
@@ -351,14 +331,6 @@ export default function Home() {
           {/* ── METHODOLOGY & TRUST PIPELINE ───────────────────────────────────── */}
           <MethodologySection />
         </>
-      )}
-
-      {/* ── IN-PLACE INTELLIGENCE DOSSIER MODAL ─────────────────────────────── */}
-      {selectedEventId && (
-        <EventDetailModal
-          eventId={selectedEventId}
-          onClose={handleCloseModal}
-        />
       )}
     </div>
   );
