@@ -142,50 +142,44 @@ export default function Navbar() {
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className={`flex items-center justify-between gap-4 transition-all duration-200 ${isScrolled ? 'h-13' : 'h-14 sm:h-15'}`}>
 
-            {/* ── Brand with Subtle Radar Emblem ───────────────────── */}
+            {/* ── Brand with Subtle Target / Radar Emblem ───────────────────── */}
             <Link
               to="/"
-              className="flex items-center gap-3 group shrink-0 focus:outline-hidden"
+              className="flex items-center gap-2.5 group shrink-0 focus:outline-hidden"
               aria-label="GeoMonitor Home"
             >
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:border-indigo-400/40"
+                className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-105"
                 style={{
-                  backgroundColor: 'rgba(21, 27, 45, 0.75)',
-                  border: '1px solid rgba(255, 255, 255, 0.10)',
+                  backgroundColor: 'rgba(244, 63, 94, 0.12)',
+                  border: '1px solid rgba(244, 63, 94, 0.35)',
                 }}
               >
-                <RadarEmblem size={17} className="text-[var(--color-accent)] group-hover:rotate-45 transition-transform duration-500" />
+                <RadarEmblem size={17} className="text-rose-400 group-hover:rotate-45 transition-transform duration-500" />
               </div>
-              <div className="flex flex-col">
-                <span
-                  className="text-sm sm:text-base font-bold font-mono-code tracking-tight leading-none text-white group-hover:text-indigo-200 transition-colors"
-                >
-                  GeoMonitor
+              <div className="flex items-center gap-1.5 font-mono-code font-bold text-sm tracking-wider">
+                <span className="text-white group-hover:text-rose-200 transition-colors">
+                  GEOMONITOR
                 </span>
-                <span
-                  className="hidden sm:inline text-[9px] font-mono-code font-medium tracking-widest uppercase mt-0.5"
-                  style={{ color: 'var(--color-text-dim)' }}
-                >
-                  GEOPOLITICAL INTELLIGENCE
+                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded text-rose-400 bg-rose-500/15 border border-rose-500/30 font-semibold tracking-widest">
+                  [LIVE]
                 </span>
               </div>
             </Link>
 
-            {/* ── Center Nav Links ─────────────────────────────────── */}
-            <nav className="hidden md:flex items-center gap-1" role="navigation">
+            {/* ── Center Nav Links — Reference-style Coral Active Pill ──────── */}
+            <nav className="hidden md:flex items-center gap-1 bg-slate-950/40 p-1 rounded-full border border-white/[0.06]" role="navigation">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
                 return (
                   <Link
                     key={link.href}
                     to={link.href}
-                    className="px-3.5 py-3 font-mono-code text-xs tracking-wider uppercase border-b-2 transition-all duration-150 whitespace-nowrap"
-                    style={{
-                      color: isActive ? '#ffffff' : 'var(--color-text-muted)',
-                      borderBottomColor: isActive ? 'var(--color-accent)' : 'transparent',
-                      fontWeight: isActive ? '700' : '500',
-                    }}
+                    className={`px-3.5 py-1 font-mono-code text-xs tracking-wider uppercase transition-all duration-200 whitespace-nowrap ${
+                      isActive
+                        ? 'bg-rose-500 text-slate-950 font-bold rounded-full shadow-md shadow-rose-500/30'
+                        : 'text-slate-400 hover:text-white font-medium hover:bg-white/[0.05] rounded-full'
+                    }`}
                   >
                     {link.label}
                   </Link>
@@ -194,28 +188,23 @@ export default function Navbar() {
             </nav>
 
             {/* ── Right Controls ───────────────────────────────────── */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2.5 shrink-0">
 
-              {/* Live monitoring badge on small screens */}
-              <div className="sm:hidden flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono-code" style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#10b981' }}>
+              {/* Live monitoring status readout */}
+              <div className="hidden lg:flex items-center gap-2 text-[10px] font-mono-code px-2.5 py-1 rounded-full bg-slate-900/60 border border-white/[0.08] text-slate-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>LIVE</span>
+                <span className="text-slate-200 font-semibold tracking-wider">MONITORING IS LIVE</span>
               </div>
 
               {/* Search */}
-              <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center relative w-36 lg:w-48">
-                <Search size={12} className="absolute left-3 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
+              <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center relative w-32 xl:w-44">
+                <Search size={12} className="absolute left-3 pointer-events-none text-slate-500" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('filters.searchPlaceholder', { defaultValue: 'Search intel...' })}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs font-mono-code rounded-md transition-colors"
-                  style={{
-                    backgroundColor: 'rgba(21, 27, 45, 0.65)',
-                    border: '1px solid rgba(255, 255, 255, 0.09)',
-                    color: 'var(--color-text-secondary)',
-                  }}
+                  className="w-full pl-8 pr-3 py-1 text-xs font-mono-code rounded-full bg-slate-900/60 border border-white/[0.08] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-rose-500/50 transition-colors"
                 />
               </form>
 
@@ -223,23 +212,14 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono-code text-xs transition-colors cursor-pointer border hover:border-white/20"
-                  style={{
-                    backgroundColor: 'rgba(21, 27, 45, 0.50)',
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                    color: 'var(--color-text-muted)',
-                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-mono-code text-xs transition-colors cursor-pointer border border-white/[0.08] bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-white/20"
                 >
                   <span className="uppercase font-semibold">{currentLang.substring(0, 2)}</span>
                   <ChevronDown size={10} />
                 </button>
                 {isLangDropdownOpen && (
                   <div
-                    className="absolute right-0 mt-1 w-36 rounded-md py-1 z-50 animate-in fade-in duration-150 shadow-xl"
-                    style={{
-                      backgroundColor: 'rgba(15, 23, 42, 0.96)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                    }}
+                    className="absolute right-0 mt-1 w-36 rounded-xl py-1 z-50 animate-in fade-in duration-150 shadow-2xl bg-slate-900 border border-white/10"
                   >
                     {[
                       { code: 'en', label: 'English' },
@@ -251,8 +231,8 @@ export default function Navbar() {
                         className="w-full px-3 py-1.5 text-xs text-left font-mono-code flex items-center justify-between transition-colors cursor-pointer hover:bg-white/[0.06]"
                         style={{
                           color: currentLang.startsWith(code)
-                            ? 'var(--color-accent)'
-                            : 'var(--color-text-muted)',
+                            ? '#f43f5e'
+                            : '#94a3b8',
                         }}
                       >
                         <span>{label}</span>
@@ -266,29 +246,19 @@ export default function Navbar() {
               {/* Ask Intel AI Modal Trigger */}
               <button
                 onClick={() => setIsAskOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
-                style={{
-                  backgroundColor: 'rgba(195, 192, 255, 0.12)',
-                  border: '1px solid rgba(195, 192, 255, 0.25)',
-                  color: 'var(--color-accent)',
-                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-mono-code text-xs font-semibold transition-all cursor-pointer bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/20"
                 title={t('intel.title', { defaultValue: 'Ask AI Intel' })}
               >
                 <Sparkles size={12} />
-                <span className="hidden sm:inline">{t('nav.askAiIntel', { defaultValue: 'Ask Intel' })}</span>
+                <span className="hidden xl:inline">{t('nav.askAiIntel', { defaultValue: 'Ask Intel' })}</span>
               </button>
 
-              {/* Auth */}
+              {/* Auth / Analyst Profile Avatar Button (Soft Coral Circle) */}
               {isAuthenticated ? (
                 <div className="flex items-center gap-1.5">
                   <Link
                     to="/profile"
-                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono-code text-xs transition-colors border hover:border-white/20"
-                    style={{
-                      backgroundColor: 'rgba(21, 27, 45, 0.50)',
-                      borderColor: 'rgba(255, 255, 255, 0.08)',
-                      color: 'var(--color-text-muted)',
-                    }}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full font-mono-code text-xs transition-colors border border-white/[0.08] bg-slate-900/60 text-slate-400 hover:border-white/20"
                     title={t('profile.accountProfile', { defaultValue: 'Profile' })}
                   >
                     <Bookmark size={11} />
@@ -296,36 +266,26 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/profile"
-                    className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold font-mono-code transition-colors border hover:border-indigo-400/50"
-                    style={{
-                      backgroundColor: 'var(--color-surface-4)',
-                      borderColor: 'rgba(255, 255, 255, 0.12)',
-                      color: 'var(--color-accent)',
-                    }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold font-mono-code transition-all bg-rose-300 text-slate-950 hover:bg-rose-200 shadow-md shadow-rose-500/20 hover:scale-105"
                     title={user?.name}
                   >
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    {user?.name ? user.name.charAt(0).toUpperCase() : 'A'}
                   </Link>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
                   <Link
                     to="/login"
-                    className="hidden sm:inline-flex px-3 py-1.5 text-xs font-mono-code font-semibold transition-colors hover:text-white"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="hidden sm:inline-flex px-3 py-1 text-xs font-mono-code font-semibold text-slate-400 hover:text-white transition-colors"
                   >
                     {t('nav.signIn', { defaultValue: 'Sign In' })}
                   </Link>
                   <Link
                     to="/signup"
-                    className="px-3 py-1.5 rounded-md text-xs font-mono-code font-bold transition-colors shadow-sm hover:brightness-110"
-                    style={{
-                      backgroundColor: 'rgba(195, 192, 255, 0.15)',
-                      border: '1px solid rgba(195, 192, 255, 0.30)',
-                      color: 'var(--color-accent)',
-                    }}
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold font-mono-code transition-all bg-rose-300 text-slate-950 hover:bg-rose-200 shadow-md shadow-rose-500/20 hover:scale-105"
+                    title={t('nav.createAccount', { defaultValue: 'Sign Up / Analyst Access' })}
                   >
-                    {t('nav.createAccount', { defaultValue: 'Sign Up' })}
+                    +
                   </Link>
                 </div>
               )}
@@ -333,12 +293,7 @@ export default function Navbar() {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-1.5 rounded-md transition-colors cursor-pointer border hover:border-white/20"
-                style={{
-                  backgroundColor: 'rgba(21, 27, 45, 0.50)',
-                  borderColor: 'rgba(255, 255, 255, 0.08)',
-                  color: 'var(--color-text-muted)',
-                }}
+                className="md:hidden p-1.5 rounded-lg transition-colors cursor-pointer border border-white/[0.08] bg-slate-900/60 text-slate-400 hover:border-white/20"
                 aria-label="Toggle Navigation"
               >
                 {isMobileMenuOpen ? <X size={17} /> : <Menu size={17} />}

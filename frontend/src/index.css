@@ -7,39 +7,55 @@
 
 @layer base {
   :root {
-    /* ── Surface palette ──────────────────────────────────────────────── */
-    --color-obsidian: #020617;        /* body background */
-    --color-bg: #0c1324;              /* page background */
-    --color-surface-1: #0c1324;       /* primary card surface */
-    --color-surface-2: #151b2d;       /* secondary / nested card */
-    --color-surface-3: #191f31;       /* sidebar / panel */
-    --color-surface-4: #23293c;       /* hover state / inner */
-    --color-surface-5: #2e3447;       /* highest container */
-    --color-border: #1e293b;          /* default border */
+    /* ── Surface palette (Dark Situation Room) ───────────────────────── */
+    --color-obsidian: #070a12;        /* near-black body background */
+    --color-bg-navy: #0b1020;         /* deep situation navy */
+    --color-surface-1: #111827;       /* primary card / panel surface */
+    --color-surface-2: #151b27;       /* secondary / nested container */
+    --color-surface-3: #1c2436;       /* sidebar / elevated console */
+    --color-surface-4: #242d44;       /* hover state / inner controls */
+    --color-surface-5: #2e3854;       /* highest container surface */
+    --color-border: rgba(255, 255, 255, 0.08); /* default 1px border */
     --color-border-subtle: rgba(255, 255, 255, 0.05);
-    --color-border-muted: rgba(255, 255, 255, 0.10);
+    --color-border-muted: rgba(255, 255, 255, 0.12);
 
     /* ── Text palette ─────────────────────────────────────────────────── */
-    --color-text-primary: #dce1fb;    /* high-emphasis text */
-    --color-text-secondary: #bec6e0;  /* medium-emphasis text */
-    --color-text-muted: #c6c6cd;      /* low-emphasis / body copy */
-    --color-text-dim: #909097;        /* very low emphasis */
+    --color-text-primary: #f8fafc;    /* crisp high-contrast white */
+    --color-text-secondary: #cbd5e1;  /* medium-contrast slate */
+    --color-text-muted: #94a3b8;      /* low-emphasis body copy */
+    --color-text-dim: #64748b;        /* small technical metadata */
 
-    /* ── Accent / interactive ─────────────────────────────────────────── */
-    --color-accent: #c3c0ff;          /* periwinkle — links, active states */
-    --color-accent-bg: rgba(195, 192, 255, 0.10);
-    --color-accent-border: rgba(195, 192, 255, 0.20);
-    --color-accent-hover: rgba(195, 192, 255, 0.25);
+    /* ── Semantic Reference Accents ───────────────────────────────────── */
+    --color-coral: #f43f5e;           /* coral/red — critical, active, primary CTA */
+    --color-coral-bg: rgba(244, 63, 94, 0.15);
+    --color-coral-border: rgba(244, 63, 94, 0.35);
+    --color-coral-glow: rgba(244, 63, 94, 0.25);
 
-    /* ── Semantic status colors ───────────────────────────────────────── */
-    --color-critical: #e11d48;        /* CRITICAL severity */
-    --color-critical-bg: rgba(225, 29, 72, 0.15);
-    --color-critical-border: rgba(225, 29, 72, 0.30);
-    --color-warning: #f59e0b;         /* HIGH severity */
-    --color-warning-bg: rgba(245, 158, 11, 0.15);
-    --color-stable: #10b981;          /* STABLE / LIVE / positive */
-    --color-stable-bg: rgba(16, 185, 129, 0.10);
-    --color-info: #38bdf8;            /* informational */
+    --color-cyan: #38bdf8;            /* cyan — intelligence, telemetry, signals */
+    --color-cyan-bg: rgba(56, 189, 248, 0.12);
+    --color-cyan-border: rgba(56, 189, 248, 0.28);
+    --color-cyan-glow: rgba(56, 189, 248, 0.20);
+
+    --color-purple: #c084fc;          /* purple — tech, analytical */
+    --color-purple-bg: rgba(192, 132, 252, 0.12);
+    --color-purple-border: rgba(192, 132, 252, 0.28);
+
+    --color-amber: #fbbf24;           /* amber — energy, impact chain highlight */
+    --color-amber-bg: rgba(251, 191, 36, 0.12);
+    --color-amber-border: rgba(251, 191, 36, 0.28);
+
+    --color-green: #34d399;           /* green — verified, operational status */
+    --color-green-bg: rgba(52, 211, 153, 0.12);
+    --color-green-border: rgba(52, 211, 153, 0.28);
+
+    /* Legacy mapping fallback */
+    --color-accent: var(--color-cyan);
+    --color-accent-bg: var(--color-cyan-bg);
+    --color-accent-border: var(--color-cyan-border);
+    --color-critical: var(--color-coral);
+    --color-warning: var(--color-amber);
+    --color-stable: var(--color-green);
+    --color-info: var(--color-cyan);
   }
 
   body {
@@ -313,6 +329,70 @@
   background: rgba(21, 31, 56, 0.82);
   border-color: rgba(195, 192, 255, 0.28);
   box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.55), 0 0 20px rgba(195, 192, 255, 0.06);
+}
+
+/* ─── Global Hover System (250ms cubic-bezier(0.16, 1, 0.3, 1)) ────────── */
+.hover-lift {
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.65), 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+/* ─── Reference Terminal & Button Utilities ──────────────────────────────── */
+.terminal-panel {
+  background: rgba(11, 16, 32, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.btn-pill-coral {
+  background-color: var(--color-coral);
+  color: #070a12;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.35);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-pill-coral:hover {
+  background-color: #fb7185;
+  box-shadow: 0 0 24px rgba(244, 63, 94, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-primary-coral {
+  background-color: var(--color-coral);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.30);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-primary-coral:hover {
+  background-color: #fb7185;
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.50);
+  transform: translateY(-1px);
+}
+
+.btn-secondary-glass {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--color-text-secondary);
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-secondary-glass:hover {
+  background: rgba(27, 36, 56, 0.90);
+  border-color: rgba(244, 63, 94, 0.40);
+  color: var(--color-coral);
+  transform: translateY(-1px);
 }
 
 /* Atmospheric section backdrop energy fields */
