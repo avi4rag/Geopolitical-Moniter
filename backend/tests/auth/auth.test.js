@@ -54,6 +54,7 @@ describe('Authentication & User API', () => {
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user).toBeDefined();
+      expect(res.body.data.token).toBeDefined();
       expect(res.body.data.user.email).toBe('jane@example.com');
       expect(res.body.data.user.passwordHash).toBeUndefined();
 
@@ -115,6 +116,7 @@ describe('Authentication & User API', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('john@example.com');
+      expect(res.body.data.token).toBeDefined();
       expect(res.headers['set-cookie']).toBeDefined();
     });
 
@@ -175,6 +177,24 @@ describe('Authentication & User API', () => {
       expect(meRes.body.success).toBe(true);
       expect(meRes.body.data.user.email).toBe('authuser@example.com');
     });
+
+    it('returns user profile when Authorization Bearer header is present', async () => {
+      const regRes = await request(app).post('/api/v1/auth/register').send({
+        name: 'Bearer User',
+        email: 'beareruser@example.com',
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+
+      const token = regRes.body.data.token;
+      const meRes = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(meRes.status).toBe(200);
+      expect(meRes.body.success).toBe(true);
+      expect(meRes.body.data.user.email).toBe('beareruser@example.com');
+    });
   });
 
   describe('Google OAuth & User Provisioning', () => {
@@ -193,6 +213,12 @@ describe('Authentication & User API', () => {
       expect(res.headers.location).toContain('error=INVALID_OAUTH_STATE');
     });
 
+    it('GET /api/v1/auth/google/callback handles user cancellation cleanly', async () => {
+      const res = await request(app).get('/api/v1/auth/google/callback?error=access_denied');
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toContain('error=OAUTH_CANCELLED');
+    });
+
     it('POST /api/v1/auth/google provisions a new Google user without password', async () => {
       const res = await request(app).post('/api/v1/auth/google').send({
         name: 'Alex Google',
@@ -205,6 +231,7 @@ describe('Authentication & User API', () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('alex@google-auth.com');
       expect(res.body.data.user.authProvider).toBe('GOOGLE');
+      expect(res.body.data.token).toBeDefined();
       expect(res.body.data.user.passwordHash).toBeUndefined();
 
       // Check user in database
@@ -231,6 +258,7 @@ describe('Authentication & User API', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.data.user.email).toBe('alex@google-auth.com');
+      expect(res.body.data.token).toBeDefined();
     });
   });
 
