@@ -100,7 +100,7 @@ export default function MethodologySection() {
           return (
             <div
               key={stage.step}
-              className="glass-panel p-5 rounded-2xl border border-teal-500/15 hover:border-teal-400/40 transition-all flex flex-col justify-between group hover:shadow-[0_4px_24px_rgba(20,184,166,0.12)]"
+              className="glass-panel hover-lift p-5 rounded-2xl border border-teal-500/15 hover:border-teal-400/40 transition-all flex flex-col justify-between group hover:shadow-[0_4px_24px_rgba(20,184,166,0.12)]"
             >
               <div className="space-y-3">
                 {/* Stage Number + Icon */}

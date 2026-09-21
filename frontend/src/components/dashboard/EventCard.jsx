@@ -32,7 +32,11 @@ export default function EventCard({ event, onSelect }) {
   return (
     <div
       onClick={() => onSelect && onSelect(event)}
-      className="glass-card p-5 rounded-2xl hover:border-cyan-500/40 hover:shadow-[0_4px_24px_rgba(6,182,212,0.12)] transition-all cursor-pointer group flex flex-col justify-between"
+      className="glass-card hover-lift p-5 rounded-2xl border transition-all cursor-pointer group flex flex-col justify-between"
+      style={{
+        backgroundColor: 'rgba(11, 16, 32, 0.70)',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+      }}
     >
       <div className="space-y-3">
         {/* Top Header: Event Type + Severity + Credibility */}

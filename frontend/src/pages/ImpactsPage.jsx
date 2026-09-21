@@ -173,7 +173,11 @@ export default function ImpactsPage() {
             return (
               <div
                 key={impact._id}
-                className="glass-card rounded-2xl p-5 space-y-3 transition-all duration-200 hover:border-cyan-500/40 hover:shadow-[0_4px_24px_rgba(6,182,212,0.12)] flex flex-col justify-between"
+                className="glass-card hover-lift rounded-2xl p-5 space-y-3 transition-all duration-200 border flex flex-col justify-between"
+                style={{
+                  backgroundColor: 'rgba(11, 16, 32, 0.70)',
+                  borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}
               >
                 <div className="space-y-3">
                   {/* Card header */}

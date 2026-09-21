@@ -83,7 +83,7 @@ export default function CountryRiskMatrix() {
             <Link
               key={stat.country}
               to={`/search?country=${encodeURIComponent(stat.country)}`}
-              className="glass-card p-4 rounded-xl border transition-all duration-200 flex items-center justify-between group cursor-pointer relative overflow-hidden"
+              className="glass-card hover-lift p-4 rounded-xl border transition-all duration-200 flex items-center justify-between group cursor-pointer relative overflow-hidden"
               style={
                 hasCritical
                   ? {
@@ -96,8 +96,8 @@ export default function CountryRiskMatrix() {
                       backgroundColor: 'rgba(245, 158, 11, 0.06)',
                     }
                   : {
-                      borderColor: 'var(--color-border)',
-                      backgroundColor: 'rgba(21, 27, 45, 0.60)',
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
+                      backgroundColor: 'rgba(11, 16, 32, 0.70)',
                     }
               }
             >

@@ -52,7 +52,11 @@ export default function SourcesPage() {
             return (
               <div
                 key={source._id}
-                className="glass-card p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/40 hover:shadow-[0_4px_24px_rgba(6,182,212,0.12)] transition-all duration-200 group"
+                className="glass-card hover-lift p-5 rounded-2xl flex flex-col justify-between border transition-all duration-200 group"
+                style={{
+                  backgroundColor: 'rgba(11, 16, 32, 0.70)',
+                  borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}
               >
                 <div>
                   {/* Name + ACTIVE badge */}

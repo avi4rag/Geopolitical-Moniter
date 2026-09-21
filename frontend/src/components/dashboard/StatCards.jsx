@@ -113,8 +113,11 @@ export default function StatCards({ stats, onRefresh }) {
           return (
             <div
               key={card.title}
-              className="glass-card p-5 rounded-xl border flex items-start justify-between relative overflow-hidden"
-              style={{ borderColor: 'var(--color-border)' }}
+              className="glass-card hover-lift p-5 rounded-xl border flex items-start justify-between relative overflow-hidden transition-all duration-200"
+              style={{
+                backgroundColor: 'rgba(11, 16, 32, 0.70)',
+                borderColor: 'rgba(255, 255, 255, 0.08)',
+              }}
             >
               <div className="space-y-1.5">
                 <span className="text-xs font-mono-code font-bold uppercase tracking-wider text-[var(--color-text-dim)]">
