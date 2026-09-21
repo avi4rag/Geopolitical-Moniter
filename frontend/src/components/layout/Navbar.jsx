@@ -1,23 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Globe,
   Search,
   Sparkles,
   Menu,
   X,
   ChevronDown,
   Bookmark,
+  Radio,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
 
-// ─── Situation Room Top Navigation ────────────────────────────────────────────
-// Dark intelligence-platform masthead:
-//  - Brand mark with globe icon
-//  - Center text tabs with periwinkle active underline
-//  - Right: language selector, search, Ask Intel, auth
+// ─── Subtle Radar Emblem Icon ────────────────────────────────────────────────
+function RadarEmblem({ size = 18, className = '' }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Outer & inner radar rings */}
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.3" />
+      <circle cx="12" cy="12" r="6" stroke="currentColor" strokeOpacity="0.5" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+      {/* Crosshairs */}
+      <line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" strokeOpacity="0.25" strokeDasharray="2 2" />
+      <line x1="2" y1="12" x2="22" y2="12" stroke="currentColor" strokeOpacity="0.25" strokeDasharray="2 2" />
+      {/* Radar sweep vector */}
+      <line x1="12" y1="12" x2="19" y2="5" stroke="var(--color-accent, #c3c0ff)" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+// ─── Premium Intelligence Masthead ───────────────────────────────────────────
+// Controlled glass header with radar emblem, real-time monitoring pulse,
+// scroll compaction, and preserved search, language, intel, and auth controls.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Navbar() {
@@ -30,8 +56,17 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const currentLang = i18n.language || 'en';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 24);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinks = [
     { href: '/', label: t('nav.newsFeed', { defaultValue: 'Intel Feed' }) },
@@ -55,7 +90,6 @@ export default function Navbar() {
     setIsLangDropdownOpen(false);
   };
 
-  // When AskIntel selects an event, navigate to the dossier page
   const handleIntelEventSelect = (id) => {
     setIsAskOpen(false);
     if (id) navigate(`/event/${id}`);
@@ -64,58 +98,68 @@ export default function Navbar() {
   return (
     <>
       <header
-        className="sticky top-0 z-50 w-full backdrop-blur-md"
-        style={{
-          backgroundColor: 'rgba(7, 13, 31, 0.95)',
-          borderBottom: '1px solid var(--color-border)',
-        }}
+        className={`sticky top-0 z-50 w-full transition-all duration-250 ${
+          isScrolled
+            ? 'bg-[#040916]/95 backdrop-blur-md shadow-lg border-b border-white/[0.08]'
+            : 'bg-[#070d1f]/85 backdrop-blur-md border-b border-white/[0.06]'
+        }`}
       >
-        {/* Top Editorial Status Strip */}
+        {/* Top Intelligence Status Strip */}
         <div
           className="hidden sm:flex items-center justify-between text-[10px] font-mono-code px-4 sm:px-6 lg:px-8 py-1 border-b"
           style={{
-            backgroundColor: 'rgba(2, 6, 23, 0.85)',
-            borderColor: 'var(--color-border-subtle)',
+            backgroundColor: 'rgba(2, 6, 23, 0.90)',
+            borderColor: 'rgba(255, 255, 255, 0.05)',
             color: 'var(--color-text-dim)',
           }}
         >
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 font-bold" style={{ color: 'var(--color-stable)' }}>
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--color-stable)' }} />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: 'var(--color-stable)' }} />
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center gap-1.5 font-bold tracking-wider" style={{ color: 'var(--color-stable)' }}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-500" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              LIVE WIRE
+              MONITORING ACTIVE
             </span>
-            <span>•</span>
-            <span className="uppercase tracking-wider">Automated Geopolitical Ingestion & Impact Matrix</span>
+            <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
+            <span className="uppercase tracking-widest text-[9px]" style={{ color: 'var(--color-text-dim)' }}>
+              Multi-Source Ingestion & Causal Transmission Engine
+            </span>
           </div>
+
           <div className="flex items-center gap-3">
             <span className="uppercase tracking-widest">{new Date().toUTCString().slice(0, 16)} UTC</span>
-            <span>•</span>
-            <span className="font-semibold tracking-wider" style={{ color: 'var(--color-accent)' }}>GLOBAL INTEL</span>
+            <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
+            {/* Subtle monitoring-status indicator: ● Monitoring is live */}
+            <span className="inline-flex items-center gap-1.5 font-semibold tracking-wider text-[10px]" style={{ color: 'var(--color-text-primary)' }}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-signalPulse" />
+              Monitoring is live
+            </span>
           </div>
         </div>
 
+        {/* Main Navbar Bar */}
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 gap-4">
+          <div className={`flex items-center justify-between gap-4 transition-all duration-200 ${isScrolled ? 'h-13' : 'h-14 sm:h-15'}`}>
 
-            {/* ── Brand ───────────────────────────────────────────── */}
+            {/* ── Brand with Subtle Radar Emblem ───────────────────── */}
             <Link
               to="/"
-              className="flex items-center gap-2.5 group shrink-0"
+              className="flex items-center gap-3 group shrink-0 focus:outline-hidden"
               aria-label="GeoMonitor Home"
             >
               <div
-                className="w-8 h-8 rounded flex items-center justify-center transition-colors group-hover:bg-[var(--color-surface-4)]"
-                style={{ backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)' }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 group-hover:border-indigo-400/40"
+                style={{
+                  backgroundColor: 'rgba(21, 27, 45, 0.75)',
+                  border: '1px solid rgba(255, 255, 255, 0.10)',
+                }}
               >
-                <Globe size={16} style={{ color: 'var(--color-accent)' }} strokeWidth={2} />
+                <RadarEmblem size={17} className="text-[var(--color-accent)] group-hover:rotate-45 transition-transform duration-500" />
               </div>
               <div className="flex flex-col">
                 <span
-                  className="text-sm font-bold font-mono-code tracking-tight leading-none transition-colors group-hover:text-white"
-                  style={{ color: 'var(--color-text-primary)' }}
+                  className="text-sm sm:text-base font-bold font-mono-code tracking-tight leading-none text-white group-hover:text-indigo-200 transition-colors"
                 >
                   GeoMonitor
                 </span>
@@ -123,12 +167,12 @@ export default function Navbar() {
                   className="hidden sm:inline text-[9px] font-mono-code font-medium tracking-widest uppercase mt-0.5"
                   style={{ color: 'var(--color-text-dim)' }}
                 >
-                  INTELLIGENCE WIRE
+                  GEOPOLITICAL INTELLIGENCE
                 </span>
               </div>
             </Link>
 
-            {/* ── Center Nav ──────────────────────────────────────── */}
+            {/* ── Center Nav Links ─────────────────────────────────── */}
             <nav className="hidden md:flex items-center gap-1" role="navigation">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.href;
@@ -136,10 +180,11 @@ export default function Navbar() {
                   <Link
                     key={link.href}
                     to={link.href}
-                    className="px-3 py-4 font-mono-code text-xs tracking-widest uppercase border-b-2 transition-all duration-150 whitespace-nowrap"
+                    className="px-3.5 py-3 font-mono-code text-xs tracking-wider uppercase border-b-2 transition-all duration-150 whitespace-nowrap"
                     style={{
-                      color: isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                      color: isActive ? '#ffffff' : 'var(--color-text-muted)',
                       borderBottomColor: isActive ? 'var(--color-accent)' : 'transparent',
+                      fontWeight: isActive ? '700' : '500',
                     }}
                   >
                     {link.label}
@@ -151,39 +196,49 @@ export default function Navbar() {
             {/* ── Right Controls ───────────────────────────────────── */}
             <div className="flex items-center gap-2 shrink-0">
 
+              {/* Live monitoring badge on small screens */}
+              <div className="sm:hidden flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono-code" style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#10b981' }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>LIVE</span>
+              </div>
+
               {/* Search */}
-              <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center relative w-40 lg:w-52">
+              <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center relative w-36 lg:w-48">
                 <Search size={12} className="absolute left-3 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t('filters.searchPlaceholder', { defaultValue: 'Search intel...' })}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs font-mono-code rounded transition-colors"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs font-mono-code rounded-md transition-colors"
                   style={{
-                    backgroundColor: 'var(--color-surface-2)',
-                    border: '1px solid var(--color-border)',
+                    backgroundColor: 'rgba(21, 27, 45, 0.65)',
+                    border: '1px solid rgba(255, 255, 255, 0.09)',
                     color: 'var(--color-text-secondary)',
                   }}
                 />
               </form>
 
-              {/* Language */}
+              {/* Language Switcher */}
               <div className="relative">
                 <button
                   onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
-                  className="inline-flex items-center gap-1 px-2 py-1.5 rounded font-mono-code text-xs transition-colors cursor-pointer"
-                  style={{ color: 'var(--color-text-muted)' }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono-code text-xs transition-colors cursor-pointer border hover:border-white/20"
+                  style={{
+                    backgroundColor: 'rgba(21, 27, 45, 0.50)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'var(--color-text-muted)',
+                  }}
                 >
-                  <span className="uppercase">{currentLang.substring(0, 2)}</span>
+                  <span className="uppercase font-semibold">{currentLang.substring(0, 2)}</span>
                   <ChevronDown size={10} />
                 </button>
                 {isLangDropdownOpen && (
                   <div
-                    className="absolute right-0 mt-1 w-36 rounded py-1 z-50 animate-in fade-in duration-150"
+                    className="absolute right-0 mt-1 w-36 rounded-md py-1 z-50 animate-in fade-in duration-150 shadow-xl"
                     style={{
-                      backgroundColor: 'var(--color-surface-3)',
-                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'rgba(15, 23, 42, 0.96)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
                     }}
                   >
                     {[
@@ -193,7 +248,7 @@ export default function Navbar() {
                       <button
                         key={code}
                         onClick={() => handleLanguageChange(code)}
-                        className="w-full px-3 py-1.5 text-xs text-left font-mono-code flex items-center justify-between transition-colors cursor-pointer hover:bg-[var(--color-surface-4)]"
+                        className="w-full px-3 py-1.5 text-xs text-left font-mono-code flex items-center justify-between transition-colors cursor-pointer hover:bg-white/[0.06]"
                         style={{
                           color: currentLang.startsWith(code)
                             ? 'var(--color-accent)'
@@ -208,18 +263,18 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Ask Intel */}
+              {/* Ask Intel AI Modal Trigger */}
               <button
                 onClick={() => setIsAskOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-mono-code text-xs font-semibold transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
                 style={{
-                  backgroundColor: 'var(--color-accent-bg)',
-                  border: '1px solid var(--color-accent-border)',
+                  backgroundColor: 'rgba(195, 192, 255, 0.12)',
+                  border: '1px solid rgba(195, 192, 255, 0.25)',
                   color: 'var(--color-accent)',
                 }}
                 title={t('intel.title', { defaultValue: 'Ask AI Intel' })}
               >
-                <Sparkles size={11} />
+                <Sparkles size={12} />
                 <span className="hidden sm:inline">{t('nav.askAiIntel', { defaultValue: 'Ask Intel' })}</span>
               </button>
 
@@ -228,10 +283,10 @@ export default function Navbar() {
                 <div className="flex items-center gap-1.5">
                   <Link
                     to="/profile"
-                    className="flex items-center gap-1 px-2 py-1.5 rounded font-mono-code text-xs transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-md font-mono-code text-xs transition-colors border hover:border-white/20"
                     style={{
-                      backgroundColor: 'var(--color-surface-2)',
-                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'rgba(21, 27, 45, 0.50)',
+                      borderColor: 'rgba(255, 255, 255, 0.08)',
                       color: 'var(--color-text-muted)',
                     }}
                     title={t('profile.accountProfile', { defaultValue: 'Profile' })}
@@ -241,10 +296,10 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/profile"
-                    className="w-7 h-7 rounded flex items-center justify-center text-xs font-bold font-mono-code transition-colors"
+                    className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold font-mono-code transition-colors border hover:border-indigo-400/50"
                     style={{
                       backgroundColor: 'var(--color-surface-4)',
-                      border: '1px solid var(--color-border)',
+                      borderColor: 'rgba(255, 255, 255, 0.12)',
                       color: 'var(--color-accent)',
                     }}
                     title={user?.name}
@@ -256,17 +311,17 @@ export default function Navbar() {
                 <div className="flex items-center gap-1.5">
                   <Link
                     to="/login"
-                    className="hidden sm:inline-flex px-3 py-1.5 text-xs font-mono-code font-semibold transition-colors"
+                    className="hidden sm:inline-flex px-3 py-1.5 text-xs font-mono-code font-semibold transition-colors hover:text-white"
                     style={{ color: 'var(--color-text-muted)' }}
                   >
                     {t('nav.signIn', { defaultValue: 'Sign In' })}
                   </Link>
                   <Link
                     to="/signup"
-                    className="px-3 py-1.5 rounded text-xs font-mono-code font-bold transition-colors"
+                    className="px-3 py-1.5 rounded-md text-xs font-mono-code font-bold transition-colors shadow-sm hover:brightness-110"
                     style={{
-                      backgroundColor: 'var(--color-accent-bg)',
-                      border: '1px solid var(--color-accent-border)',
+                      backgroundColor: 'rgba(195, 192, 255, 0.15)',
+                      border: '1px solid rgba(195, 192, 255, 0.30)',
                       color: 'var(--color-accent)',
                     }}
                   >
@@ -275,27 +330,27 @@ export default function Navbar() {
                 </div>
               )}
 
-              {/* Mobile hamburger */}
+              {/* Mobile Menu Button */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 rounded transition-colors cursor-pointer"
-                style={{ color: 'var(--color-text-muted)' }}
+                className="md:hidden p-1.5 rounded-md transition-colors cursor-pointer border hover:border-white/20"
+                style={{
+                  backgroundColor: 'rgba(21, 27, 45, 0.50)',
+                  borderColor: 'rgba(255, 255, 255, 0.08)',
+                  color: 'var(--color-text-muted)',
+                }}
                 aria-label="Toggle Navigation"
               >
-                {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                {isMobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Mobile nav drawer */}
+        {/* Mobile Nav Drawer */}
         {isMobileMenuOpen && (
           <div
-            className="md:hidden border-t px-4 py-4 space-y-3 animate-in slide-in-from-top duration-150"
-            style={{
-              backgroundColor: 'var(--color-surface-1)',
-              borderColor: 'var(--color-border)',
-            }}
+            className="md:hidden border-t px-4 py-4 space-y-3 animate-in slide-in-from-top duration-150 glass-panel"
           >
             <form onSubmit={handleSearchSubmit} className="relative w-full">
               <Search size={12} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
@@ -304,10 +359,10 @@ export default function Navbar() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('filters.searchPlaceholder', { defaultValue: 'Search intel...' })}
-                className="w-full pl-9 pr-3 py-2 text-xs font-mono-code rounded"
+                className="w-full pl-9 pr-3 py-2 text-xs font-mono-code rounded-md"
                 style={{
-                  backgroundColor: 'var(--color-surface-2)',
-                  border: '1px solid var(--color-border)',
+                  backgroundColor: 'rgba(21, 27, 45, 0.85)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)',
                   color: 'var(--color-text-secondary)',
                 }}
               />
@@ -318,9 +373,9 @@ export default function Navbar() {
                   key={link.href}
                   to={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-3 py-2 rounded text-xs font-mono-code font-semibold transition-colors tracking-wider uppercase"
+                  className="px-3 py-2 rounded-md text-xs font-mono-code font-semibold transition-colors tracking-wider uppercase"
                   style={{
-                    color: location.pathname === link.href ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                    color: location.pathname === link.href ? '#ffffff' : 'var(--color-text-muted)',
                     backgroundColor: location.pathname === link.href ? 'var(--color-accent-bg)' : 'transparent',
                   }}
                 >
@@ -332,7 +387,7 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Ask Intel modal — navigates to dossier on event selection */}
+      {/* Ask Intel modal */}
       <AskIntelModal
         isOpen={isAskOpen}
         onClose={() => setIsAskOpen(false)}
