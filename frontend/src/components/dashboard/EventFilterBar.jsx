@@ -37,7 +37,7 @@ export default function EventFilterBar({
   const { t } = useTranslation();
 
   return (
-    <div className="p-4 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-xs">
+    <div className="glass-panel p-4 rounded-2xl space-y-3">
       {/* Top row: Search input + Event Type dropdown + Sort dropdown */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         {/* Search */}
@@ -51,12 +51,12 @@ export default function EventFilterBar({
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t('search.searchPlaceholder', { defaultValue: 'Search events, countries, entities...' })}
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-indigo-400 transition"
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-xl glass-control text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400/60 transition"
           />
           {search && (
             <button
               onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer p-0.5"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 cursor-pointer p-0.5"
             >
               <X size={12} />
             </button>
@@ -68,10 +68,10 @@ export default function EventFilterBar({
           <select
             value={eventType}
             onChange={(e) => onEventTypeChange(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
+            className="w-full px-3 py-2 text-xs rounded-xl glass-control text-slate-200 bg-slate-900/90 focus:outline-none focus:border-cyan-400/60 transition cursor-pointer"
           >
             {EVENT_TYPE_KEYS.map((key) => (
-              <option key={key} value={key}>
+              <option key={key} value={key} className="bg-slate-900 text-slate-100">
                 {key === 'ALL'
                   ? t('filters.allEventTypes', { defaultValue: 'All Event Classifications' })
                   : t(`eventTypes.${key}`, { defaultValue: key.replace(/_/g, ' ') })}
@@ -85,19 +85,19 @@ export default function EventFilterBar({
           <select
             value={sortBy}
             onChange={(e) => onSortByChange(e.target.value)}
-            className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50 text-slate-800 focus:outline-none focus:border-indigo-400 transition cursor-pointer"
+            className="w-full px-3 py-2 text-xs rounded-xl glass-control text-slate-200 bg-slate-900/90 focus:outline-none focus:border-cyan-400/60 transition cursor-pointer"
           >
-            <option value="createdAt">{t('analytics.mostRecent', { defaultValue: 'Most Recent' })}</option>
-            <option value="credibilityScore">{t('analytics.highestCredibility', { defaultValue: 'Highest Credibility' })}</option>
+            <option value="createdAt" className="bg-slate-900 text-slate-100">{t('analytics.mostRecent', { defaultValue: 'Most Recent' })}</option>
+            <option value="credibilityScore" className="bg-slate-900 text-slate-100">{t('analytics.highestCredibility', { defaultValue: 'Highest Credibility' })}</option>
           </select>
         </div>
       </div>
 
       {/* Bottom row: Severity filter pills + Reset button */}
-      <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-100">
+      <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t border-slate-800/60">
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-          <span className="text-[11px] font-medium text-slate-500 mr-1 flex items-center gap-1 shrink-0">
-            <SlidersHorizontal size={11} className="text-slate-400" />
+          <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 mr-1 flex items-center gap-1 shrink-0">
+            <SlidersHorizontal size={11} className="text-cyan-400" />
             <span>{t('filters.severityLabel', { defaultValue: 'Severity:' })}</span>
           </span>
 
@@ -112,10 +112,10 @@ export default function EventFilterBar({
               <button
                 key={sev}
                 onClick={() => onSeverityChange(sev)}
-                className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all cursor-pointer shrink-0 ${
+                className={`px-2.5 py-1 rounded-full text-xs font-mono transition-all cursor-pointer shrink-0 ${
                   isSelected
-                    ? 'bg-slate-900 text-white font-bold'
-                    : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400/40 shadow-[0_0_12px_rgba(6,182,212,0.25)] font-bold'
+                    : 'bg-slate-800/60 text-slate-400 border border-slate-700/60 hover:text-slate-200 hover:bg-slate-800'
                 }`}
               >
                 {sevLabel}
@@ -127,7 +127,7 @@ export default function EventFilterBar({
         {hasActiveFilters && (
           <button
             onClick={onResetFilters}
-            className="px-3 py-1 text-xs rounded-full border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer flex items-center gap-1"
+            className="px-3 py-1 text-xs rounded-full border border-rose-500/30 bg-rose-950/40 text-rose-300 hover:bg-rose-900/50 transition cursor-pointer flex items-center gap-1 font-mono"
           >
             <X size={11} />
             <span>{t('filters.clearFilters', { defaultValue: 'Clear Filters' })}</span>

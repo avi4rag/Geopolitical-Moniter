@@ -71,32 +71,36 @@ export default function StatCards({ stats, onRefresh }) {
       value: totals.events,
       sub: `${totals.articles} articles ingested`,
       Icon: Globe,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
+      color: '#c3c0ff',
+      bg: 'rgba(195, 192, 255, 0.12)',
+      border: 'rgba(195, 192, 255, 0.25)',
     },
     {
       title: t('analytics.statCritical', { defaultValue: 'High / Critical Alerts' }),
       value: highCriticalCount,
       sub: `${stats?.breakdowns?.bySeverity?.CRITICAL || 0} critical severity`,
       Icon: AlertOctagon,
-      color: 'text-rose-600',
-      bg: 'bg-rose-50',
+      color: '#f43f5e',
+      bg: 'rgba(244, 63, 94, 0.12)',
+      border: 'rgba(244, 63, 94, 0.25)',
     },
     {
       title: t('analytics.statDomains', { defaultValue: 'Active Impacts' }),
       value: totals.activeImpacts,
       sub: 'evaluated ripple effects',
       Icon: TrendingUp,
-      color: 'text-amber-600',
-      bg: 'bg-amber-50',
+      color: '#f59e0b',
+      bg: 'rgba(245, 158, 11, 0.12)',
+      border: 'rgba(245, 158, 11, 0.25)',
     },
     {
       title: t('sources.title', { defaultValue: 'Monitored Sources' }),
       value: totals.sources,
       sub: 'live wire feeds',
       Icon: Newspaper,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      color: '#10b981',
+      bg: 'rgba(16, 185, 129, 0.12)',
+      border: 'rgba(16, 185, 129, 0.25)',
     },
   ];
 
@@ -109,20 +113,28 @@ export default function StatCards({ stats, onRefresh }) {
           return (
             <div
               key={card.title}
-              className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs transition-all flex items-start justify-between"
+              className="glass-card p-5 rounded-xl border flex items-start justify-between relative overflow-hidden"
+              style={{ borderColor: 'var(--color-border)' }}
             >
-              <div className="space-y-1">
-                <span className="text-xs font-semibold text-slate-500 font-mono">
+              <div className="space-y-1.5">
+                <span className="text-xs font-mono-code font-bold uppercase tracking-wider text-[var(--color-text-dim)]">
                   {card.title}
                 </span>
-                <div className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-                  {card.value}
+                <div className="text-3xl font-headline font-bold text-[var(--color-text-primary)] tracking-tight">
+                  {card.value.toLocaleString()}
                 </div>
-                <span className="text-[11px] text-slate-400 font-mono">
+                <span className="text-[11px] font-mono-code text-[var(--color-text-muted)]">
                   {card.sub}
                 </span>
               </div>
-              <div className={`p-2.5 rounded-xl ${card.bg} ${card.color} shrink-0`}>
+              <div
+                className="p-3 rounded-xl shrink-0 border"
+                style={{
+                  backgroundColor: card.bg,
+                  borderColor: card.border,
+                  color: card.color,
+                }}
+              >
                 <Icon size={20} />
               </div>
             </div>
@@ -131,15 +143,18 @@ export default function StatCards({ stats, onRefresh }) {
       </div>
 
       {/* Sync Pipeline Bar */}
-      <div className="p-4 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div
+        className="glass-panel p-4 rounded-xl border flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-md"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-900 font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-xs font-bold text-[var(--color-text-primary)] font-mono-code tracking-wider uppercase">
               REAL-TIME INGESTION & IMPACT PIPELINE
             </span>
           </div>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs font-mono-code text-[var(--color-text-dim)]">
             Triggers multi-source RSS harvester, entity extractor, and causal assessment models.
           </p>
         </div>
@@ -147,27 +162,40 @@ export default function StatCards({ stats, onRefresh }) {
         <button
           onClick={handleSyncNow}
           disabled={isSyncing}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-xs font-mono-code font-bold transition-all duration-200 cursor-pointer disabled:opacity-50"
+          style={{
+            backgroundColor: 'var(--color-accent)',
+            color: '#020617',
+          }}
         >
-          <RefreshCw size={13} className={isSyncing ? 'animate-spin text-indigo-400' : ''} />
+          <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
           <span>{isSyncing ? 'Syncing Pipeline...' : 'Run Pipeline Sync'}</span>
         </button>
       </div>
 
       {syncStatus && (
         <div
-          className={`p-4 rounded-xl text-xs flex items-center gap-2.5 border ${
+          className="p-4 rounded-xl text-xs font-mono-code flex items-center gap-2.5 border"
+          style={
             syncStatus.type === 'success'
-              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-              : 'bg-rose-50 text-rose-800 border-rose-200'
-          }`}
+              ? {
+                  backgroundColor: 'rgba(16, 185, 129, 0.10)',
+                  borderColor: 'rgba(16, 185, 129, 0.30)',
+                  color: '#34d399',
+                }
+              : {
+                  backgroundColor: 'rgba(244, 63, 94, 0.10)',
+                  borderColor: 'rgba(244, 63, 94, 0.30)',
+                  color: '#f43f5e',
+                }
+          }
         >
           {syncStatus.type === 'success' ? (
-            <CheckCircle size={16} className="text-emerald-600 shrink-0" />
+            <CheckCircle size={16} className="text-emerald-400 shrink-0" />
           ) : (
-            <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+            <AlertTriangle size={16} className="text-rose-400 shrink-0" />
           )}
-          <span className="font-medium">{syncStatus.message}</span>
+          <span className="font-semibold">{syncStatus.message}</span>
         </div>
       )}
     </div>

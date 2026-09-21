@@ -32,11 +32,14 @@ export default function CountryRiskMatrix() {
 
   if (isLoading) {
     return (
-      <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4">
-        <div className="h-4 w-40 bg-slate-100 rounded animate-pulse" />
+      <div
+        className="glass-panel p-6 rounded-xl border space-y-4"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
+        <div className="h-4 w-40 bg-[var(--color-surface-4)] rounded animate-pulse" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-16 bg-slate-100 rounded-xl animate-pulse" />
+            <div key={i} className="h-16 bg-[var(--color-surface-2)] rounded-xl animate-pulse" />
           ))}
         </div>
       </div>
@@ -46,19 +49,28 @@ export default function CountryRiskMatrix() {
   if (countryStats.length === 0) return null;
 
   return (
-    <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-5 shadow-xs">
-      <div className="flex items-center justify-between">
+    <div
+      className="glass-panel p-6 rounded-xl border space-y-5 shadow-lg"
+      style={{ borderColor: 'var(--color-border)' }}
+    >
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-base font-bold text-slate-950 flex items-center gap-2">
-            <Globe size={18} className="text-indigo-600" />
-            <span>{t('analytics.countryMatrix', { defaultValue: 'Country Risk Matrix' })}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="h-2.5 w-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }} />
+            <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest text-[var(--color-accent)]">
+              GEOPOLITICAL THEATER EXPOSURE
+            </span>
+          </div>
+          <h2 className="text-base font-bold font-headline text-[var(--color-text-primary)] flex items-center gap-2">
+            <Globe size={18} style={{ color: 'var(--color-accent)' }} />
+            <span>{t('analytics.countryMatrix', { defaultValue: 'Country Risk Density Matrix' })}</span>
           </h2>
-          <p className="text-xs text-slate-500">
-            {t('analytics.countryMatrixSub', { defaultValue: 'Geopolitical activity and risk density by nation' })}
+          <p className="text-xs font-mono-code text-[var(--color-text-dim)]">
+            {t('analytics.countryMatrixSub', { defaultValue: 'Geopolitical activity and threat concentration by nation' })}
           </p>
         </div>
-        <span className="text-xs font-mono text-slate-400">
-          {countryStats.length} Nations Tracked
+        <span className="text-xs font-mono-code px-2.5 py-1 rounded-md border text-[var(--color-text-secondary)]" style={{ backgroundColor: 'var(--color-surface-2)', borderColor: 'var(--color-border-subtle)' }}>
+          {countryStats.length} Sovereign Entities Tracked
         </span>
       </div>
 
@@ -71,38 +83,54 @@ export default function CountryRiskMatrix() {
             <Link
               key={stat.country}
               to={`/search?country=${encodeURIComponent(stat.country)}`}
-              className={`p-4 rounded-xl border transition-all flex items-center justify-between group cursor-pointer ${
+              className="glass-card p-4 rounded-xl border transition-all duration-200 flex items-center justify-between group cursor-pointer relative overflow-hidden"
+              style={
                 hasCritical
-                  ? 'border-rose-200 bg-rose-50/50 hover:bg-rose-50'
+                  ? {
+                      borderColor: 'rgba(244, 63, 94, 0.35)',
+                      backgroundColor: 'rgba(244, 63, 94, 0.08)',
+                    }
                   : hasHigh
-                  ? 'border-amber-200 bg-amber-50/50 hover:bg-amber-50'
-                  : 'border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-300'
-              }`}
+                  ? {
+                      borderColor: 'rgba(245, 158, 11, 0.30)',
+                      backgroundColor: 'rgba(245, 158, 11, 0.06)',
+                    }
+                  : {
+                      borderColor: 'var(--color-border)',
+                      backgroundColor: 'rgba(21, 27, 45, 0.60)',
+                    }
+              }
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-950 group-hover:text-indigo-600 transition-colors">
+                  <span className="text-xs font-mono-code font-bold text-[var(--color-text-primary)] group-hover:text-white transition-colors">
                     {stat.country}
                   </span>
                   {hasCritical && (
-                    <ShieldAlert size={12} className="text-rose-600" title="Critical Events Active" />
+                    <ShieldAlert size={13} className="text-rose-400" title="Critical Events Active" />
                   )}
                   {!hasCritical && hasHigh && (
-                    <AlertTriangle size={12} className="text-amber-600" title="High Severity Events Active" />
+                    <AlertTriangle size={13} className="text-amber-400" title="High Severity Events Active" />
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
-                  <span>{stat.totalEvents} events</span>
+                <div className="flex items-center gap-2 text-[11px] font-mono-code text-[var(--color-text-dim)]">
+                  <span>{stat.totalEvents} dispatches</span>
                   {hasCritical && (
-                    <span className="text-rose-600 font-bold">
+                    <span className="text-rose-400 font-bold">
                       ({stat.criticalEvents} critical)
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-300 transition-all">
+              <div
+                className="p-1.5 rounded-lg border text-[var(--color-text-dim)] group-hover:text-white group-hover:border-[var(--color-accent)] transition-all"
+                style={{
+                  backgroundColor: 'var(--color-surface-4)',
+                  borderColor: 'rgba(255, 255, 255, 0.08)',
+                }}
+              >
                 <ArrowUpRight size={13} />
               </div>
             </Link>
