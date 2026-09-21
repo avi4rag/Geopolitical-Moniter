@@ -13,7 +13,7 @@ const FALLBACK_CATEGORY_IMAGES = {
   FINANCE: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=800&q=80',
 };
 
-const DEFAULT_EDITORIAL_FALLBACK = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80';
+export const DEFAULT_EDITORIAL_FALLBACK = 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80';
 
 /**
  * Returns the exact image URL from the API/article if available,
