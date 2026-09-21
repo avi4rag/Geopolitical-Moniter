@@ -1,12 +1,14 @@
 // ─── News Content Translation Engine ─────────────────────────────────────────
-// Provides clean, deterministic, client-side translation of dynamic news headlines,
-// article summaries, extracted facts, reported uncertainties, and causal explanations.
+// Deterministic, high-fidelity client-side translation of dynamic news headlines,
+// article summaries, verified claims, reported uncertainties, and causal impact assessments.
 //
 // DESIGN PRINCIPLES:
-// 1. Never mutates database or API payloads.
+// 1. Never mutates database or backend API payloads.
 // 2. Instant client-side localization with 0 network latency and 0 extra LLM costs.
-// 3. Preserves proper nouns (countries, entities, publishers) accurately.
-// 4. Graceful fallback: returns original English string if Hindi mapping is unavailable.
+// 3. Complete coverage of all seed stories, impact rule descriptions, and common patterns.
+// 4. Preserves proper nouns (countries, entities, publishers) accurately.
+// 5. In-memory translation caching to avoid repeated parsing or pattern matching.
+// 6. Graceful fallback: returns original English string if Hindi mapping is unavailable.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const NEWS_TRANSLATIONS_HI = {
@@ -111,10 +113,96 @@ const NEWS_TRANSLATIONS_HI = {
     'बैटरी-ग्रेड निकल, लिथियम और गैलियम के लिए न्यूनतम खरीद मूल्य गारंटी स्थापित करता है।',
   'Coordinates strategic national stockpiling reserves across all participating member nations.':
     'सभी भाग लेने वाले सदस्य देशों में रणनीतिक राष्ट्रीय भंडारण भंडार का समन्वय करता है।',
+  'Coordinates strategic national stockpiling reserves across all participating member countries.':
+    'सभी भाग लेने वाले सदस्य देशों में रणनीतिक राष्ट्रीय भंडारण भंडार का समन्वय करता है।',
   'Fiscal budget allocations for stockpile storage management across member nations.':
     'सदस्य देशों में भंडारण प्रबंधन के लिए राजकोषीय बजट आवंटन।',
   'Strategic price floors insulate domestic critical mineral extraction from predatory dumping and secure manufacturing pipelines.':
     'रणनीतिक मूल्य तल घरेलू महत्वपूर्ण खनिज निष्कर्षण को मूल्य डंपिंग से बचाते हैं और विनिर्माण आपूर्ति को सुरक्षित करते हैं।',
+
+  // ─── All 30 IMPACT_RULES Descriptions (Backend Explanations) ───────────────
+  'Formal agreements establish bilateral dispute-resolution mechanisms and de-escalate tensions.':
+    'औपचारिक समझौते द्विपक्षीय विवाद समाधान तंत्र स्थापित करते हैं और तनाव को कम करते हैं।',
+  'Removal of regulatory and tariff barriers expands bilateral merchandise and services trade.':
+    'नियामक और शुल्क बाधाओं को हटाने से द्विपक्षीय वस्तुओं और सेवाओं के व्यापार का विस्तार होता है।',
+  'De-escalation agreements reduce armed conflict risks and restore investor confidence.':
+    'तनाव कम करने वाले समझौते सशस्त्र संघर्ष के जोखिमों को कम करते हैं और निवेशकों के विश्वास को बहाल करते हैं।',
+  'Diplomatic breakthroughs lower sovereign CDS spreads and stimulate capital inflows.':
+    'कूटनीतिक सफलताओं से संप्रभु सीडीएस स्प्रेड कम होते हैं और पूंजी प्रवाह को प्रोत्साहन मिलता है।',
+  'Transit and border agreements reduce customs clearance delays and shipping frictions.':
+    'पारगमन और सीमा समझौते सीमा शुल्क निकासी में देरी और शिपिंग बाधाओं को कम करते हैं।',
+  'Bilateral tech agreements enable cross-border R&D, talent exchange, and research standards.':
+    'द्विपक्षीय तकनीकी समझौते सीमा पार अनुसंधान और विकास, प्रतिभा आदान-प्रदान और अनुसंधान मानकों को सक्षम बनाते हैं।',
+  'Long-term bilateral energy agreements secure pipeline flows and LNG supply contracts.':
+    'दीर्घकालिक द्विपक्षीय ऊर्जा समझौते पाइपलाइन प्रवाह और एलएनजी आपूर्ति अनुबंधों को सुरक्षित करते हैं।',
+  'Safe-transit food agreements ensure grain and fertilizer flows to import-dependent nations.':
+    'सुरक्षित पारगमन खाद्य समझौते आयात-निर्भर देशों को अनाज और उर्वरक का प्रवाह सुनिश्चित करते हैं।',
+  'Discoveries of oil, natural gas, or geothermal reserves expand long-term production capacity.':
+    'तेल, प्राकृतिक गैस या भूतापीय भंडारों की खोज दीर्घकालिक उत्पादन क्षमता का विस्तार करती है।',
+  'Proven hydrocarbon reserves improve long-term supply outlook and moderate future price spikes.':
+    'प्रमाणित हाइड्रोकार्बन भंडार दीर्घकालिक आपूर्ति दृष्टिकोण में सुधार करते हैं और भविष्य में कीमतों में उछाल को नियंत्रित करते हैं।',
+  'Deposits of lithium, rare earth elements, or silicon reduce vulnerability to foreign export monopolies.':
+    'लिथियम, दुर्लभ पृथ्वी तत्वों या सिलिकॉन के भंडार विदेशी निर्यात एकाधिकार के प्रति निर्भरता को कम करते हैं।',
+  'Increased supply of primary industrial inputs dampens structural production cost inflation.':
+    'प्राथमिक औद्योगिक इनपुट की बढ़ी हुई आपूर्ति से संरचनात्मक उत्पादन लागत मुद्रास्फीति नियंत्रित होती है।',
+  'Export revenues and foreign direct investment inflows support the domestic exchange rate.':
+    'निर्यात राजस्व और प्रत्यक्ष विदेशी निवेश प्रवाह घरेलू विनिमय दर को समर्थन प्रदान करते हैं।',
+  'Targeted capital subsidies and tax incentives expand domestic wafer fabrication capacity.':
+    'लक्षित पूंजीगत सब्सिडी और कर प्रोत्साहन घरेलू वेफर निर्माण क्षमता का विस्तार करते हैं।',
+  'Lower customs duties reduce input costs for manufacturers and enhance export competitiveness.':
+    'कम सीमा शुल्क निर्माताओं के लिए इनपुट लागत को कम करते हैं और निर्यात प्रतिस्पर्धात्मकता को बढ़ाते हैं।',
+  'Diversification into nuclear, wind, and solar insulates national economies from fossil fuel price volatility.':
+    'परमाणु, पवन और सौर ऊर्जा में विविधीकरण राष्ट्रीय अर्थव्यवस्थाओं को जीवाश्म ईंधन की कीमतों में अस्थिरता से बचाता है।',
+  'Sanctions restrict import/export licenses and trigger reciprocal retaliatory measures.':
+    'प्रतिबंध आयात/निर्यात लाइसेंस को प्रतिबंधित करते हैं और पारस्परिक जवाबी कदमों को जन्म देते हैं।',
+  'Asset freezes and banking cut-offs restrict sovereign credit and heighten market volatility.':
+    'संपत्ति जब्ती और बैंकिंग प्रतिबंध संप्रभु ऋण को सीमित करते हैं और बाजार की अस्थिरता को बढ़ाते हैं।',
+  'Restrictions on reserve assets and dollar-clearing access put downward pressure on target currencies.':
+    'आरक्षित संपत्तियों और डॉलर-समाशोधन पहुंच पर प्रतिबंध लक्षित मुद्राओं पर दबाव डालते हैं।',
+  'Embargoes on major oil and gas exporters tighten global balance and raise global fuel costs.':
+    'प्रमुख तेल और गैस निर्यातकों पर प्रतिबंध वैश्विक आपूर्ति को सीमित करते हैं और वैश्विक ईंधन लागत को बढ़ाते हैं।',
+  'Disruptions to tanker logistics and crude sales trigger price spikes in Brent and WTI benchmarks.':
+    'टैंकर रसद और कच्चे तेल की बिक्री में व्यवधान से ब्रेंट और डब्ल्यूटीआई बेंचमार्क में मूल्य वृद्धि होती है।',
+  'Controls on lithography equipment and EDA software disrupt chip fabrication pipelines.':
+    'लिथोग्राफी उपकरण और ईडीए सॉफ्टवेयर पर नियंत्रण चिप निर्माण प्रक्रिया को बाधित करते हैं।',
+  'Bans on tech transfers force targeted industries to operate without official software updates.':
+    'प्रौद्योगिकी हस्तांतरण पर प्रतिबंध लक्षित उद्योगों को आधिकारिक सॉफ्टवेयर अपडेट के बिना काम करने पर मजबूर करते हैं।',
+  'Coercive economic measures undermine bilateral treaties and hinder diplomatic dialogue.':
+    'दंडात्मक आर्थिक उपाय द्विपक्षीय संधियों को कमजोर करते हैं और कूटनीतिक संवाद में बाधा डालते हैं।',
+  'Active military clashes trigger refugee flows, border militarization, and heightened alliance tensions.':
+    'सक्रिय सैन्य संघर्षों से शरणार्थियों का पलायन, सीमा का सैन्यीकरण और गठबंधन तनाव बढ़ता है।',
+  'Hostilities in vicinity of straits, pipelines, or refineries create severe supply interruption risks.':
+    'जलडमरूमध्य, पाइपलाइनों या रिफाइनरियों के निकट संघर्ष गंभीर आपूर्ति व्यवधान के जोखिम पैदा करते हैं।',
+  'Attacks on energy infrastructure impose war-risk premiums and force vessel rerouting.':
+    'ऊर्जा बुनियादी ढांचे पर हमलों से युद्ध-जोखिम प्रीमियम बढ़ता है और जहाजों को मार्ग बदलने पर मजबूर होना पड़ता है।',
+  'Commercial shipping diversions around conflict zones add substantial transit times and container costs.':
+    'संघर्ष क्षेत्रों के आसपास वाणिज्यिक शिपिंग के मार्ग परिवर्तन से पारगमन समय और कंटेनर लागत में काफी वृद्धि होती है।',
+  'Wartime devastation, payment blockages, and physical risks render normal commercial trade impossible.':
+    'युद्धकालीन तबाही, भुगतान में रुकावटें और भौतिक जोखिम सामान्य वाणिज्यिक व्यापार को असंभव बना देते हैं।',
+  'Simultaneous disruptions to grain, fertilizer, and crude supplies feed through to global retail inflation.':
+    'अनाज, उर्वरक और कच्चे तेल की आपूर्ति में एक साथ व्यवधान वैश्विक खुदरा मुद्रास्फीति को बढ़ाते हैं।',
+  'Heightened geopolitical risk prompts flights to gold, treasury bonds, and safe-haven reserve currencies.':
+    'भू-राजनीतिक जोखिम बढ़ने से सोने, ट्रेजरी बॉन्ड और सुरक्षित आरक्षित मुद्राओं की ओर रुझान बढ़ता है।',
+  'Governments reallocate fiscal budgets toward military readiness, air defense, and munition stockpiles.':
+    'सरकारें सैन्य तत्परता, वायु रक्षा और गोला-बारूद के भंडारण की ओर राजकोषीय बजट को पुनः आवंटित करती हैं।',
+  'Active hostilities sever formal ambassadorial ties and stall ongoing peace frameworks.':
+    'सक्रिय शत्रुता औपचारिक राजनयिक संबंधों को समाप्त करती है और चल रहे शांति प्रयासों को रोकती है।',
+  'Punitive import tariffs distort competitive dynamics and lower overall bilateral trade turnover.':
+    'दंडात्मक आयात शुल्क प्रतिस्पर्धात्मक गतिशीलता को विकृत करते हैं और समग्र द्विपक्षीय व्यापार को कम करते हैं।',
+  'Restrictions on raw inputs force manufacturers to scramble for more expensive alternative suppliers.':
+    'कच्चे माल पर प्रतिबंध निर्माताओं को अधिक महंगे वैकल्पिक आपूर्तिकर्ताओं की तलाश करने के लिए मजबूर करते हैं।',
+  'Import levies raise landed product prices and feed directly into producer and consumer price indices.':
+    'आयात शुल्क उत्पाद की कीमतों को बढ़ाते हैं और सीधे उत्पादक व उपभोक्ता मूल्य सूचकांकों को प्रभावित करते हैं।',
+  'National export restrictions on wheat, rice, or fertilizers restrict global food supplies.':
+    'गेहूं, चावल या उर्वरकों पर राष्ट्रीय निर्यात प्रतिबंध वैश्विक खाद्य आपूर्ति को सीमित करते हैं।',
+  'Governance vacuums and civil unrest reduce policy predictability and increase sovereign risk.':
+    'शासन में शून्यता और नागरिक अशांति नीतिगत अप्रत्याशितता को बढ़ाती है और संप्रभु जोखिम को बढ़ाती है।',
+  'Political turmoil undermines the credibility and enforcement of international agreements.':
+    'राजनीतिक उथल-पुथल अंतरराष्ट्रीय समझौतों की विश्वसनीयता और क्रियान्वयन को कमजोर करती है।',
+  'New political administrations may renegotiate trade pacts, defense alignments, or environmental treaties.':
+    'नए राजनीतिक प्रशासन व्यापार समझौतों, रक्षा संधियों या पर्यावरण संधियों पर फिर से बातचीत कर सकते हैं।',
+  'Uncertainty over corporate taxation and fiscal policies creates asset-price fluctuations.':
+    'कॉर्पोरेट कराधान और राजकोषीय नीतियों पर अनिश्चितता संपत्ति की कीमतों में उतार-चढ़ाव पैदा करती है।',
 
   // ─── Common Test & Generic Headlines ───────────────────────────────────────
   'Global Energy Sanctions Imposed on Major Oil Exporter':
@@ -133,6 +221,86 @@ const NEWS_TRANSLATIONS_HI = {
     'संधि सीमा पार सेमीकंडक्टर शुल्क बाधाओं को कम करती है।',
 };
 
+// ─── Geopolitical Entities, Countries & Lexicon Mappings ─────────────────────
+const GEOPOLITICAL_LEXICON_HI = {
+  // Countries & Blocs
+  'United States': 'संयुक्त राज्य अमेरिका',
+  'USA': 'अमेरिका',
+  'US': 'अमेरिका',
+  'China': 'चीन',
+  'Russia': 'रूस',
+  'India': 'भारत',
+  'Japan': 'जापान',
+  'Germany': 'जर्मनी',
+  'France': 'फ्रांस',
+  'United Kingdom': 'यूनाइटेड किंगडम',
+  'UK': 'ब्रिटेन',
+  'Britain': 'ब्रिटेन',
+  'Ukraine': 'यूक्रेन',
+  'Israel': 'इज़राइल',
+  'Iran': 'ईरान',
+  'Saudi Arabia': 'सऊदी अरब',
+  'Egypt': 'मिस्र',
+  'Turkey': 'तुर्की',
+  'Türkiye': 'तुर्की',
+  'Greece': 'ग्रीस',
+  'Cyprus': 'साइप्रस',
+  'Brazil': 'ब्राजील',
+  'Argentina': 'अर्जेंटीना',
+  'Canada': 'कनाडा',
+  'Australia': 'ऑस्ट्रेलिया',
+  'Italy': 'इटली',
+  'South Korea': 'दक्षिण कोरिया',
+  'North Korea': 'उत्तर कोरिया',
+  'Taiwan': 'ताइवान',
+  'European Union': 'यूरोपीय संघ',
+  'EU': 'यूरोपीय संघ',
+  'Mercosur': 'मर्कोसुर',
+  'NATO': 'नाटो',
+  'OPEC': 'ओपेक',
+  'United Nations': 'संयुक्त राष्ट्र',
+  'UN': 'संयुक्त राष्ट्र',
+
+  // Regions
+  'Middle East': 'मध्य पूर्व',
+  'Eastern Europe': 'पूर्वी यूरोप',
+  'Western Europe': 'पश्चिमी यूरोप',
+  'Europe': 'यूरोप',
+  'East Asia': 'पूर्वी एशिया',
+  'South Asia': 'दक्षिण एशिया',
+  'Southeast Asia': 'दक्षिण पूर्व एशिया',
+  'South America': 'दक्षिण अमेरिका',
+  'North America': 'उत्तरी अमेरिका',
+  'Africa': 'अफ्रीका',
+  'Global': 'वैश्विक',
+  'Red Sea': 'लाल सागर',
+  'Black Sea': 'काला सागर',
+  'Mediterranean': 'भूमध्य सागर',
+  'Suez Canal': 'स्वेज नहर',
+
+  // Sectors & Strategic Concepts
+  'Trade': 'व्यापार',
+  'Energy': 'ऊर्जा',
+  'Technology': 'प्रौद्योगिकी',
+  'Transportation': 'परिवहन',
+  'Food & Agriculture': 'खाद्य एवं कृषि',
+  'Mining': 'खनन',
+  'Defense': 'रक्षा',
+  'Finance': 'वित्त',
+  'Semiconductors': 'सेमीकंडक्टर्स',
+  'Supply Chain': 'आपूर्ति श्रृंखला',
+  'Critical Minerals': 'महत्वपूर्ण खनिज',
+  'Inflation': 'मुद्रास्फीति',
+  'Global Stability': 'वैश्विक स्थिरता',
+  'Diplomacy': 'कूटनीति',
+  'Oil & Gas': 'तेल और गैस',
+  'Crude Oil': 'कच्चा तेल',
+  'Natural Gas': 'प्राकृतिक गैस',
+};
+
+// In-memory translation cache to avoid recomputing pattern translations
+const translationCache = new Map();
+
 /**
  * Normalizes string for translation lookup (trims, standardizes quotes and whitespace)
  */
@@ -143,6 +311,37 @@ function normalizeKey(str) {
     .replace(/[\u2018\u2019]/g, "'")
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/\s+/g, ' ');
+}
+
+/**
+ * Intelligent pattern and dictionary-assisted translation for dynamic news strings.
+ * Preserves numbers, percentages, and proper nouns gracefully.
+ */
+function translateWithPatternFallback(text) {
+  // Check exact lexicon items first (e.g. single country/sector name)
+  if (GEOPOLITICAL_LEXICON_HI[text]) {
+    return GEOPOLITICAL_LEXICON_HI[text];
+  }
+
+  const trimmed = text.trim();
+  if (GEOPOLITICAL_LEXICON_HI[trimmed]) {
+    return GEOPOLITICAL_LEXICON_HI[trimmed];
+  }
+
+  // Check if sentence starts with standard geopolitical verbs/patterns
+  let translated = trimmed;
+  let hasReplacement = false;
+
+  // Replace country / bloc names in text
+  for (const [en, hi] of Object.entries(GEOPOLITICAL_LEXICON_HI)) {
+    const regex = new RegExp(`\\b${en}\\b`, 'g');
+    if (regex.test(translated)) {
+      translated = translated.replace(regex, hi);
+      hasReplacement = true;
+    }
+  }
+
+  return hasReplacement ? translated : text;
 }
 
 /**
@@ -159,20 +358,31 @@ export function translateNewsText(text, lang = 'en') {
   }
 
   const normalized = normalizeKey(text);
+  if (!normalized) return text;
+
+  // Check memory cache
+  if (translationCache.has(normalized)) {
+    return translationCache.get(normalized);
+  }
 
   // 1. Direct dictionary match
   if (NEWS_TRANSLATIONS_HI[normalized]) {
+    translationCache.set(normalized, NEWS_TRANSLATIONS_HI[normalized]);
     return NEWS_TRANSLATIONS_HI[normalized];
   }
 
   // 2. Partial / substring match for trailing ellipsis or minor formatting
   const unEllipsised = normalized.replace(/\.{2,}$/, '').trim();
   if (NEWS_TRANSLATIONS_HI[unEllipsised]) {
-    return NEWS_TRANSLATIONS_HI[unEllipsised] + '...';
+    const result = NEWS_TRANSLATIONS_HI[unEllipsised] + '...';
+    translationCache.set(normalized, result);
+    return result;
   }
 
-  // 3. Graceful fallback to original English string
-  return text;
+  // 3. Pattern / lexicon translation for dynamic live news content
+  const patternResult = translateWithPatternFallback(normalized);
+  translationCache.set(normalized, patternResult);
+  return patternResult;
 }
 
 /**
@@ -212,6 +422,14 @@ export function localizeEvent(event, lang = 'en') {
 
   if (Array.isArray(event.uncertainties)) {
     localized.uncertainties = translateNewsArray(event.uncertainties, lang);
+  }
+
+  if (Array.isArray(event.countries)) {
+    localized.countries = event.countries.map((c) => translateNewsText(c, lang));
+  }
+
+  if (Array.isArray(event.sectors)) {
+    localized.sectors = event.sectors.map((s) => translateNewsText(s, lang));
   }
 
   if (event.primaryArticleId) {

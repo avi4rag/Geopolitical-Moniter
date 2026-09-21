@@ -1,5 +1,7 @@
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { translateNewsText } from '../../i18n/newsContentTranslations.js';
 
 function timeAgo(dateStr) {
   if (!dateStr) return '';
@@ -23,6 +25,9 @@ const SEV_BAR = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function TrendingSidebar({ trendingEvents, onSelectEvent, onViewAll }) {
+  const { i18n } = useTranslation();
+  const lang = i18n.language || 'en';
+
   return (
     <div
       className="rounded-lg border overflow-hidden"
@@ -66,7 +71,7 @@ export default function TrendingSidebar({ trendingEvents, onSelectEvent, onViewA
                   className="text-xs font-headline font-semibold leading-snug line-clamp-2 group-hover:text-white transition-colors"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
-                  {event.summary}
+                  {translateNewsText(event.summary, lang)}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
                   {event.sectors?.[0] && (
@@ -74,7 +79,7 @@ export default function TrendingSidebar({ trendingEvents, onSelectEvent, onViewA
                       className="text-[9px] font-mono-code uppercase"
                       style={{ color: 'var(--color-text-dim)' }}
                     >
-                      {event.sectors[0]}
+                      {translateNewsText(event.sectors[0], lang)}
                     </span>
                   )}
                   <span
