@@ -12,6 +12,7 @@ import FeedSkeleton from '../components/feed/FeedSkeleton.jsx';
 import DomainMatrix from '../components/dashboard/DomainMatrix.jsx';
 import ActiveEventsTicker from '../components/feed/ActiveEventsTicker.jsx';
 import EventDetailModal from '../components/events/EventDetailModal.jsx';
+import MethodologySection from '../components/home/MethodologySection.jsx';
 
 // ─── Situation Room Intelligence Feed — Home Page ─────────────────────────────
 // Dark feed layout:
@@ -335,6 +336,9 @@ export default function Home() {
               </div>
             )}
           </div>
+
+          {/* ── METHODOLOGY & TRUST PIPELINE ───────────────────────────────────── */}
+          <MethodologySection />
         </>
       )}
 
