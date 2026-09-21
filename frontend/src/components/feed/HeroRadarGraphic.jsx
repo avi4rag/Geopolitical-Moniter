@@ -1,108 +1,128 @@
 import React from 'react';
 
-// ─── Abstract Geopolitical Radar / Signal Detection Visualization ────────────
-// Subtle, restrained SVG radar graphic representing global signal propagation.
-// Features concentric coordinate rings, slow rotating sweep beam, and geo-nodes.
+// ─── Situation Room Radar Scope Terminal ─────────────────────────────────────
+// Dedicated intelligence terminal with coordinate readouts, rotating sweep cone,
+// real event telemetry binding, and labeled signal nodes.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function HeroRadarGraphic({ activeSector = 'GLOBAL', className = '' }) {
+export default function HeroRadarGraphic({ event, className = '' }) {
+  const eventSector = event?.sectors?.[0] || 'CRITICAL';
+  const eventCountry = event?.countries?.[0] || 'THEATER';
+  const eventType = event?.eventType ? event.eventType.replace(/_/g, '-') : 'SIGNAL-HOT';
+
   return (
-    <div className={`relative flex items-center justify-center select-none pointer-events-none overflow-hidden ${className}`}>
-      {/* Ambient background glow */}
-      <div
-        className="absolute w-72 h-72 rounded-full opacity-20 blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(225,29,72,0.3) 0%, rgba(99,102,241,0.15) 60%, transparent 80%)' }}
-      />
+    <div
+      className={`terminal-panel rounded-2xl p-4 sm:p-5 flex flex-col justify-between border border-white/10 relative overflow-hidden select-none shadow-2xl ${className}`}
+      style={{
+        background: 'rgba(11, 16, 32, 0.85)',
+      }}
+    >
+      {/* Top Telemetry Header */}
+      <div className="flex items-start justify-between text-[10px] font-mono-code text-slate-400 pb-2 border-b border-white/[0.06] z-10">
+        <div>
+          <div className="text-rose-400 font-bold tracking-wider">T-AZM 048°</div>
+          <div className="text-[9px] text-slate-400 mt-0.5 uppercase tracking-widest">
+            GEO: {eventCountry}
+          </div>
+        </div>
+        <div className="text-right text-[10px] font-mono-code">
+          <span className="text-slate-400 uppercase tracking-wider">
+            REF: {eventType}
+          </span>
+          <span className="text-rose-400 ml-1">┐</span>
+        </div>
+      </div>
 
-      <svg
-        viewBox="0 0 400 400"
-        className="w-full h-full max-w-[380px] max-h-[380px]"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <defs>
-          {/* Radar sweep gradient */}
-          <linearGradient id="radarSweepGrad" x1="200" y1="200" x2="380" y2="200" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#c3c0ff" stopOpacity="0" />
-            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.45" />
-          </linearGradient>
+      {/* Center Radar Scope */}
+      <div className="relative w-full aspect-square max-w-[240px] mx-auto my-2 flex items-center justify-center">
+        {/* Subtle ambient red/navy glow behind scope */}
+        <div
+          className="absolute inset-0 rounded-full opacity-30 blur-2xl pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(244,63,94,0.3) 0%, rgba(56,189,248,0.15) 60%, transparent 80%)' }}
+        />
 
-          {/* Core pulse gradient */}
-          <radialGradient id="corePulseGrad" cx="200" cy="200" r="160" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#e11d48" stopOpacity="0.12" />
-            <stop offset="60%" stopColor="#38bdf8" stopOpacity="0.04" />
-            <stop offset="100%" stopColor="#020617" stopOpacity="0" />
-          </radialGradient>
-        </defs>
+        <svg
+          viewBox="0 0 300 300"
+          className="w-full h-full"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <defs>
+            {/* Radar sweep cone gradient in coral */}
+            <linearGradient id="coralRadarSweep" x1="150" y1="150" x2="280" y2="150" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#f43f5e" stopOpacity="0" />
+              <stop offset="100%" stopColor="#f43f5e" stopOpacity="0.40" />
+            </linearGradient>
 
-        {/* Ambient background disc */}
-        <circle cx="200" cy="200" r="175" fill="url(#corePulseGrad)" />
+            {/* Core glow */}
+            <radialGradient id="scopeCenterGlow" cx="150" cy="150" r="130" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.08" />
+              <stop offset="70%" stopColor="#0b1020" stopOpacity="0.80" />
+              <stop offset="100%" stopColor="#070a12" stopOpacity="1" />
+            </radialGradient>
+          </defs>
 
-        {/* Outer and inner concentric radar range rings */}
-        <circle cx="200" cy="200" r="175" stroke="rgba(255,255,255,0.08)" strokeWidth="1" strokeDasharray="4 4" />
-        <circle cx="200" cy="200" r="130" stroke="rgba(255,255,255,0.10)" strokeWidth="1" />
-        <circle cx="200" cy="200" r="85" stroke="rgba(195,192,255,0.15)" strokeWidth="1" strokeDasharray="3 3" />
-        <circle cx="200" cy="200" r="40" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-        <circle cx="200" cy="200" r="6" fill="var(--color-accent, #c3c0ff)" />
+          {/* Scope Disc Background */}
+          <circle cx="150" cy="150" r="135" fill="url(#scopeCenterGlow)" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="1" />
 
-        {/* Dynamic expanding wavefront rings */}
-        <circle cx="200" cy="200" r="110" stroke="rgba(56,189,248,0.25)" strokeWidth="1" className="animate-radarPing" style={{ transformOrigin: 'center' }} />
-        <circle cx="200" cy="200" r="150" stroke="rgba(225,29,72,0.15)" strokeWidth="1" className="animate-radarPing" style={{ transformOrigin: 'center', animationDelay: '1.2s' }} />
+          {/* Concentric Range Rings */}
+          <circle cx="150" cy="150" r="130" stroke="rgba(255, 255, 255, 0.07)" strokeWidth="1" strokeDasharray="3 3" />
+          <circle cx="150" cy="150" r="95" stroke="rgba(255, 255, 255, 0.09)" strokeWidth="1" />
+          <circle cx="150" cy="150" r="60" stroke="rgba(244, 63, 94, 0.20)" strokeWidth="1" strokeDasharray="2 2" />
+          <circle cx="150" cy="150" r="25" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1" />
+          <circle cx="150" cy="150" r="4" fill="#f43f5e" />
 
-        {/* Technical Coordinate Axes & Crosshairs */}
-        <line x1="200" y1="15" x2="200" y2="385" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" strokeDasharray="2 4" />
-        <line x1="15" y1="200" x2="385" y2="200" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" strokeDasharray="2 4" />
+          {/* Expanding Wavefront Ring */}
+          <circle cx="150" cy="150" r="80" stroke="rgba(244, 63, 94, 0.35)" strokeWidth="1" className="animate-radarPing" style={{ transformOrigin: 'center' }} />
 
-        {/* Diagonal Bearing Ticks */}
-        <line x1="80" y1="80" x2="320" y2="320" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" />
-        <line x1="320" y1="80" x2="80" y2="320" stroke="rgba(255,255,255,0.05)" strokeWidth="0.6" />
+          {/* Coordinate Crosshairs */}
+          <line x1="150" y1="15" x2="150" y2="285" stroke="rgba(255, 255, 255, 0.10)" strokeWidth="0.8" strokeDasharray="2 3" />
+          <line x1="15" y1="150" x2="285" y2="150" stroke="rgba(255, 255, 255, 0.10)" strokeWidth="0.8" strokeDasharray="2 3" />
 
-        {/* Rotating Radar Sweep Cone */}
-        <g className="animate-radarSweep" style={{ transformOrigin: '200px 200px' }}>
-          {/* Faint wedge path */}
-          <path
-            d="M 200 200 L 375 200 A 175 175 0 0 0 324 76 Z"
-            fill="url(#radarSweepGrad)"
-            opacity="0.35"
-          />
-          {/* Leading beam edge */}
-          <line x1="200" y1="200" x2="375" y2="200" stroke="#38bdf8" strokeWidth="1.5" opacity="0.75" />
-        </g>
+          {/* Rotating Radar Sweep Beam */}
+          <g className="animate-radarSweep" style={{ transformOrigin: '150px 150px' }}>
+            <path
+              d="M 150 150 L 280 150 A 130 130 0 0 0 242 58 Z"
+              fill="url(#coralRadarSweep)"
+              opacity="0.65"
+            />
+            <line x1="150" y1="150" x2="280" y2="150" stroke="#f43f5e" strokeWidth="1.5" opacity="0.85" />
+          </g>
 
-        {/* Active Geopolitical Signal Nodes / Hotspot Blips */}
-        {/* Node 1: Red tension hotspot (Middle East / Straits / Conflict corridor) */}
-        <g transform="translate(265, 155)">
-          <circle cx="0" cy="0" r="4" fill="#e11d48" className="animate-pulse" />
-          <circle cx="0" cy="0" r="9" stroke="#e11d48" strokeWidth="1" opacity="0.4" className="animate-ping" />
-          <text x="8" y="3" fill="#bec6e0" fontSize="9" fontFamily="monospace" letterSpacing="0.05em">SIG.01 [TENSION]</text>
-        </g>
+          {/* Active Hotspot Blip 1: Event Target */}
+          <g transform="translate(195, 115)">
+            <circle cx="0" cy="0" r="3.5" fill="#f43f5e" className="animate-pulse" />
+            <circle cx="0" cy="0" r="8" stroke="#f43f5e" strokeWidth="1" opacity="0.5" className="animate-ping" />
+            <line x1="0" y1="0" x2="12" y2="-10" stroke="#f43f5e" strokeWidth="0.8" opacity="0.6" />
+            <text x="14" y="-12" fill="#f43f5e" fontSize="8" fontFamily="monospace" fontWeight="bold">
+              [{eventSector.slice(0, 8)}] HOT
+            </text>
+          </g>
 
-        {/* Node 2: Cyan maritime trade corridor */}
-        <g transform="translate(130, 260)">
-          <circle cx="0" cy="0" r="3.5" fill="#38bdf8" />
-          <circle cx="0" cy="0" r="7" stroke="#38bdf8" strokeWidth="0.8" opacity="0.3" />
-          <text x="8" y="3" fill="#909097" fontSize="8" fontFamily="monospace">CORRIDOR A-4</text>
-        </g>
+          {/* Blip 2: Cyan maritime/corridor node */}
+          <g transform="translate(95, 195)">
+            <circle cx="0" cy="0" r="3" fill="#38bdf8" />
+            <circle cx="0" cy="0" r="6" stroke="#38bdf8" strokeWidth="0.7" opacity="0.3" />
+          </g>
 
-        {/* Node 3: Amber energy hub */}
-        <g transform="translate(145, 125)">
-          <circle cx="0" cy="0" r="3" fill="#f59e0b" />
-          <text x="-70" y="3" fill="#909097" fontSize="8" fontFamily="monospace">ENERGY FLOW</text>
-        </g>
+          {/* Blip 3: Amber energy hub */}
+          <g transform="translate(110, 95)">
+            <circle cx="0" cy="0" r="2.5" fill="#fbbf24" />
+          </g>
+        </svg>
+      </div>
 
-        {/* Node 4: Tech & Semiconductor cluster */}
-        <g transform="translate(290, 245)">
-          <circle cx="0" cy="0" r="3" fill="#c3c0ff" />
-          <text x="8" y="3" fill="#909097" fontSize="8" fontFamily="monospace">CHIP SUPPLY</text>
-        </g>
-
-        {/* Tactical Perimeter Markings */}
-        <text x="204" y="28" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">000° N</text>
-        <text x="360" y="196" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">090° E</text>
-        <text x="204" y="380" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">180° S</text>
-        <text x="22" y="196" fill="rgba(255,255,255,0.3)" fontSize="8" fontFamily="monospace">270° W</text>
-      </svg>
+      {/* Bottom Telemetry Footer */}
+      <div className="flex items-center justify-between text-[9px] font-mono-code text-slate-400 pt-2 border-t border-white/[0.06] z-10">
+        <span className="uppercase tracking-widest text-slate-400">
+          SWEEP: 12.8GHZ
+        </span>
+        <span className="text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1">
+          <span>RADAR LOCK</span>
+          <span>┘</span>
+        </span>
+      </div>
     </div>
   );
 }

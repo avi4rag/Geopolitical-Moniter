@@ -21,10 +21,20 @@ const SEV_COLOR = {
   LOW: '#10b981',
 };
 
-// ─── Horizontal Active Events Ticker ──────────────────────────────────────────
-// Controlled horizontal ticker populated with real live events.
-// Supports manual horizontal drag/scroll and left/right button control.
+// ─── Situation Room Horizontal Ingest Ticker ──────────────────────────────────
+// Populated with real live events. Features the RAW INGEST terminal badge,
+// domain-colored signal points, and '///' stream delimiters.
 // ─────────────────────────────────────────────────────────────────────────────
+
+const DOMAIN_COLOR = {
+  ENERGY: '#fbbf24',
+  DEFENSE: '#f43f5e',
+  TRADE: '#38bdf8',
+  TECHNOLOGY: '#c084fc',
+  CLIMATE: '#34d399',
+  FINANCE: '#38bdf8',
+  DIPLOMACY: '#c084fc',
+};
 
 export default function ActiveEventsTicker({ events = [], onSelectEvent }) {
   const { i18n } = useTranslation();
@@ -35,73 +45,65 @@ export default function ActiveEventsTicker({ events = [], onSelectEvent }) {
 
   const handleScrollLeft = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: -320, behavior: 'smooth' });
+      scrollRef.current.scrollBy({ left: -360, behavior: 'smooth' });
     }
   };
 
   const handleScrollRight = () => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+      scrollRef.current.scrollBy({ left: 360, behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="w-full glass-ticker py-2 px-2 sm:px-4 flex items-center gap-2 select-none overflow-hidden">
-      {/* Ticker Header Tag */}
-      <div className="flex items-center gap-1.5 shrink-0 pr-3 border-r border-white/10 font-mono-code text-[10px] font-bold tracking-wider">
-        <Radio size={12} className="text-rose-500 animate-pulse" />
-        <span className="text-white hidden sm:inline">LIVE WIRE</span>
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+    <div className="w-full glass-ticker py-2 px-3 sm:px-6 flex items-center gap-3 select-none overflow-hidden border-y border-white/[0.08] bg-slate-950/80">
+      {/* RAW INGEST Terminal Badge */}
+      <div className="flex items-center gap-2 shrink-0 pr-3 border-r border-white/10 font-mono-code text-[10px] font-bold tracking-widest">
+        <span className="px-2 py-0.5 rounded bg-slate-900 border border-white/15 text-slate-200 uppercase">
+          RAW INGEST
+        </span>
       </div>
 
       {/* Left Scroll Button */}
       <button
         onClick={handleScrollLeft}
-        className="hidden md:flex p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+        className="hidden md:flex p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
         aria-label="Scroll left"
       >
-        <ChevronLeft size={14} />
+        <ChevronLeft size={13} />
       </button>
 
-      {/* Events Carousel Container */}
+      {/* Events Stream Horizontal Container */}
       <div
         ref={scrollRef}
-        className="flex items-center gap-3 overflow-x-auto no-scrollbar py-0.5 scroll-smooth"
+        className="flex items-center gap-4 overflow-x-auto no-scrollbar py-0.5 scroll-smooth flex-1 text-xs font-mono-code"
       >
-        {events.map((event) => {
+        {events.map((event, idx) => {
           const headline = translateNewsText(event.summary, lang);
-          const sector = event.eventType?.replace(/_/g, ' ') || 'INTEL';
-          const sevColor = SEV_COLOR[event.severity] || '#38bdf8';
+          const domain = event.sectors?.[0]?.toUpperCase() || event.eventType?.toUpperCase() || 'INTEL';
+          const dotColor = DOMAIN_COLOR[domain] || '#38bdf8';
           const tMinus = timeAgo(event.createdAt);
 
           return (
-            <button
-              key={event._id}
-              onClick={() => onSelectEvent(event)}
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-md border border-white/5 hover:border-white/20 bg-slate-900/60 hover:bg-slate-800/80 transition-all cursor-pointer shrink-0 text-left group"
-            >
-              {/* Sector indicator badge */}
-              <span
-                className="text-[9px] font-mono-code font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
-                style={{
-                  backgroundColor: `${sevColor}20`,
-                  color: sevColor,
-                  border: `1px solid ${sevColor}40`,
-                }}
+            <React.Fragment key={event._id}>
+              <button
+                onClick={() => onSelectEvent(event)}
+                className="inline-flex items-center gap-2 hover:text-white transition-colors cursor-pointer shrink-0 text-left group"
               >
-                {sector}
-              </span>
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                <span className="text-slate-400 font-bold uppercase">[{domain}]</span>
+                <span className="text-slate-300 group-hover:text-rose-200 transition-colors max-w-[280px] sm:max-w-[420px] truncate">
+                  {headline}
+                </span>
+                <span className="text-[10px] text-slate-500">
+                  ({tMinus})
+                </span>
+              </button>
 
-              {/* Headline snippet */}
-              <span className="text-xs text-slate-300 group-hover:text-white transition-colors max-w-[240px] sm:max-w-[320px] truncate font-medium">
-                {headline}
-              </span>
-
-              {/* Time */}
-              <span className="text-[10px] font-mono-code text-slate-500 shrink-0">
-                {tMinus}
-              </span>
-            </button>
+              {idx < events.length - 1 && (
+                <span className="text-slate-600 font-bold tracking-widest shrink-0">///</span>
+              )}
+            </React.Fragment>
           );
         })}
       </div>
@@ -109,10 +111,10 @@ export default function ActiveEventsTicker({ events = [], onSelectEvent }) {
       {/* Right Scroll Button */}
       <button
         onClick={handleScrollRight}
-        className="hidden md:flex p-1 rounded hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+        className="hidden md:flex p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
         aria-label="Scroll right"
       >
-        <ChevronRight size={14} />
+        <ChevronRight size={13} />
       </button>
     </div>
   );

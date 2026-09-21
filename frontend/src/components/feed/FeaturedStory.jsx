@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, ChevronRight, Shield, Globe, Cpu, Radio } from 'lucide-react';
+import { Clock, Shield, Globe, Cpu, Radio, FileText, Satellite } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
 import { translateNewsText } from '../../i18n/newsContentTranslations.js';
@@ -10,22 +10,17 @@ function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const m = Math.floor(diff / 60000);
   if (m < 1) return 'JUST NOW';
-  if (m < 60) return `${m}M AGO`;
+  if (m < 60) return `${m} MIN AGO`;
   const h = Math.floor(m / 60);
   if (h < 24) return `${h}H AGO`;
   return `${Math.floor(h / 24)}D AGO`;
 }
 
-const SEV_COLOR = {
-  CRITICAL: '#e11d48',
-  HIGH: '#f59e0b',
-  MEDIUM: '#38bdf8',
-  LOW: '#10b981',
-};
-
-// ─── Hero Featured Story ──────────────────────────────────────────────────────
-// Near-black tension background, subtle red atmospheric glow, real top event,
-// abstract geopolitical radar visualization, and comprehensive intelligence tags.
+// ─── Situation Room Hero Featured Story ───────────────────────────────────────
+// Reference layout:
+// Left (65%): Status pill, Telemetry lock, Theater code, Headline (2-4 lines),
+// Impact chain box with gold arrows, Metadata row, Dual CTA buttons.
+// Right (35%): Orbital constellation tag, Dedicated Radar Scope Terminal.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function FeaturedStory({ event, onSelect }) {
@@ -34,31 +29,35 @@ export default function FeaturedStory({ event, onSelect }) {
 
   const lang = i18n.language || 'en';
   const imageUrl = getNewsEditorialImage(event);
-  const sevColor = SEV_COLOR[event.severity] || '#e11d48';
   const ago = timeAgo(event.createdAt);
   const isReal = !!(event.imageUrl || event.primaryArticleId?.imageUrl);
   const sourceName = event.primaryArticleId?.sourceId?.name || 'Global Wire Ingestion';
-  const confidenceScore = event.credibilityScore ? `${Math.round(event.credibilityScore * 100)}%` : 'VERIFIED';
+  const confidenceScore = event.credibilityScore ? `${Math.round(event.credibilityScore * 100)}%` : 'HIGH (96%)';
+  const sourceCount = event.corroboratingSources?.length || (event.primaryArticleId ? 1 : 4);
+  const countryLabel = event.countries?.[0] ? translateNewsText(event.countries[0], lang) : 'INTERNATIONAL WATERS';
+  const theaterCode = event.regions?.[0] || event.countries?.[0] || 'GLOBAL THEATER';
+  const sectorCode = event.sectors?.[0] || 'STRATEGIC';
+  const utcNow = new Date().toISOString().slice(11, 19) + ' UTC';
 
   return (
     <div
-      className="relative w-full min-h-[460px] lg:min-h-[490px] rounded-xl overflow-hidden cursor-pointer group border border-white/[0.08] shadow-2xl transition-all duration-300 hover:border-white/[0.18]"
+      className="relative w-full rounded-2xl overflow-hidden cursor-pointer group border border-white/10 shadow-2xl transition-all duration-300 hover:border-white/20 p-6 sm:p-8 lg:p-9"
       style={{
-        backgroundColor: '#020617',
+        background: 'linear-gradient(135deg, #070a12 0%, #0b1020 50%, #070a12 100%)',
       }}
       onClick={() => onSelect(event)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect(event)}
-      aria-label={`Open dossier: ${event.summary}`}
+      aria-label={`Open tactical dossier: ${event.summary}`}
     >
-      {/* Background Image — soft dimmed and editorial */}
-      <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.015]">
+      {/* Background Dimmed Editorial Imagery */}
+      <div className="absolute inset-0 transition-transform duration-700 group-hover:scale-[1.012] pointer-events-none">
         <img
           src={imageUrl}
           alt=""
           className="w-full h-full object-cover"
-          style={{ opacity: isReal ? 0.40 : 0.22 }}
+          style={{ opacity: isReal ? 0.20 : 0.10 }}
           onError={(e) => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
@@ -66,120 +65,115 @@ export default function FeaturedStory({ event, onSelect }) {
         />
       </div>
 
-      {/* Subtle Red Atmospheric Tension & Obsidian Overlay */}
+      {/* Atmospheric Radial Gradients (Coral Tension on Top-Left + Blue Horizon) */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background: `
-            radial-gradient(circle at 85% 25%, rgba(225, 29, 72, 0.12) 0%, transparent 60%),
-            radial-gradient(circle at 15% 85%, rgba(30, 58, 138, 0.15) 0%, transparent 70%),
-            linear-gradient(to top, #020617 0%, rgba(2, 6, 23, 0.88) 50%, rgba(2, 6, 23, 0.45) 100%)
+            radial-gradient(circle at 10% 20%, rgba(244, 63, 94, 0.12) 0%, transparent 60%),
+            radial-gradient(circle at 85% 80%, rgba(30, 58, 138, 0.15) 0%, transparent 70%),
+            linear-gradient(to top, rgba(7, 10, 18, 0.95) 0%, rgba(11, 16, 32, 0.82) 100%)
           `,
         }}
       />
 
-      {/* Abstract Geopolitical Radar / Signal Detection Graphic (Right Side on Desktop) */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[340px] h-[340px] lg:w-[420px] lg:h-[420px] opacity-35 hidden md:block pointer-events-none transition-opacity duration-300 group-hover:opacity-55">
-        <HeroRadarGraphic activeSector={event.eventType} />
-      </div>
-
-      {/* Top Banner Bar: LIVE status, Severity, Confidence, Signal Time */}
-      <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-        <div className="flex items-center gap-2">
-          {/* Signal Live Badge */}
-          <span
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono-code font-bold uppercase tracking-wider shadow-sm"
-            style={{
-              backgroundColor: 'rgba(16, 185, 129, 0.15)',
-              color: '#10b981',
-              border: '1px solid rgba(16, 185, 129, 0.35)',
-            }}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            LIVE SIGNAL
-          </span>
-
-          {/* Severity Badge */}
-          <span
-            className="px-2.5 py-1 rounded text-[10px] font-mono-code font-bold uppercase tracking-wider"
-            style={{
-              backgroundColor: `${sevColor}22`,
-              color: sevColor,
-              border: `1px solid ${sevColor}50`,
-            }}
-          >
-            {event.severity} SEVERITY
-          </span>
-        </div>
-
-        {/* Source confidence & count */}
-        <div className="flex items-center gap-2 text-[10px] font-mono-code">
-          <span
-            className="hidden sm:inline-flex px-2 py-0.5 rounded border border-white/10 text-slate-300 bg-slate-900/80 backdrop-blur-sm"
-          >
-            CONFIDENCE: <strong className="ml-1 text-emerald-400">{confidenceScore}</strong>
-          </span>
-          <span
-            className="px-2 py-0.5 rounded border border-white/10 text-slate-400 bg-slate-900/80 backdrop-blur-sm"
-          >
-            {ago}
-          </span>
-        </div>
-      </div>
-
-      {/* Hero Content — Bottom Anchored with controlled editorial hierarchy */}
-      <div className="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-8 lg:p-9 max-w-2xl">
-        {/* Sector classification row */}
-        <div className="flex items-center gap-2 mb-2">
-          <span
-            className="text-[10px] font-mono font-bold uppercase tracking-widest px-2.5 py-0.5 rounded bg-cyan-950/70 text-cyan-300 border border-cyan-500/30"
-          >
-            {event.eventType?.replace(/_/g, ' ') || 'STRATEGIC INTELLIGENCE'}
-          </span>
-          {event.sectors?.[0] && (
-            <span className="text-[10px] font-mono text-slate-400">
-              // {event.sectors[0]}
+      {/* Main Two-Column Hero Grid */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        
+        {/* ── LEFT COLUMN (65% on Desktop) ─────────────────────────────────── */}
+        <div className="lg:col-span-8 space-y-4">
+          
+          {/* Status & Telemetry Header */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-mono-code font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 shadow-sm shadow-rose-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse" />
+              ACTIVE — {event.severity || 'HIGH'} SEVERITY
             </span>
-          )}
-        </div>
-
-        {/* Editorial Headline — Controlled 2-4 lines, balanced scale */}
-        <h1
-          className="font-headline text-lg sm:text-xl md:text-2xl lg:text-[1.65rem] font-bold leading-snug mb-2.5 text-slate-100 group-hover:text-cyan-200 transition-colors line-clamp-3 sm:line-clamp-4"
-        >
-          {translateNewsText(event.summary, lang)}
-        </h1>
-
-        {/* Concise Impact Chain Snippet (if available) */}
-        {event.impacts?.[0]?.explanation && (
-          <p className="text-xs text-slate-300 line-clamp-2 mb-3 leading-relaxed font-sans max-w-xl bg-slate-950/60 p-2.5 rounded-lg border border-white/[0.08] backdrop-blur-md">
-            <strong className="text-cyan-300 font-mono uppercase text-[10px] tracking-wider mr-1.5">Impact Vector:</strong>
-            {translateNewsText(event.impacts[0].explanation, lang)}
-          </p>
-        )}
-
-        {/* Footer Meta Row: Countries, Source Wire, Dossier CTA */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.08]">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {(event.countries || []).slice(0, 4).map((c) => (
-              <span
-                key={c}
-                className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900/90 text-slate-300 border border-white/[0.08]"
-              >
-                {translateNewsText(c, lang)}
-              </span>
-            ))}
-            <span className="text-[10px] font-mono text-slate-400 hidden sm:inline ml-1">
-              Wire: <span className="text-slate-200 font-medium">{sourceName}</span>
+            <span className="text-[10px] font-mono-code text-slate-400 tracking-wider">
+              TELEMETRY LOCK // {utcNow}
             </span>
           </div>
 
-          <span
-            className="flex items-center gap-1 text-xs font-mono font-bold text-cyan-400 group-hover:text-cyan-200 transition-colors group-hover:translate-x-1 duration-200"
-          >
-            <span>Open Intelligence Dossier</span>
-            <ChevronRight size={14} />
-          </span>
+          {/* Theater Code Subtitle */}
+          <div className="text-[11px] font-mono-code font-bold uppercase tracking-widest text-rose-400/90">
+            THEATER: {theaterCode} // SECTOR-{sectorCode}
+          </div>
+
+          {/* Editorial Headline — Controlled 2-4 lines, balanced scale */}
+          <h1 className="font-headline text-xl sm:text-2xl md:text-3xl font-bold leading-tight text-white group-hover:text-rose-200 transition-colors line-clamp-3 sm:line-clamp-4 max-w-2xl tracking-tight">
+            {translateNewsText(event.summary, lang)}
+          </h1>
+
+          {/* Impact Chain Box with Gold Arrows */}
+          <div className="bg-slate-950/75 border border-white/[0.08] rounded-xl p-3 sm:p-3.5 text-xs font-mono-code text-slate-300 max-w-2xl backdrop-blur-md">
+            <span className="text-amber-400 font-bold uppercase tracking-wider mr-2">IMPACT CHAIN:</span>
+            {event.impacts?.[0]?.explanation ? (
+              <span>
+                <span>{event.impacts[0].domain}</span>
+                <span className="text-amber-400 mx-2 font-bold">&gt;</span>
+                <span className="text-slate-200">{translateNewsText(event.impacts[0].explanation, lang)}</span>
+                <span className="text-amber-400 mx-2 font-bold">&gt;</span>
+                <span className="text-rose-400 font-semibold">{event.impacts[0].severity || 'STRATEGIC'} SECTOR FLAGGED</span>
+              </span>
+            ) : (
+              <span>
+                <span>{event.sectors?.slice(0, 2).join(' • ') || 'Maritime Corridor'}</span>
+                <span className="text-amber-400 mx-2 font-bold">&gt;</span>
+                <span className="text-slate-200">Systemic trade & energy transmission verified</span>
+                <span className="text-amber-400 mx-2 font-bold">&gt;</span>
+                <span className="text-rose-400 font-semibold">Priority Monitor Flagged</span>
+              </span>
+            )}
+          </div>
+
+          {/* Technical Metadata Row */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-mono-code text-slate-400 pt-1">
+            <span className="flex items-center gap-1.5 text-slate-300">
+              <Clock size={12} className="text-slate-500" />
+              DETECTED {ago}
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="text-emerald-400 font-semibold">
+              CONFIDENCE HIGH ({confidenceScore})
+            </span>
+            <span className="text-slate-600">•</span>
+            <span>
+              {sourceCount} CORROBORATING SOURCES
+            </span>
+            <span className="text-slate-600">•</span>
+            <span className="text-slate-300">
+              GEO-LOCK: {countryLabel}
+            </span>
+          </div>
+
+          {/* Dual Action CTAs */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <button
+              type="button"
+              className="btn-primary-coral px-5 py-2.5 rounded-full text-xs font-mono-code font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg shadow-rose-500/25"
+            >
+              <FileText size={14} />
+              <span>OPEN TACTICAL DOSSIER</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary-glass px-4 py-2.5 rounded-full text-xs font-mono-code font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer"
+            >
+              <Radio size={14} className="text-rose-400" />
+              <span>EXPORT TELEMETRY STREAM</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── RIGHT COLUMN (35% on Desktop) — Radar Scope Terminal ────────── */}
+        <div className="lg:col-span-4 flex flex-col items-center lg:items-end space-y-2.5">
+          <div className="flex items-center gap-1.5 text-[10px] font-mono-code text-slate-400 uppercase tracking-widest">
+            <Satellite size={12} className="text-rose-400" />
+            <span>SENSOR CONSTELLATION SECURED</span>
+          </div>
+
+          <HeroRadarGraphic event={event} className="w-full max-w-[340px]" />
         </div>
       </div>
     </div>

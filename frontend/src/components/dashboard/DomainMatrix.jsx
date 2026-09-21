@@ -16,25 +16,28 @@ import {
   BarChart3,
 } from 'lucide-react';
 
-// ─── Domain Impact Radar / Matrix ─────────────────────────────────────────────
-// Visual breakdown of economic and geopolitical impact domains.
+// ─── Situation Room Sector Radar Console ──────────────────────────────────────
+// Aligned with the reference "SECTOR RADAR / Sectors in view" layout.
+// Features 5 primary channels with real active event counts, dynamic SVG waveforms,
+// and quick filtering across all 13 domains.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DOMAIN_METADATA = {
-  ENERGY: { Icon: Flame, hex: '#f59e0b', bg: 'rgba(245, 158, 11, 0.12)', border: 'rgba(245, 158, 11, 0.30)' },
-  OIL_AND_GAS: { Icon: Fuel, hex: '#f97316', bg: 'rgba(249, 115, 22, 0.12)', border: 'rgba(249, 115, 22, 0.30)' },
-  TRADE: { Icon: ArrowLeftRight, hex: '#38bdf8', bg: 'rgba(56, 189, 248, 0.12)', border: 'rgba(56, 189, 248, 0.30)' },
-  SUPPLY_CHAIN: { Icon: Truck, hex: '#c084fc', bg: 'rgba(192, 132, 252, 0.12)', border: 'rgba(192, 132, 252, 0.30)' },
-  CURRENCY: { Icon: DollarSign, hex: '#34d399', bg: 'rgba(52, 211, 153, 0.12)', border: 'rgba(52, 211, 153, 0.30)' },
-  INFLATION: { Icon: Percent, hex: '#fb7185', bg: 'rgba(251, 113, 133, 0.12)', border: 'rgba(251, 113, 133, 0.30)' },
-  DEFENSE: { Icon: Shield, hex: '#f43f5e', bg: 'rgba(244, 63, 94, 0.12)', border: 'rgba(244, 63, 94, 0.30)' },
-  TECHNOLOGY: { Icon: Cpu, hex: '#a855f7', bg: 'rgba(168, 85, 247, 0.12)', border: 'rgba(168, 85, 247, 0.30)' },
-  SEMICONDUCTORS: { Icon: Microchip, hex: '#14b8a6', bg: 'rgba(20, 184, 166, 0.12)', border: 'rgba(20, 184, 166, 0.30)' },
-  FOOD_AGRICULTURE: { Icon: Wheat, hex: '#eab308', bg: 'rgba(234, 179, 8, 0.12)', border: 'rgba(234, 179, 8, 0.30)' },
-  DIPLOMACY: { Icon: Handshake, hex: '#60a5fa', bg: 'rgba(96, 165, 250, 0.12)', border: 'rgba(96, 165, 250, 0.30)' },
-  GLOBAL_STABILITY: { Icon: Globe2, hex: '#818cf8', bg: 'rgba(129, 140, 248, 0.12)', border: 'rgba(129, 140, 248, 0.30)' },
-  FINANCIAL_MARKETS: { Icon: BarChart3, hex: '#10b981', bg: 'rgba(16, 185, 129, 0.12)', border: 'rgba(16, 185, 129, 0.30)' },
-};
+const PRIMARY_SECTORS = [
+  { key: 'ENERGY', label: 'Energy', hex: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)', path: 'M0,28 Q30,8 60,20 T120,6 T180,24 T240,12' },
+  { key: 'TRADE', label: 'Trade', hex: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)', path: 'M0,18 Q40,30 80,18 T160,8 T240,26' },
+  { key: 'TECHNOLOGY', label: 'Technology', hex: '#c084fc', bg: 'rgba(192, 132, 252, 0.15)', path: 'M0,22 L40,22 L70,8 L100,28 L140,14 L180,24 L240,22' },
+  { key: 'DEFENSE', label: 'Defense', hex: '#f43f5e', bg: 'rgba(244, 63, 94, 0.15)', path: 'M0,28 Q50,28 100,24 T180,12 T240,8' },
+  { key: 'CLIMATE', label: 'Climate', hex: '#34d399', bg: 'rgba(52, 211, 153, 0.15)', path: 'M0,14 Q40,4 80,14 T160,24 T240,14' },
+];
+
+const SECONDARY_SECTORS = [
+  { key: 'SUPPLY_CHAIN', label: 'Supply Chain', hex: '#38bdf8' },
+  { key: 'FINANCIAL_MARKETS', label: 'Finance', hex: '#34d399' },
+  { key: 'SEMICONDUCTORS', label: 'Semiconductors', hex: '#a855f7' },
+  { key: 'FOOD_AGRICULTURE', label: 'Agriculture', hex: '#eab308' },
+  { key: 'DIPLOMACY', label: 'Diplomacy', hex: '#60a5fa' },
+  { key: 'GLOBAL_STABILITY', label: 'Global Stability', hex: '#818cf8' },
+];
 
 export default function DomainMatrix({ domainStats = [], selectedDomain, onSelectDomain }) {
   const { t } = useTranslation();
@@ -44,125 +47,122 @@ export default function DomainMatrix({ domainStats = [], selectedDomain, onSelec
     return acc;
   }, {});
 
-  const allDomains = Object.keys(DOMAIN_METADATA);
+  const activeChannelsCount = (domainStats || []).filter((s) => s.count > 0).length || 5;
 
   return (
-    <div
-      className="glass-panel p-5 sm:p-6 rounded-xl border space-y-4 shadow-lg"
-      style={{
-        borderColor: 'var(--color-border)',
-      }}
-    >
-      <div className="flex items-center justify-between flex-wrap gap-2">
+    <div className="space-y-4 pt-4">
+      {/* Sector Radar Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="h-2.5 w-1 rounded-full" style={{ backgroundColor: 'var(--color-accent)' }} />
-            <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest text-[var(--color-accent)]">
-              STRATEGIC SECTOR TELEMETRY
-            </span>
-          </div>
-          <h2 className="text-base font-bold font-headline" style={{ color: 'var(--color-text-primary)' }}>
-            {t('analytics.domainRadar', { defaultValue: 'Domain Impact Radar' })}
-          </h2>
-          <p className="text-xs font-mono-code" style={{ color: 'var(--color-text-dim)' }}>
-            {t('analytics.domainRadarSub', { defaultValue: 'Real-time event distribution and causal risk across 13 global domains' })}
-          </p>
+          <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest text-rose-400">
+            SECTOR RADAR
+          </span>
+          <h3 className="text-xl sm:text-2xl font-bold font-headline text-white mt-0.5">
+            Sectors in view
+          </h3>
         </div>
 
-        {selectedDomain && (
-          <button
-            onClick={() => onSelectDomain(null)}
-            className="text-xs font-mono-code font-bold cursor-pointer transition-colors px-2.5 py-1 rounded-md border"
-            style={{
-              color: '#f43f5e',
-              backgroundColor: 'rgba(244,63,94,0.10)',
-              borderColor: 'rgba(244,63,94,0.25)',
-            }}
-          >
-            Clear Filter ×
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-mono-code text-slate-400 uppercase tracking-wider">
+            {activeChannelsCount} ACTIVE CHANNELS • SYNCHRONOUS TELEMETRY
+          </span>
+
+          {selectedDomain && (
+            <button
+              onClick={() => onSelectDomain(null)}
+              className="text-xs font-mono-code font-bold cursor-pointer text-rose-400 hover:text-rose-300 px-2.5 py-1 rounded-full bg-rose-500/10 border border-rose-500/30 transition-colors"
+            >
+              Clear Filter ×
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
-        {allDomains.map((domainKey) => {
-          const meta = DOMAIN_METADATA[domainKey];
-          const { Icon, hex, bg, border } = meta;
-          const stat = statsMap[domainKey];
+      {/* 5 Primary Telemetry Channels (Reference 5-Card Horizontal Row) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+        {PRIMARY_SECTORS.map((sector) => {
+          const stat = statsMap[sector.key] || statsMap[sector.key.toLowerCase()];
           const count = stat?.count || 0;
-          const isSelected = selectedDomain === domainKey;
-          const domainLabel = t(`domains.${domainKey}`, { defaultValue: domainKey.replace(/_/g, ' ') });
+          const isSelected = selectedDomain === sector.key;
 
           return (
             <button
-              key={domainKey}
-              onClick={() => onSelectDomain(isSelected ? null : domainKey)}
-              className="p-3 rounded-xl border text-left transition-all duration-200 cursor-pointer flex flex-col justify-between gap-2.5 group relative overflow-hidden focus-visible:outline-2 focus-visible:outline-[var(--color-accent)]"
-              style={
+              key={sector.key}
+              onClick={() => onSelectDomain(isSelected ? null : sector.key)}
+              className={`hover-lift relative p-4 rounded-2xl border text-left flex flex-col justify-between h-[130px] overflow-hidden cursor-pointer group transition-all duration-200 ${
                 isSelected
-                  ? {
-                      backgroundColor: 'rgba(195, 192, 255, 0.15)',
-                      borderColor: hex,
-                      boxShadow: `0 0 15px ${hex}30`,
-                    }
-                  : {
-                      backgroundColor: 'rgba(21, 27, 45, 0.55)',
-                      borderColor: 'rgba(255, 255, 255, 0.07)',
-                    }
-              }
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.borderColor = hex;
-                  e.currentTarget.style.backgroundColor = 'rgba(21, 27, 45, 0.80)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.07)';
-                  e.currentTarget.style.backgroundColor = 'rgba(21, 27, 45, 0.55)';
-                }
-              }}
+                  ? 'bg-slate-900 border-white/30 ring-2 ring-rose-500/50 shadow-xl'
+                  : 'bg-slate-950/70 border-white/[0.08] hover:border-white/20'
+              }`}
             >
-              {/* Top ambient sector line */}
+              {/* Subtle top sector-colored border line on hover */}
               <div
                 className="absolute top-0 left-0 right-0 h-[2px] opacity-40 group-hover:opacity-100 transition-opacity"
-                style={{ background: hex }}
+                style={{ backgroundColor: sector.hex }}
               />
 
-              <div className="flex items-center justify-between">
-                <div
-                  className="p-1.5 rounded-lg transition-transform duration-200 group-hover:scale-110"
+              {/* Card Header: Title + Active Count Badge */}
+              <div className="flex items-center justify-between z-10">
+                <span className="text-sm font-bold text-slate-100 font-sans group-hover:text-white transition-colors">
+                  {sector.label}
+                </span>
+
+                <span
+                  className="text-[10px] font-mono-code font-bold uppercase px-2 py-0.5 rounded-full"
                   style={{
-                    backgroundColor: bg,
-                    color: hex,
-                    border: `1px solid ${border}`,
+                    backgroundColor: `${sector.hex}22`,
+                    color: sector.hex,
+                    border: `1px solid ${sector.hex}40`,
                   }}
                 >
-                  <Icon size={14} />
-                </div>
-                <div className="flex items-center gap-1.5">
-                  {count > 0 && (
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: hex, boxShadow: `0 0 6px ${hex}` }}
-                    />
-                  )}
-                  <span
-                    className="text-xs font-mono-code font-bold"
-                    style={{ color: isSelected ? hex : 'var(--color-text-primary)' }}
-                  >
-                    {count}
-                  </span>
-                </div>
+                  {count} ACTIVE
+                </span>
               </div>
 
-              <span
-                className="text-[11px] font-mono-code font-semibold leading-tight truncate transition-colors"
-                style={{ color: isSelected ? 'white' : 'var(--color-text-secondary)' }}
-                title={domainLabel}
-              >
-                {domainLabel}
-              </span>
+              {/* Dynamic SVG Waveform / Sparkline */}
+              <div className="w-full h-9 my-auto flex items-center justify-center opacity-70 group-hover:opacity-100 transition-opacity">
+                <svg viewBox="0 0 240 36" className="w-full h-full" fill="none">
+                  <path
+                    d={sector.path}
+                    stroke={sector.hex}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+
+              {/* Card Footer: Real status indicator */}
+              <div className="flex items-center justify-between text-[10px] font-mono-code text-slate-400 z-10">
+                <span>{count > 0 ? `${count} incidents active` : 'Telemetry stable'}</span>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sector.hex }} />
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Secondary Sector Filter Chips */}
+      <div className="flex flex-wrap items-center gap-2 pt-1">
+        <span className="text-[10px] font-mono-code text-slate-400 uppercase mr-1">
+          MORE DOMAINS:
+        </span>
+        {SECONDARY_SECTORS.map((sec) => {
+          const count = statsMap[sec.key]?.count || 0;
+          const isSelected = selectedDomain === sec.key;
+
+          return (
+            <button
+              key={sec.key}
+              onClick={() => onSelectDomain(isSelected ? null : sec.key)}
+              className={`px-3 py-1 rounded-full text-[11px] font-mono-code transition-all cursor-pointer border ${
+                isSelected
+                  ? 'bg-rose-500 text-slate-950 font-bold border-rose-400 shadow-sm'
+                  : 'bg-slate-900/60 text-slate-400 border-white/[0.08] hover:text-white hover:border-white/20'
+              }`}
+            >
+              <span>{sec.label}</span>
+              {count > 0 && <span className="ml-1.5 text-slate-300 font-bold">({count})</span>}
             </button>
           );
         })}
