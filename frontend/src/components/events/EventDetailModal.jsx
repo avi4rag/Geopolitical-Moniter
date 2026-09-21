@@ -23,7 +23,7 @@ import DirectionBadge from '../common/DirectionBadge.jsx';
 import CredibilityBadge from '../common/CredibilityBadge.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { translateNewsText, translateNewsArray } from '../../i18n/newsContentTranslations.js';
-import { getNewsEditorialImage } from '../../lib/newsImages.js';
+import { getNewsEditorialImage, DEFAULT_EDITORIAL_FALLBACK } from '../../lib/newsImages.js';
 
 // ─── Editorial Article Dossier Modal ──────────────────────────────────────────
 // Clean news article presentation matching modern publication standards.
@@ -216,6 +216,10 @@ export default function EventDetailModal({ eventId, onClose }) {
                   src={imageUrl}
                   alt={eventData.summary}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = DEFAULT_EDITORIAL_FALLBACK;
+                  }}
                 />
               </div>
 
