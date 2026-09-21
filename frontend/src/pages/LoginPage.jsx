@@ -66,38 +66,32 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[75vh] flex items-center justify-center py-8 px-4 w-full">
-      <div
-        className="w-full max-w-md p-6 sm:p-8 rounded-lg border space-y-6"
-        style={{ backgroundColor: 'var(--color-surface-1)', borderColor: 'var(--color-border)' }}
-      >
+      <div className="w-full max-w-md p-6 sm:p-8 rounded-2xl glass-panel space-y-6 shadow-2xl">
         {/* Brand */}
         <div className="text-center space-y-2">
-          <div
-            className="w-12 h-12 rounded flex items-center justify-center mx-auto"
-            style={{ backgroundColor: 'var(--color-surface-4)', border: '1px solid var(--color-border)' }}
-          >
-            <Globe size={22} style={{ color: 'var(--color-accent)' }} />
+          <div className="w-12 h-12 rounded-xl bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400">
+            <Globe size={22} />
           </div>
-          <h1 className="font-headline text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+          <h1 className="font-headline text-2xl font-bold text-slate-100">
             {t('auth.welcomeBack', { defaultValue: 'Welcome back to GeoMonitor' })}
           </h1>
-          <p className="text-xs font-mono-code" style={{ color: 'var(--color-text-muted)' }}>
+          <p className="text-xs font-mono text-slate-400">
             {t('auth.loginSubtitle', { defaultValue: 'Sign in to access your bookmarked intelligence dossiers' })}
           </p>
         </div>
 
         {/* OAuth notice */}
         {oauthNotice && (
-          <div className="p-3.5 rounded border text-xs flex items-start gap-2.5 leading-relaxed" style={{ backgroundColor: 'rgba(245,158,11,0.10)', borderColor: 'rgba(245,158,11,0.30)', color: '#f59e0b' }}>
-            <Info size={14} className="shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl border border-amber-500/30 bg-amber-950/30 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed font-mono">
+            <Info size={14} className="shrink-0 mt-0.5 text-amber-400" />
             <span>{oauthNotice}</span>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="p-3.5 rounded border text-xs flex items-center gap-2" style={{ backgroundColor: 'rgba(225,29,72,0.10)', borderColor: 'rgba(225,29,72,0.30)', color: '#e11d48' }}>
-            <AlertCircle size={14} className="shrink-0" />
+          <div className="p-3.5 rounded-xl border border-rose-500/30 bg-rose-950/40 text-rose-300 text-xs flex items-center gap-2 font-mono">
+            <AlertCircle size={14} className="shrink-0 text-rose-400" />
             <span>{error}</span>
           </div>
         )}
@@ -105,37 +99,35 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-mono-code font-semibold mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            <label className="block text-xs font-mono font-semibold mb-1.5 text-slate-300">
               {t('auth.emailAddress', { defaultValue: 'Email address' })}
             </label>
             <div className="relative">
-              <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
+              <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="analyst@geomonitor.org"
-                className="w-full pl-9 pr-3 py-2.5 text-xs rounded font-mono-code"
-                style={inputStyle}
+                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl font-mono glass-control text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-mono-code font-semibold mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            <label className="block text-xs font-mono font-semibold mb-1.5 text-slate-300">
               {t('auth.password', { defaultValue: 'Password' })}
             </label>
             <div className="relative">
-              <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'var(--color-text-dim)' }} />
+              <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full pl-9 pr-3 py-2.5 text-xs rounded font-mono-code"
-                style={inputStyle}
+                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl font-mono glass-control text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-400/60 transition"
               />
             </div>
           </div>
@@ -143,8 +135,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 rounded text-xs font-mono-code font-bold cursor-pointer flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
-            style={{ backgroundColor: 'var(--color-accent-bg)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}
+            className="w-full py-3 px-4 rounded-xl text-xs font-mono font-bold cursor-pointer flex items-center justify-center gap-2 transition-all disabled:opacity-50 bg-cyan-500/20 text-cyan-200 border border-cyan-400/50 hover:bg-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.25)]"
           >
             {isLoading ? t('auth.signingIn', { defaultValue: 'Signing In...' }) : t('auth.signInButton', { defaultValue: 'Sign In to Account' })}
             <ArrowRight size={13} />
@@ -153,8 +144,8 @@ export default function LoginPage() {
 
         {/* Divider */}
         <div className="relative flex items-center justify-center">
-          <div className="border-t w-full" style={{ borderColor: 'var(--color-border)' }} />
-          <span className="px-3 text-[10px] font-mono-code uppercase shrink-0" style={{ backgroundColor: 'var(--color-surface-1)', color: 'var(--color-text-dim)' }}>
+          <div className="border-t border-slate-800/80 w-full" />
+          <span className="px-3 text-[10px] font-mono uppercase shrink-0 bg-slate-950/80 text-slate-500">
             {t('auth.continueGoogle', { defaultValue: 'Or continue with Google' })}
           </span>
         </div>
@@ -163,8 +154,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={handleGoogleOAuthRedirect}
-          className="w-full py-2.5 px-4 rounded text-xs font-mono-code font-semibold cursor-pointer flex items-center justify-center gap-2.5 transition-colors"
-          style={{ backgroundColor: 'var(--color-surface-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}
+          className="w-full py-2.5 px-4 rounded-xl text-xs font-mono font-semibold cursor-pointer flex items-center justify-center gap-2.5 transition glass-control text-slate-300 hover:text-white hover:bg-slate-800/60"
         >
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -176,9 +166,9 @@ export default function LoginPage() {
         </button>
 
         {/* Sign up link */}
-        <div className="text-center text-xs font-mono-code" style={{ color: 'var(--color-text-muted)' }}>
+        <div className="text-center text-xs font-mono text-slate-400">
           {t('auth.dontHaveAccount', { defaultValue: "Don't have an account?" })}{' '}
-          <Link to="/signup" className="font-bold transition-colors" style={{ color: 'var(--color-accent)' }}>
+          <Link to="/signup" className="font-bold text-cyan-400 hover:text-cyan-200 transition-colors">
             {t('auth.signUpLink', { defaultValue: 'Create account' })}
           </Link>
         </div>
