@@ -12,6 +12,9 @@ import { errorHandler } from './api/middleware/errorHandler.js';
 // ─── Express Application ──────────────────────────────────────────────────────
 const app = express();
 
+// Trust reverse proxies (Render, Vercel, Railway) so req.secure reflects original protocol
+app.set('trust proxy', 1);
+
 // ─── Security & CORS Middleware ───────────────────────────────────────────────
 
 app.use(helmet());
