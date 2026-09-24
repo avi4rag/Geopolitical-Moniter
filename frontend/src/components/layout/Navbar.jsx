@@ -10,13 +10,11 @@ import {
   Bookmark,
   Radio,
   UploadCloud,
-  Layers,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useSocket } from '../../context/SocketContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
 import { FileUploadModal } from '../common/FileUploadModal.jsx';
-import { ConceptsDemonstrationModal } from '../common/ConceptsDemonstrationModal.jsx';
 
 // ─── Subtle Radar Emblem Icon ────────────────────────────────────────────────
 function RadarEmblem({ size = 18, className = '' }) {
@@ -59,7 +57,6 @@ export default function Navbar() {
 
   const [isAskOpen, setIsAskOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isConceptsOpen, setIsConceptsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
@@ -272,21 +269,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Concepts Suite Trigger */}
-              <button
-                onClick={() => setIsConceptsOpen(true)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
-                style={{
-                  backgroundColor: 'rgba(255, 107, 74, 0.12)',
-                  border: '1px solid rgba(255, 107, 74, 0.35)',
-                  color: '#ff8a70',
-                }}
-                title="12 Concepts Verification & Live Testing Suite"
-              >
-                <Layers size={12} />
-                <span className="hidden sm:inline">12 Concepts</span>
-              </button>
-
               {/* Upload Dossier Attachment Trigger */}
               <button
                 onClick={() => setIsUploadOpen(true)}
@@ -335,7 +317,7 @@ export default function Navbar() {
                   </Link>
                   <Link
                     to="/profile"
-                    className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold font-mono-code transition-colors border hover:border-indigo-400/50"
+                    className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold font-mono-code transition-colors border hover:border-indigo-400/50 overflow-hidden"
                     style={{
                       backgroundColor: 'var(--color-surface-4)',
                       borderColor: 'rgba(255, 255, 255, 0.12)',
@@ -343,7 +325,18 @@ export default function Navbar() {
                     }}
                     title={user?.name}
                   >
-                    {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name || 'User'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      user?.name ? user.name.charAt(0).toUpperCase() : 'U'
+                    )}
                   </Link>
                 </div>
               ) : (
@@ -437,12 +430,6 @@ export default function Navbar() {
       <FileUploadModal
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
-      />
-
-      {/* 12 Core Concepts Suite Modal */}
-      <ConceptsDemonstrationModal
-        isOpen={isConceptsOpen}
-        onClose={() => setIsConceptsOpen(false)}
       />
     </>
   );
