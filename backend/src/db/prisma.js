@@ -1,5 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import pkg from '@prisma/client';
 import { logger } from '../config/logger.js';
+
+const PrismaClient = pkg?.PrismaClient || (typeof pkg === 'function' ? pkg : null);
 
 /**
  * Prisma ORM Database Connection & Client Provider
@@ -15,7 +17,7 @@ let prismaInstance = null;
 let isPrismaAvailable = false;
 
 // Initialize Prisma Client if DATABASE_URL is configured
-if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL && PrismaClient) {
   try {
     prismaInstance = new PrismaClient({
       log: ['error', 'warn'],
