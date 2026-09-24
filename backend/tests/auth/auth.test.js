@@ -313,4 +313,53 @@ describe('Authentication & User API', () => {
       expect(res.body.data[0]._id).toBe(event._id.toString());
     });
   });
+
+  describe('User Avatar Update (PUT /api/v1/users/avatar)', () => {
+    it('requires authentication to update avatar', async () => {
+      const res = await request(app)
+        .put('/api/v1/users/avatar')
+        .send({ avatar: '/uploads/avatar-test.jpg' });
+
+      expect(res.status).toBe(401);
+    });
+
+    it('updates and persists user avatar for authenticated user', async () => {
+      const testEmail = `avatar-test-${Date.now()}@geomonitor.local`;
+      const regRes = await request(app).post('/api/v1/auth/register').send({
+        name: 'Avatar Officer',
+        email: testEmail,
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      const cookie = regRes.headers['set-cookie'][0];
+
+      // Update avatar
+      const updateRes = await request(app)
+        .put('/api/v1/users/avatar')
+        .set('Cookie', cookie)
+        .send({ avatar: '/uploads/avatar-officer.png' });
+
+      expect(updateRes.status).toBe(200);
+      expect(updateRes.body.success).toBe(true);
+      expect(updateRes.body.data.avatar).toBe('/uploads/avatar-officer.png');
+
+      // Verify on subsequent /auth/me call
+      const meRes = await request(app)
+        .get('/api/v1/auth/me')
+        .set('Cookie', cookie);
+
+      expect(meRes.status).toBe(200);
+      expect(meRes.body.data.user.avatar).toBe('/uploads/avatar-officer.png');
+
+      // Reset avatar
+      const resetRes = await request(app)
+        .put('/api/v1/users/avatar')
+        .set('Cookie', cookie)
+        .send({ avatar: '' });
+
+      expect(resetRes.status).toBe(200);
+      expect(resetRes.body.data.avatar).toBe('');
+    });
+  });
 });
+

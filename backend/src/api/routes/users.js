@@ -3,6 +3,7 @@ import {
   toggleBookmark,
   getBookmarks,
   updatePreferences,
+  updateAvatar,
 } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/auth.js';
 
@@ -22,5 +23,8 @@ router.post('/bookmarks/:eventId', toggleBookmark);
 
 // PUT /api/v1/users/preferences
 router.put('/preferences', updatePreferences);
+
+// PUT /api/v1/users/avatar
+router.put('/avatar', updateAvatar);
 
 export default router;

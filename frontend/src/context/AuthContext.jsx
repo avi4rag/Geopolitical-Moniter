@@ -161,6 +161,23 @@ export function AuthProvider({ children }) {
     return bookmarks.some((id) => id.toString() === eventId?.toString());
   };
 
+  // Update user profile avatar
+  const updateAvatar = async (avatarUrl) => {
+    try {
+      const res = await apiClient.put('/users/avatar', { avatar: avatarUrl });
+      const updatedUser = res.data?.data || res.data?.user;
+      if (updatedUser) {
+        setUser(updatedUser);
+      } else {
+        setUser((prev) => (prev ? { ...prev, avatar: avatarUrl } : null));
+      }
+      return true;
+    } catch (err) {
+      console.error('Failed to update avatar:', err);
+      throw err;
+    }
+  };
+
   const value = {
     user,
     isLoading,
@@ -172,6 +189,7 @@ export function AuthProvider({ children }) {
     logout,
     toggleBookmark,
     isBookmarked,
+    updateAvatar,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
