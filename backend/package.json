@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "postinstall": "prisma generate || true",
     "seed:sources": "node src/scripts/seedSources.js"
   },
   "keywords": [],
@@ -21,14 +22,14 @@
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.10",
     "mongodb-memory-server": "^11.2.0",
-    "prisma": "^6.4.1",
     "supertest": "^7.2.2",
     "vitest": "^4.1.10"
   },
   "dependencies": {
     "@google/genai": "^2.17.1",
     "@google/generative-ai": "^0.24.1",
-    "@prisma/client": "^7.10.0",
+    "@prisma/client": "^6.4.1",
+    "prisma": "^6.4.1",
     "axios": "^1.19.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
