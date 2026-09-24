@@ -108,3 +108,26 @@ export async function updatePreferences(req, res, next) {
     next(err);
   }
 }
+
+/**
+ * PUT /api/v1/users/avatar
+ * Update user avatar picture URL or reset it.
+ */
+export async function updateAvatar(req, res, next) {
+  try {
+    const { avatar } = req.body;
+    const user = req.user;
+
+    user.avatar = typeof avatar === 'string' ? avatar.trim() : '';
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: user.toJSON(),
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
