@@ -97,8 +97,8 @@ export const env = {
   // Google OAuth 2.0
   googleClientId: raw.GOOGLE_CLIENT_ID || '',
   googleClientSecret: raw.GOOGLE_CLIENT_SECRET || '',
-  googleCallbackUrl: raw.GOOGLE_CALLBACK_URL,
-  frontendUrl: raw.FRONTEND_URL,
+  googleCallbackUrl: raw.GOOGLE_CALLBACK_URL.replace(/\/+$/, ''),
+  frontendUrl: raw.FRONTEND_URL.replace(/\/+$/, ''),
 
   corsOrigins: raw.CORS_ORIGINS.split(',').map((o) => o.trim()),
 };
