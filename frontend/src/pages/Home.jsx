@@ -187,36 +187,31 @@ export default function Home() {
         </div>
       ) : (
         <>
-          {/* ── HERO + SUB-RAIL + TRENDING SIDEBAR ─────────────────────────────── */}
+          {/* ── HERO + TRENDING SIGNALS RAIL + SUB-FEATURED RAIL ───────────────── */}
           {!hasActiveFilters && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-              {/* Left Column: Hero + Sub-rail (8 cols on desktop) */}
-              <div className="lg:col-span-8 space-y-6">
-                {featuredEvent && (
-                  <FeaturedStory
-                    event={featuredEvent}
-                    onSelect={handleEventSelect}
-                  />
-                )}
-                {subFeaturedEvents.length > 0 && (
-                  <SubFeaturedRail
-                    events={subFeaturedEvents}
-                    onSelect={handleEventSelect}
-                  />
-                )}
-              </div>
-
-              {/* Right Column: Trending Sidebar (4 cols on desktop) */}
-              <div
-                className="lg:col-span-4 border-t lg:border-t-0 lg:border-l pt-6 lg:pt-0 lg:pl-8"
-                style={{ borderColor: 'var(--color-border)' }}
-              >
-                <TrendingSidebar
-                  trendingEvents={recommendedEvents}
-                  onSelectEvent={handleEventSelect}
-                  onViewAll={handleScrollToFeed}
+            <div className="space-y-6">
+              {/* Full-width Hero with 2-Column Hierarchy (62% Content / 38% Radar) */}
+              {featuredEvent && (
+                <FeaturedStory
+                  event={featuredEvent}
+                  onSelect={handleEventSelect}
                 />
-              </div>
+              )}
+
+              {/* Relocated Trending Signals: Compact Horizontal Intelligence Rail */}
+              <TrendingSidebar
+                trendingEvents={recommendedEvents}
+                onSelectEvent={handleEventSelect}
+                onViewAll={handleScrollToFeed}
+              />
+
+              {/* Sub-featured Intelligence Rail */}
+              {subFeaturedEvents.length > 0 && (
+                <SubFeaturedRail
+                  events={subFeaturedEvents}
+                  onSelect={handleEventSelect}
+                />
+              )}
             </div>
           )}
 
