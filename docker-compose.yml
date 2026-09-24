@@ -1,0 +1,117 @@
+services:
+  # ─── 1. Frontend Web Client (React + Vite + Nginx) ───────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: geomonitor-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - geomonitor-network
+
+  # ─── 2. Backend Application API (Node.js + Express + WebSockets) ────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: geomonitor-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/geopolitical_monitor
+      - DATABASE_URL=postgresql://postgres:postgres_secure_pass@postgres:5432/geomonitor_relational?schema=public
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=geomonitor_production_jwt_secret_key_32_bytes_min
+      - CORS_ORIGINS=http://localhost,http://localhost:5173,http://localhost:80
+      - ENABLE_CRON=true
+      - RUN_PIPELINE_ON_START=false
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - backend-uploads:/app/uploads
+    networks:
+      - geomonitor-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ─── 3. PostgreSQL Database (Relational 1NF/2NF/3NF & Prisma ORM) ────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: geomonitor-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_secure_pass
+      - POSTGRES_DB=geomonitor_relational
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - geomonitor-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d geomonitor_relational"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── 4. Redis Cache (In-Memory Response Caching & Rate Limiting) ───────────
+  redis:
+    image: redis:7-alpine
+    container_name: geomonitor-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - geomonitor-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── 5. MongoDB Database (Document Store for Articles & Ingestion) ───────────
+  mongodb:
+    image: mongo:7.0
+    container_name: geomonitor-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - geomonitor-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  geomonitor-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  mongodb-data:
+  backend-uploads:
