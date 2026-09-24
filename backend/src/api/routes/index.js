@@ -7,6 +7,8 @@ import statsRouter from './stats.js';
 import sourcesRouter from './sources.js';
 import authRouter from './auth.js';
 import usersRouter from './users.js';
+import sqlRouter from './sqlEvents.js';
+import uploadsRouter from './uploads.js';
 
 // ─── Root API Router ─────────────────────────────────────────────────────────
 // All v1 API endpoints are mounted here.
@@ -22,5 +24,7 @@ router.use('/stats', statsRouter);
 router.use('/sources', sourcesRouter);
 router.use('/auth', authRouter);
 router.use('/users', usersRouter);
+router.use('/sql', sqlRouter);
+router.use('/uploads', uploadsRouter);
 
 export default router;

@@ -1,14 +1,16 @@
 // ─── Load env vars FIRST before any other import ─────────────────────────────
 import 'dotenv/config';
 
+import http from 'http';
 import app from './src/app.js';
 import { connectDB } from './src/db/connection.js';
 import { startScheduler, stopScheduler } from './src/scheduler/cronScheduler.js';
+import { initWebSocketServer } from './src/services/websocketService.js';
 import { env } from './src/config/env.js';
 import { logger } from './src/config/logger.js';
 
 // ─── Server Entry Point ───────────────────────────────────────────────────────
-// Connects to MongoDB, starts the cron scheduler (if enabled), and starts HTTP server.
+// Connects to MongoDB, starts cron scheduler, attaches WebSockets, and starts HTTP server.
 // Handles graceful shutdown on SIGTERM / SIGINT.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -24,27 +26,32 @@ async function startServer() {
       logger.info('Scheduler: Background cron is disabled (ENABLE_CRON=false)');
     }
 
-    // 3. Start HTTP server
-    const server = app.listen(env.port, () => {
+    // 3. Create HTTP Server & initialize WebSocket communication hub
+    const httpServer = http.createServer(app);
+    initWebSocketServer(httpServer);
+
+    // 4. Start HTTP & WebSocket Server
+    httpServer.listen(env.port, () => {
       logger.info(
         {
           port: env.port,
           env: env.nodeEnv,
           url: `http://localhost:${env.port}`,
+          ws: `ws://localhost:${env.port}`,
           cronEnabled: env.enableCron,
           runOnStart: env.runPipelineOnStart,
         },
-        '🚀 Server started'
+        '🚀 Server started (HTTP & WebSockets live)'
       );
       logger.info(`Health check: http://localhost:${env.port}/api/v1/health`);
     });
 
-    // 4. Graceful shutdown
+    // 5. Graceful shutdown
     const shutdown = async (signal) => {
       logger.info({ signal }, 'Shutdown signal received');
       stopScheduler();
-      server.close(async () => {
-        logger.info('HTTP server closed');
+      httpServer.close(async () => {
+        logger.info('HTTP & WebSocket server closed');
         process.exit(0);
       });
     };
