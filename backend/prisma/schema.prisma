@@ -1,0 +1,160 @@
+// Prisma Schema: Geopolitical Event Monitoring Architecture
+// Compliant with 1NF, 2NF, and 3NF Relational Database Normalization
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── 1. USER & PROFILE (1:1 Normalized) ───────────────────────────────────────
+// Separates core authentication data from user profile attributes (2NF & 3NF)
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  role         Role           @default(ANALYST)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  profile      Profile?
+  bookmarks    UserBookmark[]
+  auditLogs    AuditLog[]
+
+  @@map("users")
+}
+
+enum Role {
+  VIEWER
+  ANALYST
+  ADMIN
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName    String?
+  avatarUrl   String?
+  bio         String?
+  theaterPref String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+// ─── 2. GEOPOLITICAL EVENTS (Core Entity) ─────────────────────────────────────
+model Event {
+  id            String              @id @default(uuid())
+  title         String
+  summary       String
+  description   String?
+  theater       String              // e.g. INDO_PACIFIC, MIDDLE_EAST, EUROPE
+  severity      SeverityLevel       @default(MEDIUM)
+  severityScore Float               @default(5.0) // 1.0 to 10.0
+  status        EventStatus         @default(MONITORING)
+  detectedAt    DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  impact        ImpactAssessment?
+  eventSources  EventSource[]
+  bookmarks     UserBookmark[]
+
+  @@index([theater])
+  @@index([severity])
+  @@index([detectedAt])
+  @@map("events")
+}
+
+enum SeverityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum EventStatus {
+  DEVELOPING
+  MONITORING
+  STABILIZING
+  RESOLVED
+}
+
+// ─── 3. IMPACT ASSESSMENT (1:1 Normalized with Event) ──────────────────────────
+// Decomposed from Event to eliminate multi-attribute grouping and ensure 3NF
+model ImpactAssessment {
+  id                  String   @id @default(uuid())
+  eventId             String   @unique
+  event               Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  economicImpact      Float    @default(0.0) // Score -10 to +10
+  diplomaticImpact    Float    @default(0.0)
+  militaryImpact      Float    @default(0.0)
+  humanitarianImpact  Float    @default(0.0)
+  cyberImpact         Float    @default(0.0)
+  domainAnalysis      String?
+  assessedAt          DateTime @default(now())
+
+  @@map("impact_assessments")
+}
+
+// ─── 4. NEWS SOURCES & JUNCTION TABLE (N:M Normalized) ────────────────────────
+model Source {
+  id               String        @id @default(uuid())
+  name             String        @unique
+  baseUrl          String
+  country          String
+  reliabilityScore Float         @default(0.85) // 0.0 to 1.0
+  isActive         Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+
+  eventSources     EventSource[]
+
+  @@map("sources")
+}
+
+// Junction table resolving Many-to-Many relation between Events and Sources (3NF)
+model EventSource {
+  eventId     String
+  sourceId    String
+  citationUrl String
+  publishedAt DateTime @default(now())
+
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  source      Source   @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, sourceId])
+  @@map("event_sources")
+}
+
+// ─── 5. USER BOOKMARKS (N:M Junction) ─────────────────────────────────────────
+model UserBookmark {
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@id([userId, eventId])
+  @@map("user_bookmarks")
+}
+
+// ─── 6. AUDIT LOGGING (1:N System Logging) ────────────────────────────────────
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  resource  String
+  metadata  String?  // JSON serialized telemetry
+  createdAt DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

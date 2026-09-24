@@ -9,9 +9,14 @@ import {
   ChevronDown,
   Bookmark,
   Radio,
+  UploadCloud,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
+import { useSocket } from '../../context/SocketContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
+import { FileUploadModal } from '../common/FileUploadModal.jsx';
+import { ConceptsDemonstrationModal } from '../common/ConceptsDemonstrationModal.jsx';
 
 // ─── Subtle Radar Emblem Icon ────────────────────────────────────────────────
 function RadarEmblem({ size = 18, className = '' }) {
@@ -53,10 +58,14 @@ export default function Navbar() {
   const { user, isAuthenticated, bookmarks } = useAuth();
 
   const [isAskOpen, setIsAskOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isConceptsOpen, setIsConceptsOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const { isConnected: isWsConnected } = useSocket();
 
   const currentLang = i18n.language || 'en';
 
@@ -130,10 +139,10 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <span className="uppercase tracking-widest">{new Date().toUTCString().slice(0, 16)} UTC</span>
             <span style={{ color: 'rgba(255,255,255,0.15)' }}>•</span>
-            {/* Subtle monitoring-status indicator: ● Monitoring is live */}
+            {/* Real-time WebSocket connection state */}
             <span className="inline-flex items-center gap-1.5 font-semibold tracking-wider text-[10px]" style={{ color: 'var(--color-text-primary)' }}>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-signalPulse" />
-              Monitoring is live
+              <span className={`w-1.5 h-1.5 rounded-full ${isWsConnected ? 'bg-emerald-400 animate-signalPulse' : 'bg-amber-400'}`} />
+              {isWsConnected ? 'WS LIVE' : 'WS STANDBY'}
             </span>
           </div>
         </div>
@@ -262,6 +271,36 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              {/* Concepts Suite Trigger */}
+              <button
+                onClick={() => setIsConceptsOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
+                style={{
+                  backgroundColor: 'rgba(255, 107, 74, 0.12)',
+                  border: '1px solid rgba(255, 107, 74, 0.35)',
+                  color: '#ff8a70',
+                }}
+                title="12 Concepts Verification & Live Testing Suite"
+              >
+                <Layers size={12} />
+                <span className="hidden sm:inline">12 Concepts</span>
+              </button>
+
+              {/* Upload Dossier Attachment Trigger */}
+              <button
+                onClick={() => setIsUploadOpen(true)}
+                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
+                style={{
+                  backgroundColor: 'rgba(34, 211, 238, 0.10)',
+                  border: '1px solid rgba(34, 211, 238, 0.25)',
+                  color: '#38bdf8',
+                }}
+                title="Upload Intelligence File (Multer Handling)"
+              >
+                <UploadCloud size={12} />
+                <span>Upload</span>
+              </button>
 
               {/* Ask Intel AI Modal Trigger */}
               <button
@@ -392,6 +431,18 @@ export default function Navbar() {
         isOpen={isAskOpen}
         onClose={() => setIsAskOpen(false)}
         onSelectEvent={handleIntelEventSelect}
+      />
+
+      {/* Intelligence Attachment Upload Modal (Multer Handling) */}
+      <FileUploadModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+      />
+
+      {/* 12 Core Concepts Suite Modal */}
+      <ConceptsDemonstrationModal
+        isOpen={isConceptsOpen}
+        onClose={() => setIsConceptsOpen(false)}
       />
     </>
   );

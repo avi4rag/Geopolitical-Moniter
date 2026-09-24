@@ -36,3 +36,7 @@ coverage/
 # ─── Misc ─────────────────────────────────────────────────────────────────────
 *.tgz
 *.zip
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep

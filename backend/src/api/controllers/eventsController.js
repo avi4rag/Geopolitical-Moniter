@@ -110,6 +110,47 @@ export async function listEvents(req, res, next) {
 }
 
 /**
+ * GET /api/v1/events/grouped
+ * Group events by field (severity, eventType, regions, sectors) with count and aggregations
+ */
+export async function getGroupedEvents(req, res, next) {
+  try {
+    const groupBy = req.query.groupBy || 'severity';
+    const validGroupFields = ['severity', 'eventType', 'regions', 'sectors', 'processingStatus'];
+    const field = validGroupFields.includes(groupBy) ? groupBy : 'severity';
+
+    const pipeline = [
+      { $unwind: { path: `$${field}`, preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: `$${field}`,
+          count: { $sum: 1 },
+          avgConfidence: { $avg: '$confidenceScore' },
+        },
+      },
+      { $sort: { count: -1 } },
+    ];
+
+    const results = await Event.aggregate(pipeline);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        groupBy: field,
+        groups: results.map((r) => ({
+          category: r._id || 'UNKNOWN',
+          count: r.count,
+          avgConfidence: r.avgConfidence ? Math.round(r.avgConfidence * 100) / 100 : null,
+        })),
+      },
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
  * GET /api/v1/events/:id
  * Retrieve a single event along with its latest impact assessments.
  */

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
+import { SocketProvider } from './context/SocketContext.jsx';
 import Layout from './components/layout/Layout.jsx';
 import Home from './pages/Home.jsx';
 import SearchPage from './pages/SearchPage.jsx';
@@ -15,14 +16,15 @@ import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 // ─── App Router ───────────────────────────────────────────────────────────────
-// Main news platform routes wrapped in AuthProvider and shared Layout.
+// Main news platform routes wrapped in AuthProvider, SocketProvider, and shared Layout.
 // Event detail: /event/:id and /events/:id both render the full-screen dossier.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
   return (
     <AuthProvider>
-      <Routes>
+      <SocketProvider>
+        <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchPage />} />
@@ -44,6 +46,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
+      </SocketProvider>
     </AuthProvider>
   );
 }

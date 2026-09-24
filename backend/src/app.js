@@ -3,11 +3,17 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import apiRouter from './api/routes/index.js';
 import { notFoundHandler } from './api/middleware/notFound.js';
 import { errorHandler } from './api/middleware/errorHandler.js';
+import { sanitizationMiddleware } from './api/middleware/sanitization.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // ─── Express Application ──────────────────────────────────────────────────────
 const app = express();
@@ -70,6 +76,12 @@ app.use(limiter);
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ─── Security Sanitization (SQL, NoSQL, XSS) ──────────────────────────────────
+app.use(sanitizationMiddleware);
+
+// ─── Static Files (File Upload Handling) ──────────────────────────────────────
+app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
 // ─── Request Logging ──────────────────────────────────────────────────────────
 
