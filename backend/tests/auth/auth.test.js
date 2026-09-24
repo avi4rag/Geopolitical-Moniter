@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import request from 'supertest';
 import app from '../../src/app.js';
 import { User, Event, Article, Source } from '../../src/models/index.js';
+import { formatAbsoluteUrl } from '../../src/config/env.js';
 
 // ─── Authentication & User Bookmarks Integration Tests ───────────────────────
 // Tests registration, login, logout, profile checks, Google OAuth, and bookmark management.
@@ -361,5 +362,29 @@ describe('Authentication & User API', () => {
       expect(resetRes.body.data.avatar).toBe('');
     });
   });
+
+  describe('OAuth URL Scheme & Normalization (formatAbsoluteUrl)', () => {
+    it('prepends https:// if scheme is missing', () => {
+      expect(formatAbsoluteUrl('geopolitical-moniter.vercel.app/api/v1/auth/google/callback')).toBe(
+        'https://geopolitical-moniter.vercel.app/api/v1/auth/google/callback'
+      );
+    });
+
+    it('preserves existing https:// and http:// schemes', () => {
+      expect(formatAbsoluteUrl('https://geomoniter.onrender.com/api/v1/auth/google/callback')).toBe(
+        'https://geomoniter.onrender.com/api/v1/auth/google/callback'
+      );
+      expect(formatAbsoluteUrl('http://localhost:3000/api/v1/auth/google/callback')).toBe(
+        'http://localhost:3000/api/v1/auth/google/callback'
+      );
+    });
+
+    it('strips trailing slashes correctly', () => {
+      expect(formatAbsoluteUrl('https://geopolitical-moniter.vercel.app///')).toBe(
+        'https://geopolitical-moniter.vercel.app'
+      );
+    });
+  });
 });
+
 

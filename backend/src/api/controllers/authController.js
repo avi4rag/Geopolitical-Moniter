@@ -224,6 +224,11 @@ export async function initiateGoogleAuth(req, res) {
       prompt: 'select_account',
     });
 
+    logger.info(
+      { redirectUri: env.googleCallbackUrl, clientId: env.googleClientId },
+      'Initiating Google OAuth redirect'
+    );
+
     res.redirect(authorizeUrl);
   } catch (err) {
     logger.error({ err }, 'Failed to initiate Google OAuth');
