@@ -62,6 +62,16 @@ if (!parseResult.success) {
   process.exit(1);
 }
 
+export function formatAbsoluteUrl(urlStr, defaultFallback = '') {
+  if (!urlStr || typeof urlStr !== 'string') return defaultFallback;
+  let trimmed = urlStr.trim().replace(/\/+$/, '');
+  if (!trimmed) return defaultFallback;
+  if (!/^https?:\/\//i.test(trimmed)) {
+    trimmed = `https://${trimmed}`;
+  }
+  return trimmed;
+}
+
 const raw = parseResult.data;
 
 export const env = {
@@ -97,8 +107,8 @@ export const env = {
   // Google OAuth 2.0
   googleClientId: raw.GOOGLE_CLIENT_ID || '',
   googleClientSecret: raw.GOOGLE_CLIENT_SECRET || '',
-  googleCallbackUrl: raw.GOOGLE_CALLBACK_URL.replace(/\/+$/, ''),
-  frontendUrl: raw.FRONTEND_URL.replace(/\/+$/, ''),
+  googleCallbackUrl: formatAbsoluteUrl(raw.GOOGLE_CALLBACK_URL, 'http://localhost:3000/api/v1/auth/google/callback'),
+  frontendUrl: formatAbsoluteUrl(raw.FRONTEND_URL, 'http://localhost:5173'),
 
   corsOrigins: raw.CORS_ORIGINS.split(',').map((o) => o.trim()),
 };
