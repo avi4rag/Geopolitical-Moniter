@@ -50,11 +50,28 @@ const storage = multer.diskStorage({
   },
 });
 
+// Allowed Avatar MIME types whitelist (strictly JPEG, PNG, WEBP)
+const ALLOWED_AVATAR_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]);
+
 const fileFilter = (req, file, cb) => {
   if (ALLOWED_MIME_TYPES.has(file.mimetype)) {
     cb(null, true);
   } else {
     const error = new Error(`Unsupported file type: ${file.mimetype}. Allowed: JPEG, PNG, WEBP, GIF, PDF, JSON`);
+    error.code = 'INVALID_FILE_TYPE';
+    cb(error, false);
+  }
+};
+
+const avatarFileFilter = (req, file, cb) => {
+  if (ALLOWED_AVATAR_MIME_TYPES.has(file.mimetype)) {
+    cb(null, true);
+  } else {
+    const error = new Error(`Unsupported image format: ${file.mimetype}. Allowed formats: JPEG, PNG, WEBP`);
     error.code = 'INVALID_FILE_TYPE';
     cb(error, false);
   }
@@ -66,6 +83,15 @@ export const upload = multer({
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit
     files: 5,                  // Max 5 files per request
+  },
+});
+
+export const avatarUpload = multer({
+  storage,
+  fileFilter: avatarFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+    files: 1,                  // Exactly 1 avatar file
   },
 });
 
