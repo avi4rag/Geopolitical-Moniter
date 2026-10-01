@@ -8,7 +8,6 @@ import {
   X,
   ChevronDown,
   Bookmark,
-  Radio,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useSocket } from '../../context/SocketContext.jsx';
