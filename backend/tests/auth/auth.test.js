@@ -385,6 +385,65 @@ describe('Authentication & User API', () => {
       );
     });
   });
+
+  describe('Avatar Upload Handling (POST /api/v1/uploads/avatar)', () => {
+    it('requires authentication to upload an avatar', async () => {
+      const dummyBuffer = Buffer.from('fake-image-bytes');
+      const res = await request(app)
+        .post('/api/v1/uploads/avatar')
+        .attach('avatar', dummyBuffer, 'avatar.png');
+
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('successfully uploads valid image for authenticated user', async () => {
+      const testEmail = `upload-test-${Date.now()}@geomonitor.local`;
+      const regRes = await request(app).post('/api/v1/auth/register').send({
+        name: 'Upload Specialist',
+        email: testEmail,
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      const cookie = regRes.headers['set-cookie'][0];
+
+      // Send 1x1 PNG header buffer
+      const pngBuffer = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+        0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89,
+      ]);
+
+      const uploadRes = await request(app)
+        .post('/api/v1/uploads/avatar')
+        .set('Cookie', cookie)
+        .attach('avatar', pngBuffer, { filename: 'avatar.png', contentType: 'image/png' });
+
+      expect(uploadRes.status).toBe(201);
+      expect(uploadRes.body.status).toBe('success');
+      expect(uploadRes.body.data.files[0].url).toContain('/uploads/');
+    });
+
+    it('rejects unsupported file formats like pdf or text', async () => {
+      const testEmail = `reject-test-${Date.now()}@geomonitor.local`;
+      const regRes = await request(app).post('/api/v1/auth/register').send({
+        name: 'Reject Specialist',
+        email: testEmail,
+        password: 'Password123!',
+        confirmPassword: 'Password123!',
+      });
+      const cookie = regRes.headers['set-cookie'][0];
+
+      const pdfBuffer = Buffer.from('%PDF-1.4 test dummy');
+      const uploadRes = await request(app)
+        .post('/api/v1/uploads/avatar')
+        .set('Cookie', cookie)
+        .attach('avatar', pdfBuffer, { filename: 'doc.pdf', contentType: 'application/pdf' });
+
+      expect(uploadRes.status).toBe(400);
+      expect(uploadRes.body.code).toBe('INVALID_FILE_TYPE');
+    });
+  });
 });
 
 
