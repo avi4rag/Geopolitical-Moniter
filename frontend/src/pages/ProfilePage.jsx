@@ -65,16 +65,18 @@ export default function ProfilePage() {
     setUploadError('');
     setUploadSuccess(false);
 
-    // 1. Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    // 1. Validate file type (strictly JPEG, PNG, WEBP)
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
-      setUploadError('Please select a valid image file (JPEG, PNG, WEBP, or GIF).');
+      setUploadError('Please select a valid image file (JPEG, PNG, or WEBP).');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     // 2. Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Image size exceeds 5MB limit. Please choose a smaller file.');
+      setUploadError('Image size exceeds the 5MB limit. Please choose a smaller file.');
+      if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
@@ -87,7 +89,7 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      // 4. Upload to existing Multer endpoint
+      // 4. Upload to Multer endpoint
       const uploadRes = await apiClient.post('/uploads/avatar', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -97,7 +99,7 @@ export default function ProfilePage() {
         throw new Error('Failed to retrieve uploaded image URL');
       }
 
-      // 5. Persist avatar URL to User document
+      // 5. Persist avatar URL to User document in MongoDB
       await updateAvatar(uploadedUrl);
       setUploadSuccess(true);
       setTimeout(() => setUploadSuccess(false), 4000);
@@ -134,92 +136,130 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto w-full">
-      {/* ── USER ACCOUNT & INTERACTIVE AVATAR HEADER ──────────────────────── */}
+      {/* ── SITUATION ROOM PROFILE DOSSIER HEADER ─────────────────────────── */}
+      <div className="flex items-center justify-between gap-4 border-b border-white/[0.08] pb-3">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <h1 className="font-headline text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            <span>OFFICER PROFILE</span>
+            <span className="text-xs font-mono-code font-normal text-slate-500">//</span>
+            <span className="text-xs font-mono-code font-medium text-cyan-400/90 tracking-widest uppercase">
+              SITUATION ROOM INTEL
+            </span>
+          </h1>
+        </div>
+
+        <button
+          onClick={logout}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-semibold cursor-pointer transition-all hover:brightness-110"
+          style={{
+            color: '#f43f5e',
+            border: '1px solid rgba(244,63,94,0.30)',
+            backgroundColor: 'rgba(244,63,94,0.08)',
+          }}
+          title={t('nav.signOut', { defaultValue: 'Sign Out' })}
+        >
+          <LogOut size={13} />
+          <span>{t('nav.signOut', { defaultValue: 'Sign Out' })}</span>
+        </button>
+      </div>
+
+      {/* ── PROFILE & PHOTO MANAGEMENT CARD ───────────────────────────────── */}
       <div
-        className="p-6 rounded-xl border border-white/[0.08] shadow-lg flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
-        style={{ backgroundColor: 'rgba(15, 23, 42, 0.60)', backdropFilter: 'blur(12px)' }}
+        className="p-6 sm:p-8 rounded-2xl border border-white/[0.08] shadow-2xl relative overflow-hidden"
+        style={{
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(16px)',
+        }}
       >
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 w-full md:w-auto">
-          {/* Avatar Container with interactive upload trigger */}
-          <div className="relative group shrink-0">
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-indigo-400/40 bg-slate-950 flex items-center justify-center shadow-xl relative cursor-pointer transition-transform duration-200 group-hover:scale-[1.02]"
-              title="Click to change profile picture"
-            >
-              {currentDisplayAvatar ? (
-                <img
-                  src={currentDisplayAvatar}
-                  alt={user.name || 'Profile'}
-                  className="w-full h-full object-cover"
-                  onError={() => setAvatarPreview(null)}
-                />
-              ) : (
-                <span className="text-2xl sm:text-3xl font-mono-code font-bold text-indigo-300">
-                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                </span>
-              )}
+        {/* Subtle decorative background telemetry grid */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-5"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+        />
 
-              {/* Uploading loading spinner overlay */}
-              {isUploading && (
-                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center gap-1 z-20">
-                  <Loader2 size={20} className="animate-spin text-indigo-400" />
-                  <span className="text-[9px] font-mono-code text-slate-300 font-bold">SAVING</span>
-                </div>
-              )}
+        <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
+          {/* ── Profile Photo Section (Centered column on left/top) ─────────── */}
+          <div className="flex flex-col items-center text-center shrink-0 w-full sm:w-auto">
+            {/* Avatar Frame with hover overlay & click trigger */}
+            <div className="relative group">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-cyan-500/40 bg-slate-950 flex items-center justify-center shadow-2xl relative cursor-pointer transition-all duration-300 group-hover:scale-[1.03] group-hover:border-cyan-400 group-hover:shadow-[0_0_25px_rgba(34,211,238,0.25)]"
+                title="Click to select new profile photo"
+              >
+                {currentDisplayAvatar ? (
+                  <img
+                    src={currentDisplayAvatar}
+                    alt={user.name || 'Profile'}
+                    className="w-full h-full object-cover"
+                    onError={() => setAvatarPreview(null)}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    <UserIcon size={44} className="text-cyan-400/70" />
+                    <span className="text-[10px] font-mono-code font-bold text-slate-400 uppercase tracking-widest">
+                      {user.name ? user.name.charAt(0).toUpperCase() : 'USER'}
+                    </span>
+                  </div>
+                )}
 
-              {/* Hover overlay hint */}
-              {!isUploading && (
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1 text-white z-10">
-                  <Camera size={18} />
-                  <span className="text-[9px] font-mono-code uppercase font-bold tracking-wider">Change</span>
-                </div>
-              )}
-            </div>
+                {/* Uploading loading spinner overlay */}
+                {isUploading && (
+                  <div className="absolute inset-0 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-20">
+                    <Loader2 size={24} className="animate-spin text-cyan-400" />
+                    <span className="text-[9px] font-mono-code text-cyan-200 font-bold tracking-widest uppercase">
+                      SAVING...
+                    </span>
+                  </div>
+                )}
 
-            {/* Active presence dot */}
-            <span className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 shadow" />
-          </div>
+                {/* Hover overlay hint */}
+                {!isUploading && (
+                  <div className="absolute inset-0 bg-slate-950/75 opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center gap-1.5 text-white z-10 backdrop-blur-[2px]">
+                    <Camera size={22} className="text-cyan-400" />
+                    <span className="text-[10px] font-mono-code uppercase font-bold tracking-wider text-slate-200">
+                      Change Photo
+                    </span>
+                  </div>
+                )}
+              </div>
 
-          {/* User details */}
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-bold font-headline text-white">
-                {user.name}
-              </h1>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono-code font-bold uppercase tracking-wider bg-indigo-500/15 border border-indigo-400/30 text-indigo-300">
-                {user.role ? user.role.toUpperCase() : 'ANALYST'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 text-xs font-mono-code text-slate-400 flex-wrap">
-              <span className="flex items-center gap-1 text-slate-300">
-                <Mail size={12} className="text-slate-400" />
-                {user.email}
-              </span>
-              <span>•</span>
-              <span className="text-slate-400">
-                Auth: <strong className="text-slate-300 font-bold">{user.authProvider || 'LOCAL'}</strong>
-              </span>
-            </div>
-
-            {/* Photo controls */}
-            <div className="flex flex-wrap items-center gap-2 pt-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={handleFileSelect}
-                className="hidden"
-                disabled={isUploading}
+              {/* Online/Active security pulse badge */}
+              <span
+                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-950 shadow-md"
+                title="Officer Active"
               />
+            </div>
+
+            {/* Hidden native file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isUploading}
+            />
+
+            {/* Action buttons directly below photo */}
+            <div className="flex flex-wrap items-center justify-center gap-2 mt-4">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono-code font-semibold tracking-wider bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 border border-white/10 transition-colors cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-code font-semibold tracking-wider transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: 'rgba(34, 211, 238, 0.12)',
+                  border: '1px solid rgba(34, 211, 238, 0.35)',
+                  color: '#38bdf8',
+                }}
               >
-                <Camera size={12} />
+                <Camera size={13} />
                 <span>{user.avatar ? 'Change Photo' : 'Upload Photo'}</span>
               </button>
 
@@ -228,43 +268,111 @@ export default function ProfilePage() {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={isUploading}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono-code font-semibold tracking-wider text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 transition-colors cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-mono-code font-semibold tracking-wider text-rose-400 hover:text-rose-300 transition-colors cursor-pointer disabled:opacity-50"
+                  style={{
+                    backgroundColor: 'rgba(244, 63, 94, 0.10)',
+                    border: '1px solid rgba(244, 63, 94, 0.25)',
+                  }}
                   title="Remove custom profile picture"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={13} />
                   <span>Remove</span>
                 </button>
               )}
             </div>
 
-            {/* Upload feedback messages */}
+            <p className="text-[10px] font-mono-code text-slate-500 mt-2 tracking-wide">
+              JPG, PNG, WEBP (MAX 5MB)
+            </p>
+
+            {/* Upload Feedback Messages */}
             {uploadError && (
-              <div className="flex items-center gap-1.5 text-xs font-mono-code text-rose-400 pt-1">
-                <AlertCircle size={13} className="shrink-0" />
-                <span>{uploadError}</span>
+              <div className="mt-3 flex items-center gap-1.5 text-xs font-mono-code text-rose-400 bg-rose-500/10 border border-rose-500/25 px-3 py-1.5 rounded-lg">
+                <AlertCircle size={14} className="shrink-0" />
+                <span className="text-left">{uploadError}</span>
               </div>
             )}
             {uploadSuccess && (
-              <div className="flex items-center gap-1.5 text-xs font-mono-code text-emerald-400 pt-1">
-                <CheckCircle2 size={13} className="shrink-0" />
+              <div className="mt-3 flex items-center gap-1.5 text-xs font-mono-code text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1.5 rounded-lg">
+                <CheckCircle2 size={14} className="shrink-0" />
                 <span>Profile picture updated successfully</span>
               </div>
             )}
           </div>
-        </div>
 
-        <button
-          onClick={logout}
-          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-xs font-mono-code font-bold cursor-pointer transition-colors self-start md:self-center"
-          style={{
-            color: '#e11d48',
-            border: '1px solid rgba(225,29,72,0.30)',
-            backgroundColor: 'rgba(225,29,72,0.10)',
-          }}
-        >
-          <LogOut size={13} />
-          {t('nav.signOut', { defaultValue: 'Sign Out' })}
-        </button>
+          {/* ── User & Account Dossier Information ───────────────────────────── */}
+          <div className="flex-1 w-full space-y-5 border-t md:border-t-0 md:border-l border-white/[0.08] pt-6 md:pt-0 md:pl-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] font-mono-code uppercase tracking-widest text-slate-500 font-semibold">
+                  IDENTIFIER // AGENT NAME
+                </span>
+                <h2 className="text-2xl font-bold font-headline text-white tracking-tight">
+                  {user.name}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="px-2.5 py-1 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-cyan-500/10 border border-cyan-400/30 text-cyan-300">
+                  {user.role ? user.role.toUpperCase() : 'ANALYST'}
+                </span>
+                <span className="px-2.5 py-1 rounded text-[11px] font-mono-code font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-400/30 text-purple-300">
+                  AUTH: {user.authProvider || 'LOCAL'}
+                </span>
+              </div>
+            </div>
+
+            {/* Metadata Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+              <div className="p-3.5 rounded-xl border border-white/[0.06] bg-slate-900/40 space-y-1">
+                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-widest">
+                  COMMUNICATION // EMAIL
+                </span>
+                <div className="flex items-center gap-2 text-xs font-mono-code text-slate-200">
+                  <Mail size={13} className="text-cyan-400/80 shrink-0" />
+                  <span className="truncate">{user.email}</span>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-xl border border-white/[0.06] bg-slate-900/40 space-y-1">
+                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-widest">
+                  ACCESS CLEARANCE
+                </span>
+                <div className="flex items-center gap-2 text-xs font-mono-code text-emerald-400">
+                  <Shield size={13} className="text-emerald-400 shrink-0" />
+                  <span className="tracking-wide">VERIFIED SITUATION ROOM</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Dossier Telemetry Metrics */}
+            <div className="p-4 rounded-xl border border-white/[0.06] bg-slate-900/30 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-widest block">
+                  BOOKMARKED DOSSIERS
+                </span>
+                <span className="text-lg font-bold font-mono-code text-cyan-300">
+                  {bookmarkedEvents.length} Active
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-widest block">
+                  SESSION INTEGRITY
+                </span>
+                <span className="text-xs font-mono-code text-emerald-400 font-semibold">
+                  SECURE (HTTP-ONLY)
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono-code text-slate-500 uppercase tracking-widest block">
+                  ACCOUNT STATUS
+                </span>
+                <span className="text-xs font-mono-code text-slate-300 font-semibold">
+                  ACTIVE ANALYST
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ── BOOKMARKED INTELLIGENCE DOSSIERS ─────────────────────────────── */}
