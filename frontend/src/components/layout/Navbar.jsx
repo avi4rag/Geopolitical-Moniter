@@ -9,12 +9,10 @@ import {
   ChevronDown,
   Bookmark,
   Radio,
-  UploadCloud,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useSocket } from '../../context/SocketContext.jsx';
 import AskIntelModal from '../intel/AskIntelModal.jsx';
-import { FileUploadModal } from '../common/FileUploadModal.jsx';
 
 // ─── Subtle Radar Emblem Icon ────────────────────────────────────────────────
 function RadarEmblem({ size = 18, className = '' }) {
@@ -56,7 +54,6 @@ export default function Navbar() {
   const { user, isAuthenticated, bookmarks } = useAuth();
 
   const [isAskOpen, setIsAskOpen] = useState(false);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
@@ -269,21 +266,6 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Upload Dossier Attachment Trigger */}
-              <button
-                onClick={() => setIsUploadOpen(true)}
-                className="hidden lg:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md font-mono-code text-xs font-semibold transition-all cursor-pointer shadow-sm hover:brightness-110"
-                style={{
-                  backgroundColor: 'rgba(34, 211, 238, 0.10)',
-                  border: '1px solid rgba(34, 211, 238, 0.25)',
-                  color: '#38bdf8',
-                }}
-                title="Upload Intelligence File (Multer Handling)"
-              >
-                <UploadCloud size={12} />
-                <span>Upload</span>
-              </button>
-
               {/* Ask Intel AI Modal Trigger */}
               <button
                 onClick={() => setIsAskOpen(true)}
@@ -424,12 +406,6 @@ export default function Navbar() {
         isOpen={isAskOpen}
         onClose={() => setIsAskOpen(false)}
         onSelectEvent={handleIntelEventSelect}
-      />
-
-      {/* Intelligence Attachment Upload Modal (Multer Handling) */}
-      <FileUploadModal
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
       />
     </>
   );
